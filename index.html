@@ -141,7 +141,6 @@ th{background:#f3f6f3;color:#526357}
 .satset-row.single{grid-template-columns:1fr}
 .satset-row.triple{grid-template-columns:minmax(0,1.3fr) minmax(0,1.3fr) minmax(72px,.6fr)}
 .calc-preview{margin-top:6px;font-size:11px;color:#44564b;background:#ffffffb8;padding:6px 8px;border-radius:6px;line-height:1.45}
-.rule-hint{font-size:10px;color:#627368;margin-top:5px;line-height:1.4}
 
 .warehouse-box{background:#f7faf7;border:1px solid #cfe0d3;border-radius:10px;padding:15px;margin-top:16px}
 .warehouse-box h4{margin:0 0 10px;font-size:15px;color:var(--green)}
@@ -174,8 +173,6 @@ th{background:#f3f6f3;color:#526357}
 .result-card .sub{font-size:10px;color:var(--muted);margin-top:4px}
 .result-card .metric span{display:block;font-size:9px;color:var(--muted);margin-bottom:4px}
 .result-card .metric strong{font-size:12px;overflow-wrap:anywhere}
-.flag{border:1px solid #e6bd73;background:#fff8eb;color:#80530e;border-radius:7px;padding:9px;margin-top:7px;font-size:10px;line-height:1.5}
-.flag.rev{border-color:#d8a39d;background:#fdf1ef;color:#8f2c24}
 .bal-note{border:1px solid #b5d9ce;background:#eef8f4;color:#1d634d;border-radius:7px;padding:8px 10px;margin-top:7px;font-size:10px;line-height:1.45}
 .history-card{border:1px solid var(--line);border-radius:9px;padding:14px;margin-bottom:9px;display:flex;justify-content:space-between;gap:12px;align-items:center}
 .history-card strong{font-size:13px}.history-card p{font-size:11px;color:var(--muted);margin:5px 0 0}
@@ -224,7 +221,6 @@ th{background:#f3f6f3;color:#526357}
  .result-card{border:1px solid #bbb;break-inside:avoid;padding:7px}
  .result-grid{grid-template-columns:repeat(3,1fr)}
  .result-list{gap:4px}
- .flag{border:1px solid #999;color:#111;background:#fff}
  .menu-reco-box,.pdf-detail-sheet{border:1px solid #888;background:#fff;padding:10px;break-inside:avoid}
  .reco-cols{grid-template-columns:repeat(2,1fr)}
  .pdf-table th,.pdf-table td{font-size:9px;padding:5px 6px}
@@ -245,10 +241,10 @@ th{background:#f3f6f3;color:#526357}
    <h2>☕ POIN COFFEE</h2>
    <p>RAW MATERIAL AUDIT SYSTEM</p>
   </div>
-  <div id="headerLiveBadge" class="live-badge" title="Status sinkronisasi otomatis Google Sheets">
+  <div id="headerLiveBadge" class="live-badge syncing" title="Status sinkronisasi real-time Firebase">
    <span class="spinner" id="headerSpinner"></span>
    <span class="live-dot"></span>
-   <span id="headerSyncLabel">Live Sync</span>
+   <span id="headerSyncLabel">Menghubungkan...</span>
   </div>
  </div>
 </header>
@@ -268,14 +264,14 @@ th{background:#f3f6f3;color:#526357}
 <div id="pageMaster">
  <div class="page-title"><h2>Master PLU</h2><p>Pengelolaan data utama bahan baku Poin Coffee</p></div>
  <section class="panel">
-  <h3>Database Google Sheets Real-Time</h3>
-  <div class="notice">Terhubung otomatis dua arah ke database Google Sheets Poin Coffee (Master PLU, Resep Menu &amp; Riwayat Audit). Setiap perubahan di perangkat mana pun dikirim ke Google Sheets dan ditarik otomatis ke perangkat lain.</div>
-  <div id="syncStatus" class="sync-status">Menghubungkan ke database Google Sheets...</div>
+  <h3>Database Firebase Realtime</h3>
+  <div class="notice">Terhubung real-time ke Firebase Realtime Database (<b>point-coffee-audit</b>) untuk Master PLU, Resep Menu &amp; Riwayat Audit. Setiap perubahan langsung tersinkron ke semua perangkat.</div>
+  <div id="syncStatus" class="sync-status">Menghubungkan ke Firebase Realtime Database...</div>
  </section>
 
  <section class="panel" style="border: 2px dashed #244b36;">
   <h3>⚡ Injeksi Data Master PLU Instan</h3>
-  <div class="notice">Tempel (Paste) kode JSON Master PLU di bawah ini ke dalam kotak, lalu klik tombol untuk memasukkan atau memperbarui seluruh daftar barang sekaligus dan langsung mengirimnya ke Google Sheets.</div>
+  <div class="notice">Tempel (Paste) kode JSON Master PLU di bawah ini ke dalam kotak, lalu klik tombol untuk memasukkan atau memperbarui seluruh daftar barang sekaligus dan langsung mengirimnya ke Firebase.</div>
   <div class="field">
    <label>Kotak Kode Injeksi Data (JSON)</label>
    <textarea id="dataInjectionBox" rows="4" placeholder='Tempel kode JSON di sini, contoh: [{"plu":"20080424","nama":"Coffee Bean","kategori":"RAW","satuan":"PCS"}]'></textarea>
@@ -332,7 +328,7 @@ th{background:#f3f6f3;color:#526357}
 
  <section class="panel" style="border: 2px dashed #315e91;">
   <h3>⚡ Injeksi Kode JSON Resep Menu</h3>
-  <div class="notice">Tempel kode JSON daftar resep (ukuran <b>REGULAR</b> normal) ke kotak di bawah, lalu klik terapkan. Sistem otomatis mencocokkan PLU bahan (baik <b>RAW</b> maupun <b>KONVERSI</b>) dengan Master PLU dan menyimpannya ke Google Sheets.</div>
+  <div class="notice">Tempel kode JSON daftar resep (ukuran <b>REGULAR</b> normal) ke kotak di bawah, lalu klik terapkan. Sistem otomatis mencocokkan PLU bahan (baik <b>RAW</b> maupun <b>KONVERSI</b>) dengan Master PLU dan menyimpannya ke Firebase.</div>
   <div class="field">
    <label>Kotak Kode Injeksi Resep (JSON)</label>
    <textarea id="recipeInjectionBox" rows="4" placeholder='Tempel JSON resep di sini, contoh: [{"kode":"OAL","nama":"Oat Aren Latte","varian":"COLD","bahan":[{"plu":"20080001","nama":"Gula Aren","takaran":15,"satuan":"ML"}]}]'></textarea>
@@ -490,7 +486,7 @@ th{background:#f3f6f3;color:#526357}
 
 <!-- HISTORY -->
 <div id="pageHistory" class="hidden">
- <div class="page-title"><h2>Riwayat Audit</h2><p>Daftar hasil audit yang tersimpan di database bersama (Google Sheets)</p></div>
+ <div class="page-title"><h2>Riwayat Audit</h2><p>Daftar hasil audit yang tersinkron real-time di Firebase Realtime Database</p></div>
  <section class="panel">
   <div class="actions" style="margin-top:0;margin-bottom:15px">
    <button class="btn blue" onclick="exportAllHistory()">Export Daftar Riwayat CSV</button>
@@ -535,28 +531,167 @@ th{background:#f3f6f3;color:#526357}
 </main>
 </div>
 
+<!-- Firebase JS SDK (Compat) -->
+<script src="https://www.gstatic.com/firebasejs/11.10.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/11.10.0/firebase-database-compat.js"></script>
+
 <script>
-const DEFAULT_SHEETS_API = "https://script.google.com/macros/s/AKfycbyIYxWJ3WfRgdSe9Xq4eyfgX6hs1NopX4M8cDNeOacKBhv_GJWdADuSzVS2YqGo5zFB/exec";
 const $ = id => document.getElementById(id);
 const today = () => new Date().toLocaleDateString("en-CA");
+
 let masterPLU = JSON.parse(localStorage.getItem("masterPLU") || "[]");
 let menuRecipes = JSON.parse(localStorage.getItem("poinMenuRecipes") || "[]");
 let audit = JSON.parse(localStorage.getItem("poinAuditMandiri") || "null");
 let auditHistory = JSON.parse(localStorage.getItem("poinAuditHistory") || "[]");
-let pendingQueue = JSON.parse(localStorage.getItem("poinPendingQueue") || "[]");
 let editId = null;
 let editRecipeId = null;
 let recipeFilterVarian = "ALL";
 let historyViewing = null;
-let SHEETS_API = (localStorage.getItem("poinSheetsApi") || DEFAULT_SHEETS_API).replace(/^Https:/i, "https:");
-localStorage.setItem("poinSheetsApi", SHEETS_API);
-let isPulling = false;
-let isPushing = false;
-let pushDebounceTimer = null;
-let lastCloudSignature = "";
 let physicalSearch = "";
 let physicalFilter = "ALL";
 let selectedCompareKeys = new Set();
+let isRemoteApplying = false;
+
+// ==========================================
+// KONFIGURASI FIREBASE REALTIME DATABASE
+// ==========================================
+const firebaseConfig = {
+  apiKey: "AIzaSyCyHTZUxx3C4zL4ef1wXth6JsD8BME2JOY",
+  authDomain: "point-coffee-audit.firebaseapp.com",
+  databaseURL: "https://point-coffee-audit-default-rtdb.asia-southeast1.firebasedatabase.app",
+  projectId: "point-coffee-audit",
+  storageBucket: "point-coffee-audit.firebasestorage.app",
+  messagingSenderId: "325832398615",
+  appId: "1:325832398615:web:c4b864109fcf7cc8930952"
+};
+
+firebase.initializeApp(firebaseConfig);
+const db = firebase.database();
+
+const refMaster  = db.ref("poinCoffee/masterPLU");
+const refRecipes = db.ref("poinCoffee/menuRecipes");
+const refHistory = db.ref("poinCoffee/auditHistory");
+
+function arrayToMapById(arr, idField = "id") {
+  const map = {};
+  (Array.isArray(arr) ? arr : []).forEach((item, idx) => {
+    if (!item || typeof item !== "object") return;
+    const key = String(item[idField] ?? `item_${idx}`);
+    map[key] = item;
+  });
+  return map;
+}
+
+function mapToArray(val) {
+  if (!val) return [];
+  if (Array.isArray(val)) return val.filter(Boolean);
+  if (typeof val === "object") return Object.values(val).filter(Boolean);
+  return [];
+}
+
+function stampLive(labelText = "Realtime", kind = "ok") {
+  const badge = $("headerLiveBadge");
+  const lbl = $("headerSyncLabel");
+  const st = $("syncStatus");
+  const jam = new Date().toLocaleTimeString("id-ID", {
+    hour: "2-digit",
+    minute: "2-digit",
+    second: "2-digit"
+  });
+
+  if (badge) {
+    badge.classList.remove("syncing");
+    badge.classList.toggle("error", kind === "bad");
+  }
+  if (lbl) lbl.textContent = `${labelText} · ${jam}`;
+  if (st) {
+    st.textContent = kind === "bad"
+      ? `Koneksi Firebase terputus (${jam}). Perubahan tetap tersimpan lokal.`
+      : `Terhubung real-time ke Firebase Realtime Database (${jam}).`;
+    st.className = "sync-status " + (kind === "bad" ? "bad" : "ok");
+  }
+}
+
+function saveMaster(){
+ localStorage.setItem("masterPLU", JSON.stringify(masterPLU));
+ if(isRemoteApplying) return;
+ refMaster.set(arrayToMapById(masterPLU, "id"))
+  .then(() => stampLive("Realtime"))
+  .catch(() => stampLive("Error Push", "bad"));
+}
+function saveRecipes(){
+ localStorage.setItem("poinMenuRecipes", JSON.stringify(menuRecipes));
+ if(isRemoteApplying) return;
+ refRecipes.set(arrayToMapById(menuRecipes, "id"))
+  .then(() => stampLive("Realtime"))
+  .catch(() => stampLive("Error Push", "bad"));
+}
+function saveAudit(){
+ localStorage.setItem("poinAuditMandiri", JSON.stringify(audit));
+}
+function saveHistory(){
+ localStorage.setItem("poinAuditHistory", JSON.stringify(auditHistory));
+ if(isRemoteApplying) return;
+ refHistory.set(arrayToMapById(auditHistory, "historyId"))
+  .then(() => stampLive("Realtime"))
+  .catch(() => stampLive("Error Push", "bad"));
+}
+
+function initFirebaseRealtime(){
+ refMaster.on("value", snap => {
+  isRemoteApplying = true;
+  try {
+   masterPLU = mapToArray(snap.val());
+   localStorage.setItem("masterPLU", JSON.stringify(masterPLU));
+   const pMaster = $("pageMaster");
+   const pRec = $("pageRecipes");
+   if(pMaster && !pMaster.classList.contains("hidden")) renderMaster();
+   if(pRec && !pRec.classList.contains("hidden")) renderRecipeFormRows();
+   stampLive("Realtime");
+  } finally {
+   isRemoteApplying = false;
+  }
+ });
+
+ refRecipes.on("value", snap => {
+  isRemoteApplying = true;
+  try {
+   menuRecipes = mapToArray(snap.val());
+   localStorage.setItem("poinMenuRecipes", JSON.stringify(menuRecipes));
+   const pRec = $("pageRecipes");
+   if(pRec && !pRec.classList.contains("hidden")) renderRecipes();
+   stampLive("Realtime");
+  } finally {
+   isRemoteApplying = false;
+  }
+ });
+
+ refHistory.on("value", snap => {
+  isRemoteApplying = true;
+  try {
+   const list = mapToArray(snap.val());
+   list.sort((a, b) => Number(b.historyId || 0) - Number(a.historyId || 0));
+   auditHistory = list;
+   localStorage.setItem("poinAuditHistory", JSON.stringify(auditHistory));
+   const pHist = $("pageHistory");
+   if(pHist && !pHist.classList.contains("hidden")){
+    renderHistory();
+    if(historyViewing && historyViewing.historyId){
+     const updatedDoc = auditHistory.find(x => String(x.historyId) === String(historyViewing.historyId));
+     if(updatedDoc){ historyViewing = JSON.parse(JSON.stringify(updatedDoc)); renderHistoryDetail(); }
+    }
+   }
+   stampLive("Realtime");
+  } finally {
+   isRemoteApplying = false;
+  }
+ });
+
+ db.ref(".info/connected").on("value", snap => {
+  const connected = Boolean(snap.val());
+  stampLive(connected ? "Realtime" : "Offline", connected ? "ok" : "bad");
+ });
+}
 
 function parseRawLinks(rawLinkVal){
  if(!rawLinkVal) return [];
@@ -564,31 +699,10 @@ function parseRawLinks(rawLinkVal){
  return String(rawLinkVal).split(",").map(v=>v.trim()).filter(Boolean);
 }
 
-function saveMaster(){
- localStorage.setItem("masterPLU", JSON.stringify(masterPLU));
- enqueueSyncAction("saveBundle");
-}
-function saveRecipes(){
- localStorage.setItem("poinMenuRecipes", JSON.stringify(menuRecipes));
- enqueueSyncAction("saveBundle");
-}
-function saveAudit(){
- localStorage.setItem("poinAuditMandiri", JSON.stringify(audit));
-}
-function saveHistory(){
- localStorage.setItem("poinAuditHistory", JSON.stringify(auditHistory));
- enqueueSyncAction("saveBundle");
-}
-function savePendingQueue(){
- localStorage.setItem("poinPendingQueue", JSON.stringify(pendingQueue));
-}
-
 function esc(v){return String(v??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]))}
 function fmt(v){if(v===null||v===undefined||v==="")return "-";return Number(v).toLocaleString("id-ID",{maximumFractionDigits:3})}
 function safeDate(v){return esc(v||"-")}
 function dateTimeText(value){if(!value)return "-";const d=new Date(value);return Number.isNaN(d.getTime())?"-":d.toLocaleString("id-ID",{dateStyle:"medium",timeStyle:"medium"})}
-function timeText(value){if(!value)return "-";const d=new Date(value);return Number.isNaN(d.getTime())?"-":d.toLocaleTimeString("id-ID",{hour:"2-digit",minute:"2-digit",second:"2-digit"})}
-function durationText(start,end){if(!start||!end)return "-";const a=new Date(start).getTime(),b=new Date(end).getTime();if(!Number.isFinite(a)||!Number.isFinite(b)||b<a)return "-";const sec=Math.floor((b-a)/1000),h=Math.floor(sec/3600),m=Math.floor((sec%3600)/60),ss=sec%60;return [h?`${h} jam`:"",m?`${m} menit`:"",`${ss} detik`].filter(Boolean).join(" ")}
 function locationLabel(loc){
  if(loc==="GUDANG")return "Gudang Saja (Hanya RAW — Tanpa Konversi)";
  if(loc==="KABINET")return "Kabinet / Booth Saja (RAW + Konversi)";
@@ -606,7 +720,6 @@ function showPage(page){
  if(page==="recipes"){renderRecipeFormRows();renderRecipes();}
  if(page==="audit")renderAudit();
  if(page==="history")renderHistory();
- pullFromCloud(false);
 }
 
 document.addEventListener("DOMContentLoaded", () => {
@@ -614,14 +727,12 @@ document.addEventListener("DOMContentLoaded", () => {
  if(dateInput) dateInput.value = today();
  const katSelect = $("kategori");
  if(katSelect) katSelect.addEventListener("change", categoryChanged);
- 
+
  renderMaster();
  renderRecipeFormRows();
  renderRecipes();
- if(pendingQueue.length > 0) flushPendingQueue();
- else pullFromCloud(false);
+ initFirebaseRealtime();
  if(audit) renderAudit();
- else document.body.classList.remove("audit-active");
 });
 
 function categoryChanged(){
@@ -732,7 +843,7 @@ function injectDataFromCode(){
  saveMaster();
  renderMaster();
  $("dataInjectionBox").value = "";
- alert(`Selesai! ${added} Master PLU baru ditambahkan, ${updated} Master PLU diperbarui dan sedang dikirim ke Google Sheets.`);
+ alert(`Selesai! ${added} Master PLU baru ditambahkan, ${updated} Master PLU diperbarui dan langsung dikirim ke Firebase.`);
 }
 
 const pluForm = $("pluForm");
@@ -754,7 +865,7 @@ if(pluForm){
   if(masterPLU.some(x=>x.plu.toLowerCase()===plu.toLowerCase()&&x.id!==editId)){alert("Nomor PLU sudah terdaftar!");return}
   const item={id:editId||Date.now(),plu,nama,kategori,satuan,berat,isiBersih,rawLink};
   if(editId)masterPLU=masterPLU.map(x=>x.id===editId?item:x);else masterPLU.push(item);
-  saveMaster();resetForm();renderMaster();alert("Master PLU berhasil disimpan dan dikirim ke Google Sheets.");
+  saveMaster();resetForm();renderMaster();
  });
 }
 
@@ -950,7 +1061,6 @@ if(recipeForm){
   saveRecipes();
   resetRecipeForm();
   renderRecipes();
-  alert("Resep menu berhasil disimpan.");
  });
 }
 
@@ -1206,7 +1316,7 @@ function startAudit(){
  }
  if(audit&&audit.status!=="completed"&&!confirm("Ada audit yang belum selesai. Mulai baru?"))return;
  physicalSearch="";physicalFilter="ALL";selectedCompareKeys.clear();
- 
+
  const dateEl = $("auditDate");
  audit={
   lokasi,
@@ -1382,11 +1492,11 @@ function updateProgressOnly(){
 function renderAudit(){
  if(audit && (audit.status==="physical_konversi"||audit.status==="physical_raw")) audit.status="physical_all";
  if(audit && isCombinedMode() && !audit.combinedZone) audit.combinedZone="GUDANG";
- 
+
  const auditStart = $("auditStart");
  const auditWorkspace = $("auditWorkspace");
  const auditResult = $("auditResult");
- 
+
  if(!audit){
   if(auditStart) auditStart.classList.remove("hidden");
   if(auditWorkspace) auditWorkspace.classList.add("hidden");
@@ -1406,7 +1516,7 @@ function renderAudit(){
  const whOnly = isWarehouseOnly();
  const comb = isCombinedMode();
  const zoneText = comb ? (audit.combinedZone==="GUDANG" ? " · Tahap Aktif: GUDANG (RAW)" : " · Tahap Aktif: KABINET / BOOTH (RAW + KONVERSI)") : "";
- 
+
  const auditInfo = $("auditInfo");
  if(auditInfo){
   auditInfo.innerHTML=`<b>Mode Audit:</b> <span class="tag loc-tag">${esc(locationLabel(audit.lokasi))}${esc(zoneText)}</span> &nbsp; | &nbsp; <b>Auditor:</b> ${esc(audit.auditor)} &nbsp; | &nbsp; <b>Tanggal:</b> ${safeDate(audit.tanggal)}<br><b>Mulai audit:</b> ${dateTimeText(audit.mulaiPada)}<br><b>Item Tahap Ini:</b> ${activeAuditItems().length} PLU`;
@@ -1477,7 +1587,7 @@ function renderComputer(cat){
  }
  if($("auditHeading")) $("auditHeading").textContent="Input Stok Komputer "+cat;
  if($("auditInstruction")) $("auditInstruction").innerHTML="Ketik angka stok komputer lalu klik <b>+/− Minus</b> jika minus.";
- 
+
  const tBody = $("auditTableBody");
  if(tBody){
   tBody.className="comp-cards";
@@ -1554,11 +1664,11 @@ function renderPhysicalAll(){
  const isCombWh = isCombinedMode() && audit.combinedZone === "GUDANG";
  const isCombBt = isCombinedMode() && audit.combinedZone === "BOOTH";
  const showWhInput = whOnly || isCombWh;
- 
+
  if($("compTopNav")) $("compTopNav").classList.add("hidden");
  const tBody = $("auditTableBody");
  if(tBody) tBody.className="audit-list";
- 
+
  if(whOnly){
   if($("auditHeading")) $("auditHeading").textContent = "Catat Fisik Gudang (Khusus RAW)";
   if($("auditInstruction")) $("auditInstruction").innerHTML = "Isi jumlah stok fisik <b>RAW</b> (segel) di gudang.";
@@ -1572,7 +1682,7 @@ function renderPhysicalAll(){
   if($("auditHeading")) $("auditHeading").textContent = "Catat Fisik Kabinet / Booth";
   if($("auditInstruction")) $("auditInstruction").innerHTML = "Isi stok fisik <b>RAW</b> dan <b>KONVERSI</b>.";
  }
- 
+
  if($("auditTableHead")) $("auditTableHead").className="hidden";
  const toolbar = $("auditToolbar");
  if(toolbar){
@@ -1590,7 +1700,7 @@ function renderPhysicalAll(){
   `;
  }
  renderPairedCards();
- 
+
  const act = $("auditActions");
  if(act){
   if(whOnly){
@@ -1625,11 +1735,11 @@ function renderPairedCards(){
   if(!q) return true;
   return allItems.some(it => it.nama.toLowerCase().includes(q) || it.plu.toLowerCase().includes(q));
  });
- 
+
  const tBody = $("auditTableBody");
  if(!tBody) return;
  if(!groups.length){ tBody.innerHTML='<div class="empty">Tidak ada barang yang cocok.</div>'; return; }
- 
+
  tBody.innerHTML = groups.map((g, idx) => {
   const allItems = [g.raw, ...g.convs].filter(Boolean);
   const allDone = allItems.every(isItemPhysicalDone);
@@ -1770,7 +1880,6 @@ function getAllCompareCandidates(report){
 }
 
 function toggleCompareKey(key, checked){ if(checked) selectedCompareKeys.add(key); else selectedCompareKeys.delete(key); }
-function toggleAllCompareKeys(checked){ if(!audit) return; const list = getAllCompareCandidates(audit); selectedCompareKeys.clear(); if(checked) list.forEach(c => selectedCompareKeys.add(c.key)); renderCurrentResult(); }
 function addManualCompare(){
  if(!audit) return;
  const plusId = Number($("mcPlusSelect")?.value); const minusId = Number($("mcMinusSelect")?.value); const ratio = Number($("mcRatioInput")?.value);
@@ -1838,7 +1947,6 @@ function comparePanelHTML(report){
    const mIdx = (report.manualCompares||[]).findIndex(m => m.plusId===c.plusItem.id && m.minusId===c.minusItem.id);
    return `<div class="compare-item"><input type="checkbox" ${checked} onchange="toggleCompareKey('${esc(c.key)}', this.checked)"><div class="compare-item-body"><div><b>#${idx+1} [MANUAL] ${esc(c.plusItem.nama)}</b> ↔ <b>${esc(c.minusItem.nama)}</b> <button type="button" class="zero-btn" style="margin-left:6px" onclick="removeManualCompare(${mIdx})">Hapus</button></div></div></div>`;
   }
-  const isRawPlus = c.direction === "RAW_TO_CONV";
   return `<div class="compare-item"><input type="checkbox" ${checked} onchange="toggleCompareKey('${esc(c.key)}', this.checked)"><div class="compare-item-body"><div><b>#${idx+1} ${esc(c.raw.nama)}</b> &amp; <b>${esc(c.conv.nama)}</b></div></div></div>`;
  }).join("");
  const manualBuilderHTML = (plusItems.length && minusItems.length) ? `<div class="manual-compare-box no-print"><b style="font-size:12px;color:#7b5312">+ Tambah Kompair Manual</b><div class="manual-compare-grid"><div class="field"><label>PLUS</label><select id="mcPlusSelect">${plusItems.map(x=>`<option value="${x.id}">${esc(x.nama)} (+${fmt(x.selisih)})</option>`).join("")}</select></div><div class="field"><label>MINUS</label><select id="mcMinusSelect">${minusItems.map(x=>`<option value="${x.id}">${esc(x.nama)} (${fmt(x.selisih)})</option>`).join("")}</select></div><div class="field"><label>Rasio</label><input id="mcRatioInput" type="number" inputmode="decimal" min="0.0001" step="any" value="1"></div><button type="button" class="btn warn-btn" onclick="addManualCompare()">+ Tambah</button></div></div>` : "";
@@ -1870,9 +1978,8 @@ function fullDetailSheetHTML(report){
 
 function sortedItems(items,order){ const a=[...items]; if(order==="minus")a.sort((x,y)=>x.selisih-y.selisih); else if(order==="plus")a.sort((x,y)=>y.selisih-x.selisih); else if(order==="plu")a.sort((x,y)=>x.plu.localeCompare(y.plu,undefined,{numeric:true})); else if(order==="name")a.sort((x,y)=>x.nama.localeCompare(y.nama)); return a; }
 function summaryHTML(items){ const plus=items.filter(x=>x.selisih>0).length,minus=items.filter(x=>x.selisih<0).length,same=items.filter(x=>x.selisih===0).length; return `<div class="mini-stat"><span>PLUS</span><strong class="plus">${plus}</strong></div><div class="mini-stat"><span>MINUS</span><strong class="minus">${minus}</strong></div><div class="mini-stat"><span>SESUAI</span><strong class="same">${same}</strong></div>`; }
-function linkedFlags(items){ return []; }
 
-function resultCard(x,flags){
+function resultCard(x){
  const cls=x.selisih>0?"plus":x.selisih<0?"minus":"same";
  const balVal = Number(x.penyeimbangRAW)||0;
  const balNote = balVal !== 0 ? `<div class="bal-note">⚖️ Kompair: ${balVal>0?`+${fmt(balVal)}`:fmt(balVal)}</div>` : "";
@@ -1883,9 +1990,8 @@ function renderResultsInto(items,rawId,convId,rawSumId,convSumId,infoId,metaId,o
  const whOnly = currentReport && currentReport.lokasi === "GUDANG";
  const raw=sortedItems(items.filter(x=>x.kategori==="RAW"),order);
  const conv=whOnly ? [] : sortedItems(items.filter(x=>x.kategori==="KONVERSI"),order);
- const flags=[];
- if($(rawId)) $(rawId).innerHTML=raw.map(x=>resultCard(x,flags)).join("")||'<div class="empty">Kosong.</div>';
- if($(convId)) $(convId).innerHTML=conv.map(x=>resultCard(x,flags)).join("")||'<div class="empty">Kosong.</div>';
+ if($(rawId)) $(rawId).innerHTML=raw.map(x=>resultCard(x)).join("")||'<div class="empty">Kosong.</div>';
+ if($(convId)) $(convId).innerHTML=conv.map(x=>resultCard(x)).join("")||'<div class="empty">Kosong.</div>';
  if($(rawSumId)) $(rawSumId).innerHTML=summaryHTML(raw);
  if($(convSumId)) $(convSumId).innerHTML=summaryHTML(conv);
 }
@@ -1924,7 +2030,7 @@ function saveAuditResult(){
  const copy=JSON.parse(JSON.stringify(audit));
  copy.saved=true;copy.historyId=Date.now();
  auditHistory.unshift(copy);audit.saved=true;
- saveAudit();saveHistory();renderCurrentResult();alert("Berhasil disimpan.");
+ saveAudit();saveHistory();renderCurrentResult();alert("Berhasil disimpan ke Firebase.");
 }
 
 function renderHistory(){
@@ -1971,9 +2077,8 @@ function renderHistoryDetail(){
  if($("historyConvSection")) $("historyConvSection").classList.toggle("hidden", whOnly);
  if($("historyRawSummary")) $("historyRawSummary").innerHTML=summaryHTML(raw);
  if($("historyKonversiSummary")) $("historyKonversiSummary").innerHTML=summaryHTML(conv);
- const flags=[];
- if($("historyRawResults")) $("historyRawResults").innerHTML=sortedItems(raw,order).map(x=>resultCard(x,flags)).join("")||'<div class="empty">Kosong.</div>';
- if($("historyKonversiResults")) $("historyKonversiResults").innerHTML=sortedItems(conv,order).map(x=>resultCard(x,flags)).join("")||'<div class="empty">Kosong.</div>';
+ if($("historyRawResults")) $("historyRawResults").innerHTML=sortedItems(raw,order).map(x=>resultCard(x)).join("")||'<div class="empty">Kosong.</div>';
+ if($("historyKonversiResults")) $("historyKonversiResults").innerHTML=sortedItems(conv,order).map(x=>resultCard(x)).join("")||'<div class="empty">Kosong.</div>';
 }
 
 function exportPDF(fromHistory=false){
@@ -2017,155 +2122,6 @@ function downloadCSV(rows,name){
  const blob=new Blob(["\uFEFF"+csv],{type:"text/csv;charset=utf-8;"});
  const url=URL.createObjectURL(blob),a=document.createElement("a");a.href=url;a.download=name;a.click();URL.revokeObjectURL(url);
 }
-
-function setBusyIndicator(active, labelText, kind="ok"){
- const badge = $("headerLiveBadge");
- const lbl = $("headerSyncLabel");
- if(badge){
-  badge.classList.toggle("syncing", Boolean(active));
-  badge.classList.toggle("error", kind === "bad");
- }
- if(lbl && labelText) lbl.textContent = labelText;
-}
-
-function setSyncStatus(message, kind=""){
- const el = $("syncStatus");
- if(el){ el.textContent = message; el.className = "sync-status " + kind; }
-}
-
-function jsonpRead(url){
- return new Promise((resolve, reject) => {
-  const cb = "poinCb" + Date.now() + "_" + Math.floor(Math.random()*100000);
-  const script = document.createElement("script");
-  const timer = setTimeout(() => { cleanup(); reject(new Error("Waktu habis.")); }, 20000);
-  function cleanup(){ clearTimeout(timer); delete window[cb]; script.remove(); }
-  window[cb] = data => { cleanup(); resolve(data); };
-  script.onerror = () => { cleanup(); reject(new Error("Gagal memuat data.")); };
-  script.src = url + (url.includes("?") ? "&" : "?") + "action=read&callback=" + cb + "&_=" + Date.now();
-  document.body.appendChild(script);
- });
-}
-
-function enqueueSyncAction(actionName){
- pendingQueue.push({
-  id: Date.now() + "_" + Math.random().toString(36).slice(2,7),
-  action: actionName || "saveBundle",
-  createdAt: new Date().toISOString()
- });
- savePendingQueue();
- setBusyIndicator(true, "Mengirim...", "ok");
- setSyncStatus("Menyimpan ke Google Sheets...", "");
- if(pushDebounceTimer) clearTimeout(pushDebounceTimer);
- pushDebounceTimer = setTimeout(() => { flushPendingQueue(); }, 250);
-}
-
-async function flushPendingQueue(){
- if(!SHEETS_API || isPushing || !pendingQueue.length) return;
- isPushing = true;
- setBusyIndicator(true, "Mengirim...", "ok");
- try {
-  while(pendingQueue.length > 0){
-   const payload = {
-    action: "saveBundle",
-    master: masterPLU,
-    history: auditHistory,
-    recipes: menuRecipes
-   };
-   await fetch(SHEETS_API, {
-    method: "POST",
-    mode: "no-cors",
-    headers: { "Content-Type": "text/plain;charset=utf-8" },
-    body: JSON.stringify(payload)
-   });
-   pendingQueue.shift();
-   savePendingQueue();
-  }
-  const jam = new Date().toLocaleTimeString("id-ID", { hour:"2-digit", minute:"2-digit", second:"2-digit" });
-  setSyncStatus("Tersinkron real-time (" + jam + ").", "ok");
-  setBusyIndicator(false, "Live · " + jam, "ok");
- } catch (e) {
-  setSyncStatus("Gagal mengirim: " + e.message, "bad");
-  setBusyIndicator(false, "Antre Kirim", "bad");
- } finally {
-  isPushing = false;
- }
-}
-
-async function pullFromCloud(silent = true){
- if(!SHEETS_API || isPulling || isPushing || pendingQueue.length > 0) return;
- isPulling = true;
- if(!silent) setBusyIndicator(true, "Menarik data...", "ok");
- try {
-  const data = await jsonpRead(SHEETS_API);
-  if(!data || !data.ok) throw new Error(data?.error || "Respons tidak valid.");
-  
-  const remoteMaster = Array.isArray(data.master) ? data.master : [];
-  const remoteHistory = Array.isArray(data.history) ? data.history : [];
-  const remoteRecipes = Array.isArray(data.recipes) ? data.recipes : [];
-  
-  const sig = JSON.stringify({ m: remoteMaster, h: remoteHistory, r: remoteRecipes });
-  const changed = sig !== lastCloudSignature;
-  lastCloudSignature = sig;
-
-  if(changed){
-   if(remoteMaster.length > 0 || masterPLU.length === 0){
-    masterPLU = remoteMaster;
-    localStorage.setItem("masterPLU", JSON.stringify(masterPLU));
-   }
-   if(remoteHistory.length > 0 || auditHistory.length === 0){
-    auditHistory = remoteHistory;
-    localStorage.setItem("poinAuditHistory", JSON.stringify(auditHistory));
-   }
-   if(remoteRecipes.length > 0 || menuRecipes.length === 0){
-    menuRecipes = remoteRecipes;
-    localStorage.setItem("poinMenuRecipes", JSON.stringify(menuRecipes));
-   }
-
-   const pMaster = $("pageMaster");
-   const pRec = $("pageRecipes");
-   const pAudit = $("pageAudit");
-   const pHist = $("pageHistory");
-   
-   if(pMaster && !pMaster.classList.contains("hidden")) renderMaster();
-   if(pRec && !pRec.classList.contains("hidden")){ renderRecipeFormRows(); renderRecipes(); }
-   if(pAudit && !pAudit.classList.contains("hidden") && audit && audit.status === "completed") renderCurrentResult();
-   if(pHist && !pHist.classList.contains("hidden")){
-    renderHistory();
-    if(historyViewing && historyViewing.historyId){
-     const updatedDoc = auditHistory.find(x => String(x.historyId) === String(historyViewing.historyId));
-     if(updatedDoc){ historyViewing = JSON.parse(JSON.stringify(updatedDoc)); renderHistoryDetail(); }
-    }
-   }
-  }
-
-  const jam = new Date().toLocaleTimeString("id-ID", { hour:"2-digit", minute:"2-digit", second:"2-digit" });
-  setSyncStatus("Terhubung real-time (" + jam + ").", "ok");
-  setBusyIndicator(false, "Live · " + jam, "ok");
- } catch (e) {
-  setSyncStatus("Gagal menarik data: " + e.message, "bad");
-  setBusyIndicator(false, "Gangguan Sync", "bad");
- } finally {
-  isPulling = false;
- }
-}
-
-document.addEventListener("visibilitychange", () => {
- if(document.visibilityState === "visible"){
-  if(pendingQueue.length > 0) flushPendingQueue();
-  else pullFromCloud(false);
- }
-});
-
-window.addEventListener("focus", () => {
- if(pendingQueue.length > 0) flushPendingQueue();
- else pullFromCloud(true);
-});
-
-setInterval(() => {
- if(document.visibilityState !== "visible") return;
- if(pendingQueue.length > 0) flushPendingQueue();
- else pullFromCloud(true);
-}, 5000);
 </script>
 </body>
 </html>
