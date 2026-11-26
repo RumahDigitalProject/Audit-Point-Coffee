@@ -3,13 +3,13 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Poin Coffee | Raw Material Audit System</title>
+<title>Poin Coffee | Raw Material Audit & Recipe System</title>
 <style>
 :root{--green:#19372b;--green2:#244b36;--gold:#d7b98e;--bg:#f4f6f4;--text:#263a2e;--muted:#78847b;--line:#e7ece8;--red:#b73535;--orange:#a66a13;--blue:#315e91}
 *{box-sizing:border-box;font-family:Arial,sans-serif}
 body{margin:0;background:var(--bg);color:var(--text)}
 header{background:var(--green);color:#fff;padding:20px 28px;display:flex;justify-content:space-between;align-items:center;gap:14px;flex-wrap:wrap}
-.brand-row{display:flex;align-items:center;gap:12px}
+.brand-row{display:flex;align-items:center;gap:12px;flex-wrap:wrap}
 header h2{margin:0;letter-spacing:1px;font-size:22px}
 header p{margin:7px 0 0;color:#bdcec2;font-size:11px;letter-spacing:2px}
 .live-badge{display:inline-flex;align-items:center;gap:8px;background:#11271e;border:1px solid #355d49;padding:7px 12px;border-radius:999px;font-size:11px;color:#d6e6dc}
@@ -57,6 +57,7 @@ small,.muted{color:#89948b;font-size:11px}
 .hidden{display:none!important}
 .tag{display:inline-block;padding:3px 8px;border-radius:20px;font-size:10px;font-weight:bold;white-space:nowrap}
 .raw{background:#e6f2e8;color:#26713b}.konversi{background:#e7effb;color:#315e9b}.loc-tag{background:#f5efe3;color:#7b581e}.bal-tag{background:#e5f2ee;color:#1d634d}
+.hot-tag{background:#fdeceb;color:#a52c25}.cold-tag{background:#e5f0fc;color:#1e5899}
 .plus{color:#21834b;font-weight:bold}.minus{color:#c13c36;font-weight:bold}.same{color:#587263;font-weight:bold}
 .notice{background:#edf4ee;color:#31563c;border-radius:9px;padding:12px;font-size:12px;line-height:1.55;margin-bottom:15px}
 .notice.warn{background:#fff3df;color:#865711}
@@ -70,6 +71,33 @@ th{background:#f3f6f3;color:#526357}
 .raw-multi-box{border:1px solid #dce3dd;border-radius:7px;padding:9px;max-height:145px;overflow-y:auto;background:#fafcfa;display:grid;gap:6px}
 .raw-multi-item{display:flex;align-items:center;gap:8px;font-size:12px;cursor:pointer}
 .raw-multi-item input{width:auto;margin:0}
+
+/* RESEP MENU STYLING */
+.recipe-ing-list{display:grid;gap:8px;margin-top:6px}
+.recipe-ing-row{display:grid;grid-template-columns:minmax(0,1.7fr) minmax(95px,.7fr) minmax(95px,.7fr) auto;gap:8px;align-items:center;background:#f7faf7;border:1px solid #dce5de;padding:9px;border-radius:8px}
+.recipe-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(290px,1fr));gap:13px;margin-top:14px}
+.recipe-card{border:1px solid #dce3dd;border-radius:10px;background:#fff;overflow:hidden;display:flex;flex-direction:column;justify-content:space-between}
+.recipe-card-head{padding:11px 14px;color:#fff;display:flex;justify-content:space-between;align-items:center;gap:8px}
+.recipe-card-head.is-hot{background:#a72c26}
+.recipe-card-head.is-cold{background:#225d9c}
+.recipe-card-title{font-weight:bold;font-size:13px;letter-spacing:.3px}
+.recipe-card-sub{font-size:10px;opacity:.9;margin-top:2px}
+.recipe-card-body{padding:12px 14px;font-size:12px}
+.recipe-ing-table{width:100%;border-collapse:collapse;margin-top:4px}
+.recipe-ing-table td{padding:6px 4px;border-bottom:1px dashed #e6ece7;font-size:11px}
+.recipe-ing-table tr:last-child td{border-bottom:0}
+.recipe-card-foot{padding:10px 14px;background:#f7f9f7;border-top:1px solid #edf0ed;display:flex;justify-content:space-between;align-items:center;gap:6px}
+
+/* REKOMENDASI MENU DI HASIL AUDIT */
+.menu-reco-box{background:#f3f8fc;border:1px solid #c3d8ee;border-radius:10px;padding:16px;margin-top:16px}
+.menu-reco-box h4{margin:0 0 8px;font-size:15px;color:#1d4e80}
+.reco-cols{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;margin-top:10px}
+.reco-col{background:#fff;border:1px solid #dce6f0;border-radius:9px;padding:12px}
+.reco-col h5{margin:0 0 8px;font-size:13px}
+.reco-col.safe h5{color:#1f7a44}
+.reco-col.risk h5{color:#b0322b}
+.reco-item{border-bottom:1px dashed #e6ece8;padding:8px 0;font-size:11px;line-height:1.5}
+.reco-item:last-child{border-bottom:0;padding-bottom:0}
 
 .audit-toolbar{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:14px;align-items:center;background:#f7f9f7;padding:12px;border-radius:9px;border:1px solid var(--line)}
 .audit-toolbar input{flex:1;min-width:200px;background:#fff}
@@ -168,7 +196,8 @@ th{background:#f3f6f3;color:#526357}
 @media(max-width:850px){
  .layout{display:block}.sidebar{width:100%;display:flex;gap:5px;flex-wrap:wrap;padding:9px}
  .menu-title{display:none}.sidebar button{width:auto;flex:1;text-align:center;font-size:11px;padding:11px 7px}
- main{padding:14px}.panel{padding:15px}.form-grid,.manual-compare-grid,.comp-card{grid-template-columns:1fr}
+ main{padding:14px}.panel{padding:15px}.form-grid,.manual-compare-grid,.comp-card,.reco-cols{grid-template-columns:1fr}
+ .recipe-ing-row{grid-template-columns:1fr 1fr}
 }
 @media(max-width:560px){
  header{padding:17px}.stats,.wh-summary-grid{grid-template-columns:repeat(2,minmax(0,1fr))}
@@ -187,7 +216,7 @@ th{background:#f3f6f3;color:#526357}
 @media print{
  @page{size:A4 portrait;margin:10mm}
  body{background:#fff;color:#111}
- header,.sidebar,.no-print,#pageMaster,#pageAuditStart,#pageHistory,.page-title,.screen-only{display:none!important}
+ header,.sidebar,.no-print,#pageMaster,#pageRecipes,#pageAuditStart,#pageHistory,.page-title,.screen-only{display:none!important}
  .layout{display:block;min-height:0}
  main{padding:0}
  #pageAudit{display:block!important}
@@ -199,7 +228,8 @@ th{background:#f3f6f3;color:#526357}
  .result-grid{grid-template-columns:repeat(3,1fr)}
  .result-list{gap:4px}
  .flag{border:1px solid #999;color:#111;background:#fff}
- .pdf-detail-sheet{border:1px solid #888;background:#fff;padding:10px;break-inside:avoid}
+ .menu-reco-box,.pdf-detail-sheet{border:1px solid #888;background:#fff;padding:10px;break-inside:avoid}
+ .reco-cols{grid-template-columns:repeat(2,1fr)}
  .pdf-table th,.pdf-table td{font-size:9px;padding:5px 6px}
  .print-heading{display:block!important}
  .print-meta{font-size:10px;margin-bottom:10px}
@@ -230,6 +260,7 @@ th{background:#f3f6f3;color:#526357}
 <aside class="sidebar">
  <div class="menu-title">MASTER DATA</div>
  <button id="menuMaster" class="active" onclick="showPage('master')">▦ Master PLU</button>
+ <button id="menuRecipes" onclick="showPage('recipes')">☕ Resep Menu</button>
  <div class="menu-title">AUDIT SYSTEM</div>
  <button id="menuAudit" onclick="showPage('audit')">◉ Audit Mandiri</button>
  <button id="menuHistory" onclick="showPage('history')">◷ Riwayat Audit</button>
@@ -241,14 +272,14 @@ th{background:#f3f6f3;color:#526357}
  <div class="page-title"><h2>Master PLU</h2><p>Pengelolaan data utama bahan baku Poin Coffee</p></div>
  <section class="panel">
   <h3>Database Google Sheets Real-Time</h3>
-  <div class="notice">Terhubung otomatis dua arah ke database Google Sheets Poin Coffee. Setiap perubahan di perangkat mana pun dikirim ke Google Sheets dan ditarik otomatis ke perangkat lain.</div>
+  <div class="notice">Terhubung otomatis dua arah ke database Google Sheets Poin Coffee (Master PLU, Resep Menu &amp; Riwayat Audit). Setiap perubahan di perangkat mana pun dikirim ke Google Sheets dan ditarik otomatis ke perangkat lain.</div>
   <div id="syncStatus" class="sync-status">Menghubungkan ke database Google Sheets...</div>
  </section>
 
  <!-- FITUR INJEKSI DATA CEPAT -->
  <section class="panel" style="border: 2px dashed #244b36;">
-  <h3>⚡ Injeksi Data Instan</h3>
-  <div class="notice">Tempel (Paste) kode JSON di bawah ini ke dalam kotak, lalu klik tombol untuk memasukkan atau memperbarui seluruh daftar barang sekaligus ke daftar Master PLU dan langsung mengirimnya ke Google Sheets.</div>
+  <h3>⚡ Injeksi Data Master PLU Instan</h3>
+  <div class="notice">Tempel (Paste) kode JSON Master PLU di bawah ini ke dalam kotak, lalu klik tombol untuk memasukkan atau memperbarui seluruh daftar barang sekaligus dan langsung mengirimnya ke Google Sheets.</div>
   <div class="field">
    <label>Kotak Kode Injeksi Data (JSON)</label>
    <textarea id="dataInjectionBox" rows="4" placeholder='Tempel kode JSON di sini, contoh: [{"plu":"20080424","nama":"Coffee Bean","kategori":"RAW","satuan":"PCS"}]'></textarea>
@@ -296,6 +327,73 @@ th{background:#f3f6f3;color:#526357}
     <tbody id="tableData"></tbody>
    </table>
   </div>
+ </section>
+</div>
+
+<!-- RESEP MENU -->
+<div id="pageRecipes" class="hidden">
+ <div class="page-title"><h2>Resep Menu Minuman (Regular Normal)</h2><p>Penautan PLU RAW &amp; KONVERSI untuk rekomendasi menu otomatis pada hasil audit</p></div>
+
+ <section class="panel" style="border: 2px dashed #315e91;">
+  <h3>⚡ Injeksi Kode JSON Resep Menu</h3>
+  <div class="notice">Tempel kode JSON daftar resep (ukuran <b>REGULAR</b> normal) ke kotak di bawah, lalu klik terapkan. Sistem otomatis mencocokkan PLU bahan (baik <b>RAW</b> maupun <b>KONVERSI</b>) dengan Master PLU dan menyimpannya ke Google Sheets.</div>
+  <div class="field">
+   <label>Kotak Kode Injeksi Resep (JSON)</label>
+   <textarea id="recipeInjectionBox" rows="4" placeholder='Tempel JSON resep di sini, contoh: [{"kode":"OAL","nama":"Oat Aren Latte","varian":"COLD","bahan":[{"plu":"20080001","nama":"Gula Aren","takaran":15,"satuan":"ML"}]}]'></textarea>
+  </div>
+  <div class="actions"><button class="btn blue" type="button" onclick="injectRecipesFromCode()">▼ Terapkan &amp; Simpan Semua Resep</button></div>
+ </section>
+
+ <div class="stats">
+  <div class="stat"><p>Total Resep Menu</p><h2 id="totalRecipes">0</h2></div>
+  <div class="stat"><p>Varian HOT</p><h2 id="totalRecipesHot">0</h2></div>
+  <div class="stat"><p>Varian COLD</p><h2 id="totalRecipesCold">0</h2></div>
+ </div>
+
+ <section class="panel">
+  <h3 id="recipeFormTitle">Tambah Resep Menu (Ukuran REGULAR Normal)</h3>
+  <form id="recipeForm">
+   <div class="form-grid">
+    <div class="field"><label>1. Kode Menu (Opsional)</label><input id="recKode" placeholder="Contoh: OAL, PSL, CAP"></div>
+    <div class="field"><label>2. Nama Menu Minuman</label><input id="recNama" required placeholder="Contoh: Oat Aren Latte"></div>
+    <div class="field">
+     <label>3. Varian Sajian</label>
+     <select id="recVarian">
+      <option value="COLD">COLD (Dingin)</option>
+      <option value="HOT">HOT (Panas)</option>
+     </select>
+    </div>
+    <div class="field">
+     <label>4. Standar Ukuran &amp; Takaran</label>
+     <input value="REGULAR (Normal)" disabled>
+    </div>
+    <div class="field full">
+     <label>5. Daftar Bahan Baku &amp; Penautan PLU (RAW / KONVERSI)</label>
+     <div id="recipeIngContainer" class="recipe-ing-list"></div>
+     <div style="margin-top:8px">
+      <button type="button" class="btn edit" onclick="addRecipeIngRow()">+ Tambah Baris Bahan</button>
+     </div>
+     <small>Pilih PLU dari Master PLU (RAW maupun KONVERSI) agar saat bahan tersebut MINUS di audit, sistem otomatis menghitung dampak dan rekomendasi penjualan menunya.</small>
+    </div>
+   </div>
+   <div class="actions">
+    <button class="btn save" id="saveRecipeBtn" type="submit">+ Simpan Resep Menu</button>
+    <button class="btn cancel hidden" id="cancelRecipeBtn" type="button" onclick="resetRecipeForm()">Batal Edit</button>
+   </div>
+  </form>
+ </section>
+
+ <section class="panel">
+  <h3>Daftar Resep Menu Tersimpan</h3>
+  <div class="audit-toolbar" style="margin-bottom:0">
+   <input id="recipeSearch" placeholder="Cari kode, nama menu, atau bahan..." oninput="renderRecipes()">
+   <div class="filter-pills">
+    <button type="button" class="pill active" id="recFilterALL" onclick="setRecipeFilter('ALL')">Semua</button>
+    <button type="button" class="pill" id="recFilterHOT" onclick="setRecipeFilter('HOT')">HOT</button>
+    <button type="button" class="pill" id="recFilterCOLD" onclick="setRecipeFilter('COLD')">COLD</button>
+   </div>
+  </div>
+  <div id="recipeCardsGrid" class="recipe-grid"></div>
  </section>
 </div>
 
@@ -358,6 +456,7 @@ th{background:#f3f6f3;color:#526357}
     <div class="stat"><p>Jumlah MINUS</p><h2 id="resultMinus">0</h2></div>
    </div>
    <div id="comparePanel"></div>
+   <div id="menuRecommendationPanel"></div>
    <div id="warehouseConclusion"></div>
    <div id="pdfFullBreakdown"></div>
    <div class="notice" style="margin-top:14px">PLUS = stok fisik lebih besar dari stok komputer. MINUS = stok fisik lebih kecil. SESUAI = stok fisik sama dengan stok komputer.</div>
@@ -411,6 +510,7 @@ th{background:#f3f6f3;color:#526357}
    <div class="print-heading"><h2>POIN COFFEE — LAPORAN DETAIL AUDIT BAHAN BAKU (GUDANG, BOOTH &amp; KOMPAIR)</h2></div>
    <h3>Detail Hasil Audit</h3>
    <div id="historyResultInfo"></div>
+   <div id="historyMenuRecommendation"></div>
    <div id="historyWarehouseConclusion"></div>
    <div id="historyFullBreakdown"></div>
    <div class="sort-row no-print">
@@ -444,10 +544,13 @@ const DEFAULT_SHEETS_API = "https://script.google.com/macros/s/AKfycbyGS_W8JCIxO
 const $ = id => document.getElementById(id);
 const today = () => new Date().toLocaleDateString("en-CA");
 let masterPLU = JSON.parse(localStorage.getItem("masterPLU") || "[]");
+let menuRecipes = JSON.parse(localStorage.getItem("poinMenuRecipes") || "[]");
 let audit = JSON.parse(localStorage.getItem("poinAuditMandiri") || "null");
 let auditHistory = JSON.parse(localStorage.getItem("poinAuditHistory") || "[]");
 let pendingQueue = JSON.parse(localStorage.getItem("poinPendingQueue") || "[]");
 let editId = null;
+let editRecipeId = null;
+let recipeFilterVarian = "ALL";
 let historyViewing = null;
 let SHEETS_API = (localStorage.getItem("poinSheetsApi") || DEFAULT_SHEETS_API).replace(/^Https:/i, "https:");
 localStorage.setItem("poinSheetsApi", SHEETS_API);
@@ -467,6 +570,10 @@ function parseRawLinks(rawLinkVal){
 
 function saveMaster(){
  localStorage.setItem("masterPLU", JSON.stringify(masterPLU));
+ enqueueSyncAction("saveBundle");
+}
+function saveRecipes(){
+ localStorage.setItem("poinMenuRecipes", JSON.stringify(menuRecipes));
  enqueueSyncAction("saveBundle");
 }
 function saveAudit(){
@@ -493,11 +600,12 @@ function locationLabel(loc){
 }
 
 function showPage(page){
- ["master","audit","history"].forEach(p=>{
+ ["master","recipes","audit","history"].forEach(p=>{
   $("page"+p[0].toUpperCase()+p.slice(1)).classList.toggle("hidden",p!==page);
   $("menu"+p[0].toUpperCase()+p.slice(1)).classList.toggle("active",p===page);
  });
  if(page==="master")renderMaster();
+ if(page==="recipes"){renderRecipeFormRows();renderRecipes();}
  if(page==="audit")renderAudit();
  if(page==="history")renderHistory();
  pullFromCloud(false);
@@ -537,7 +645,7 @@ function getSelectedRawLinks(){
  return Array.from(document.querySelectorAll('input[name="rawLinkCheck"]:checked')).map(el=>el.value.trim()).filter(Boolean).join(", ");
 }
 
-/* LOGIKA INJEKSI DATA JSON INSTAN */
+/* LOGIKA INJEKSI DATA MASTER PLU INSTAN */
 function injectDataFromCode(){
  const rawInput = $("dataInjectionBox").value.trim();
  if(!rawInput){alert("Kotak Injeksi Data masih kosong!");return;}
@@ -656,6 +764,370 @@ function resetForm(){
  $("formTitle").textContent="Tambah Master PLU";$("saveButton").textContent="+ Simpan Master PLU";$("cancelButton").classList.add("hidden");
 }
 
+// ================= RESEP MENU (REGULAR NORMAL + PLU LINKING) =================
+let draftRecipeRows = [];
+
+function renderRecipeFormRows(){
+ if(!draftRecipeRows.length){
+  draftRecipeRows = [{plu:"", nama:"", kategori:"", takaran:"", satuan:"ML"}];
+ }
+ const container = $("recipeIngContainer");
+ if(!container) return;
+ const optionsHTML = `<option value="">-- Pilih PLU dari Master (RAW / KONVERSI) --</option>` +
+  masterPLU.map(m => `<option value="${esc(m.plu)}">[${esc(m.kategori)}] ${esc(m.plu)} — ${esc(m.nama)} (${esc(m.satuan)})</option>`).join("");
+
+ container.innerHTML = draftRecipeRows.map((row, idx) => `
+  <div class="recipe-ing-row">
+   <select onchange="onRecipePluChange(${idx}, this.value)">
+    ${optionsHTML.replace(`value="${esc(row.plu)}"`, `value="${esc(row.plu)}" selected`)}
+   </select>
+   <input type="number" inputmode="decimal" min="0" step="any" placeholder="Takaran" value="${esc(row.takaran)}" oninput="draftRecipeRows[${idx}].takaran=this.value">
+   <input placeholder="Satuan" value="${esc(row.satuan)}" oninput="draftRecipeRows[${idx}].satuan=this.value">
+   <button type="button" class="btn delete" style="padding:8px 10px" onclick="removeRecipeIngRow(${idx})" ${draftRecipeRows.length<=1?'disabled':''}>✕</button>
+  </div>
+ `).join("");
+}
+
+function onRecipePluChange(idx, pluVal){
+ const m = masterPLU.find(x => String(x.plu) === String(pluVal));
+ draftRecipeRows[idx].plu = pluVal;
+ if(m){
+  draftRecipeRows[idx].nama = m.nama;
+  draftRecipeRows[idx].kategori = m.kategori;
+  draftRecipeRows[idx].satuan = m.satuan;
+ }
+ renderRecipeFormRows();
+}
+function addRecipeIngRow(){
+ draftRecipeRows.push({plu:"", nama:"", kategori:"", takaran:"", satuan:"ML"});
+ renderRecipeFormRows();
+}
+function removeRecipeIngRow(idx){
+ if(draftRecipeRows.length <= 1) return;
+ draftRecipeRows.splice(idx, 1);
+ renderRecipeFormRows();
+}
+
+function normalizeRecipeIngredient(b){
+ const pluStr = String(b.plu || "").trim();
+ const matchedMaster = pluStr
+  ? masterPLU.find(m => String(m.plu).toLowerCase() === pluStr.toLowerCase())
+  : masterPLU.find(m => String(m.nama).toLowerCase() === String(b.nama || "").trim().toLowerCase());
+ return {
+  plu: matchedMaster ? matchedMaster.plu : pluStr,
+  nama: String(b.nama || (matchedMaster ? matchedMaster.nama : "")).trim(),
+  kategori: matchedMaster ? matchedMaster.kategori : String(b.kategori || "KONVERSI").trim().toUpperCase(),
+  takaran: Number(b.takaran) || 0,
+  satuan: String(b.satuan || (matchedMaster ? matchedMaster.satuan : "ML")).trim()
+ };
+}
+
+function injectRecipesFromCode(){
+ const rawInput = $("recipeInjectionBox").value.trim();
+ if(!rawInput){ alert("Kotak kode JSON resep masih kosong!"); return; }
+ let parsed;
+ try {
+  const trimmed = rawInput.replace(/^\s+/, "");
+  parsed = (trimmed.startsWith("[") || trimmed.startsWith("{"))
+   ? JSON.parse(rawInput)
+   : JSON.parse(atob(rawInput.replace(/\s+/g, "")));
+ } catch (e) {
+  alert("Format JSON resep tidak valid atau terpotong. Pastikan menyalin seluruh teks JSON.");
+  return;
+ }
+ const list = Array.isArray(parsed) ? parsed : [parsed];
+ let added = 0, updated = 0;
+
+ list.forEach((item, idx) => {
+  if(!item || typeof item !== "object") return;
+  const namaStr = String(item.nama || "").trim();
+  if(!namaStr) return;
+  const kodeStr = String(item.kode || "").trim().toUpperCase();
+  const varianStr = String(item.varian || "COLD").trim().toUpperCase() === "HOT" ? "HOT" : "COLD";
+  const bahanRaw = Array.isArray(item.bahan) ? item.bahan : [];
+  const bahanClean = bahanRaw.map(normalizeRecipeIngredient).filter(b => b.nama && b.takaran > 0);
+  if(!bahanClean.length) return;
+
+  const existingIdx = menuRecipes.findIndex(r =>
+   String(r.nama).toLowerCase() === namaStr.toLowerCase() &&
+   String(r.varian || "COLD").toUpperCase() === varianStr
+  );
+  const obj = {
+   id: existingIdx >= 0 ? menuRecipes[existingIdx].id : Date.now() + idx,
+   kode: kodeStr,
+   nama: namaStr,
+   varian: varianStr,
+   ukuran: "REGULAR",
+   bahan: bahanClean
+  };
+  if(existingIdx >= 0){ menuRecipes[existingIdx] = obj; updated++; }
+  else { menuRecipes.push(obj); added++; }
+ });
+
+ saveRecipes();
+ renderRecipes();
+ $("recipeInjectionBox").value = "";
+ alert(`Selesai! ${added} resep menu baru ditambahkan, ${updated} resep diperbarui dan dikirim ke Google Sheets.`);
+}
+
+$("recipeForm").addEventListener("submit", e => {
+ e.preventDefault();
+ const kode = $("recKode").value.trim().toUpperCase();
+ const nama = $("recNama").value.trim();
+ const varian = $("recVarian").value === "HOT" ? "HOT" : "COLD";
+ if(!nama){ alert("Masukkan nama menu minuman!"); return; }
+
+ const bahan = draftRecipeRows.map(r => normalizeRecipeIngredient(r)).filter(b => b.plu && b.takaran > 0);
+ if(!bahan.length){ alert("Pilih minimal 1 PLU bahan baku beserta takarannya!"); return; }
+
+ const item = {
+  id: editRecipeId || Date.now(),
+  kode,
+  nama,
+  varian,
+  ukuran: "REGULAR",
+  bahan
+ };
+ if(editRecipeId) menuRecipes = menuRecipes.map(x => x.id === editRecipeId ? item : x);
+ else menuRecipes.push(item);
+
+ saveRecipes();
+ resetRecipeForm();
+ renderRecipes();
+ alert("Resep menu berhasil disimpan ke Google Sheets.");
+});
+
+function editRecipe(id){
+ const r = menuRecipes.find(x => x.id === id); if(!r) return;
+ editRecipeId = id;
+ $("recKode").value = r.kode || "";
+ $("recNama").value = r.nama || "";
+ $("recVarian").value = r.varian === "HOT" ? "HOT" : "COLD";
+ draftRecipeRows = (r.bahan || []).map(b => ({
+  plu: b.plu || "",
+  nama: b.nama || "",
+  kategori: b.kategori || "",
+  takaran: b.takaran ?? "",
+  satuan: b.satuan || "ML"
+ }));
+ renderRecipeFormRows();
+ $("recipeFormTitle").textContent = "Edit Resep Menu (REGULAR Normal)";
+ $("saveRecipeBtn").textContent = "Simpan Perubahan Resep";
+ $("cancelRecipeBtn").classList.remove("hidden");
+ $("pageRecipes").scrollIntoView({behavior:"smooth"});
+}
+
+function deleteRecipe(id){
+ if(!confirm("Hapus resep menu ini dari database?")) return;
+ menuRecipes = menuRecipes.filter(x => x.id !== id);
+ saveRecipes();
+ renderRecipes();
+}
+
+function resetRecipeForm(){
+ editRecipeId = null;
+ $("recipeForm").reset();
+ draftRecipeRows = [{plu:"", nama:"", kategori:"", takaran:"", satuan:"ML"}];
+ renderRecipeFormRows();
+ $("recipeFormTitle").textContent = "Tambah Resep Menu (Ukuran REGULAR Normal)";
+ $("saveRecipeBtn").textContent = "+ Simpan Resep Menu";
+ $("cancelRecipeBtn").classList.add("hidden");
+}
+
+function setRecipeFilter(v){
+ recipeFilterVarian = v;
+ ["ALL","HOT","COLD"].forEach(k => $("recFilter"+k)?.classList.toggle("active", k===v));
+ renderRecipes();
+}
+
+function renderRecipes(){
+ const q = ($("recipeSearch")?.value || "").toLowerCase();
+ $("totalRecipes").textContent = menuRecipes.length;
+ $("totalRecipesHot").textContent = menuRecipes.filter(r => r.varian === "HOT").length;
+ $("totalRecipesCold").textContent = menuRecipes.filter(r => r.varian === "COLD").length;
+
+ const filtered = menuRecipes.filter(r => {
+  if(recipeFilterVarian !== "ALL" && r.varian !== recipeFilterVarian) return false;
+  if(!q) return true;
+  const inHead = String(r.nama).toLowerCase().includes(q) || String(r.kode).toLowerCase().includes(q);
+  const inIng = (r.bahan || []).some(b => String(b.nama).toLowerCase().includes(q) || String(b.plu).toLowerCase().includes(q));
+  return inHead || inIng;
+ });
+
+ const grid = $("recipeCardsGrid");
+ if(!grid) return;
+ if(!filtered.length){
+  grid.innerHTML = '<div class="empty full">Belum ada resep menu yang cocok. Tambahkan lewat form di atas atau tempel JSON resep.</div>';
+  return;
+ }
+
+ grid.innerHTML = filtered.map(r => {
+  const isHot = r.varian === "HOT";
+  const rowsHTML = (r.bahan || []).map(b => {
+   const m = masterPLU.find(x => String(x.plu) === String(b.plu));
+   const kat = m ? m.kategori : (b.kategori || "");
+   const pluBadge = b.plu
+    ? `<span class="tag ${kat==='RAW'?'raw':'konversi'}">${esc(b.plu)}</span>`
+    : `<span class="tag loc-tag">Belum Tertaut</span>`;
+   return `<tr>
+    <td><b>${esc(b.nama)}</b><div class="muted">${pluBadge}</div></td>
+    <td style="text-align:right;white-space:nowrap"><b>${fmt(b.takaran)} ${esc(b.satuan)}</b></td>
+   </tr>`;
+  }).join("");
+
+  return `<div class="recipe-card">
+   <div>
+    <div class="recipe-card-head ${isHot?'is-hot':'is-cold'}">
+     <div>
+      <div class="recipe-card-title">${esc(r.nama)} ${r.kode?`(${esc(r.kode)})`:''}</div>
+      <div class="recipe-card-sub">REGULAR · NORMAL</div>
+     </div>
+     <span class="tag" style="background:#ffffff2e;color:#fff">${isHot?'🔥 HOT':'🧊 COLD'}</span>
+    </div>
+    <div class="recipe-card-body">
+     <table class="recipe-ing-table"><tbody>${rowsHTML}</tbody></table>
+    </div>
+   </div>
+   <div class="recipe-card-foot">
+    <span class="muted">${(r.bahan||[]).length} bahan tertaut</span>
+    <div>
+     <button type="button" class="btn edit" style="padding:6px 10px" onclick="editRecipe(${Number(r.id)})">Edit</button>
+     <button type="button" class="btn delete" style="padding:6px 10px" onclick="deleteRecipe(${Number(r.id)})">Hapus</button>
+    </div>
+   </div>
+  </div>`;
+ }).join("");
+}
+
+function menuRecommendationHTML(report){
+ if(!report) return "";
+ const items = report.items || [];
+ const minusItems = items.filter(x => Number(x.selisih) < 0);
+ const plusItems = items.filter(x => Number(x.selisih) > 0);
+
+ if(!menuRecipes.length){
+  return `<div class="menu-reco-box">
+   <h4>🍹 Analisis &amp; Rekomendasi Penjualan Menu Minuman</h4>
+   <div class="muted">Data resep menu masih kosong. Isi atau injeksi JSON resep di menu <b>☕ Resep Menu</b> agar sistem otomatis menyimpulkan menu mana yang harus didorong atau direm berdasarkan item minus.</div>
+  </div>`;
+ }
+
+ if(!minusItems.length){
+  return `<div class="menu-reco-box">
+   <h4>🍹 Analisis &amp; Rekomendasi Penjualan Menu Minuman</h4>
+   <div class="notice" style="margin:0">Tidak ada item bahan baku yang MINUS pada hasil audit ini. Seluruh <b>${menuRecipes.length} menu</b> aman dijual secara normal.</div>
+  </div>`;
+ }
+
+ const minusByPlu = new Map(minusItems.map(x => [String(x.plu), x]));
+ const plusByPlu = new Map(plusItems.map(x => [String(x.plu), x]));
+ const itemByPlu = new Map(items.map(x => [String(x.plu), x]));
+
+ const safeMenus = [];
+ const riskyMenus = [];
+
+ menuRecipes.forEach(rec => {
+  const conflicts = [];
+  const plusHits = [];
+
+  (rec.bahan || []).forEach(b => {
+   const bPlu = String(b.plu || "").trim();
+   if(!bPlu) return;
+
+   // Cek langsung ke item MINUS
+   if(minusByPlu.has(bPlu)){
+    const mItem = minusByPlu.get(bPlu);
+    const estCups = b.takaran > 0 && Number(mItem.fisikBersih) > 0 ? Math.floor(Number(mItem.fisikBersih) / b.takaran) : 0;
+    conflicts.push({
+     bahanNama: mItem.nama,
+     plu: mItem.plu,
+     kategori: mItem.kategori,
+     selisih: mItem.selisih,
+     satuan: mItem.satuan,
+     takaran: b.takaran,
+     takaranSatuan: b.satuan,
+     estCups
+    });
+   } else {
+    // Cek jika bahan KONVERSI tertaut ke RAW yang sedang MINUS
+    const auditObj = itemByPlu.get(bPlu);
+    if(auditObj && auditObj.kategori === "KONVERSI"){
+     parseRawLinks(auditObj.rawLink).forEach(rPlu => {
+      if(minusByPlu.has(rPlu)){
+       const rawMinus = minusByPlu.get(rPlu);
+       conflicts.push({
+        bahanNama: `${auditObj.nama} → RAW ${rawMinus.nama}`,
+        plu: rawMinus.plu,
+        kategori: "RAW TERKAIT",
+        selisih: rawMinus.selisih,
+        satuan: rawMinus.satuan,
+        takaran: b.takaran,
+        takaranSatuan: b.satuan,
+        estCups: null
+       });
+      }
+     });
+    }
+   }
+
+   if(plusByPlu.has(bPlu)){
+    const pItem = plusByPlu.get(bPlu);
+    plusHits.push(`${pItem.nama} (+${fmt(pItem.selisih)} ${pItem.satuan})`);
+   }
+  });
+
+  if(conflicts.length > 0){
+   riskyMenus.push({ rec, conflicts });
+  } else {
+   safeMenus.push({ rec, plusHits });
+  }
+ });
+
+ // Prioritaskan menu aman yang menggunakan bahan PLUS
+ safeMenus.sort((a, b) => b.plusHits.length - a.plusHits.length);
+
+ const minusSummaryBadges = minusItems.map(m =>
+  `<span class="tag" style="background:#fae9e7;color:#a63d36">${esc(m.nama)} (${fmt(m.selisih)} ${esc(m.satuan)})</span>`
+ ).join(" ");
+
+ const safeHTML = safeMenus.length
+  ? safeMenus.map((s, idx) => `
+     <div class="reco-item">
+      <div><b>${idx+1}. ${esc(s.rec.nama)}</b> ${s.rec.kode?`(${esc(s.rec.kode)})`:''} <span class="tag ${s.rec.varian==='HOT'?'hot-tag':'cold-tag'}">${esc(s.rec.varian)}</span></div>
+      <div class="muted">${s.plusHits.length ? `⭐ Memanfaatkan stok PLUS: <b>${esc(s.plusHits.join(", "))}</b>` : `Aman dijual — tidak memakai bahan yang minus.`}</div>
+     </div>`).join("")
+  : `<div class="muted">Semua resep terdaftar memakai salah satu bahan yang sedang minus. Prioritaskan menu dengan konsumsi bahan minus paling kecil.</div>`;
+
+ const riskyHTML = riskyMenus.length
+  ? riskyMenus.map((r, idx) => `
+     <div class="reco-item">
+      <div><b>${idx+1}. ${esc(r.rec.nama)}</b> ${r.rec.kode?`(${esc(r.rec.kode)})`:''} <span class="tag ${r.rec.varian==='HOT'?'hot-tag':'cold-tag'}">${esc(r.rec.varian)}</span></div>
+      ${r.conflicts.map(c => `
+       <div style="color:#8f2c24;margin-top:2px">
+        • Memakai <b>${esc(c.bahanNama)}</b> (${fmt(c.takaran)} ${esc(c.takaranSatuan)}/cup) — status audit <b>MINUS ${fmt(Math.abs(c.selisih))} ${esc(c.satuan)}</b>${c.estCups!==null ? ` · Sisa fisik cukup ±<b>${c.estCups} cup</b>` : ``}
+       </div>
+      `).join("")}
+     </div>`).join("")
+  : `<div class="muted">Tidak ada resep yang memakai bahan minus.</div>`;
+
+ return `
+  <div class="menu-reco-box">
+   <h4>🍹 Kesimpulan &amp; Rekomendasi Penjualan Menu (Berdasarkan Item Minus)</h4>
+   <div style="font-size:11px;margin-bottom:8px"><b>Item Bahan Minus Terdeteksi:</b> ${minusSummaryBadges}</div>
+   <div class="reco-cols">
+    <div class="reco-col safe">
+     <h5>✅ Prioritas Menu untuk Dijual / Didorong (${safeMenus.length} Menu)</h5>
+     ${safeHTML}
+    </div>
+    <div class="reco-col risk">
+     <h5>⚠️ Menu Pemakai Bahan Minus — Batasi / Pantau (${riskyMenus.length} Menu)</h5>
+     ${riskyHTML}
+    </div>
+   </div>
+  </div>`;
+}
+
+// ================= AUDIT MANDIRI =================
 function isWarehouseOnly(){return audit && audit.lokasi === "GUDANG"}
 function isBoothOnly(){return audit && audit.lokasi === "KABINET"}
 function isCombinedMode(){return audit && audit.lokasi === "KEDUANYA"}
@@ -1346,6 +1818,7 @@ function renderCurrentResult(){
  $("resultInfo").innerHTML=`<b>Mode Audit:</b> <span class="tag loc-tag">${esc(locationLabel(audit.lokasi))}</span> ${audit.balanced?'<span class="tag bal-tag">SUDAH DIKOMPAIR RAW ↔ KONVERSI</span>':''}<br><b>Nama Auditor:</b> ${esc(audit.auditor)}<br><b>Tanggal Audit:</b> ${esc(audit.tanggal)}<br><b>Mulai Audit:</b> ${dateTimeText(audit.mulaiPada)}<br><b>Selesai Audit:</b> ${dateTimeText(audit.selesaiPada)}<br><b>Durasi Audit:</b> ${durationText(audit.mulaiPada,audit.selesaiPada)}`;
  $("resultTotal").textContent=items.length;$("resultPlus").textContent=plus;$("resultMinus").textContent=minus;
  $("comparePanel").innerHTML = comparePanelHTML(audit);
+ $("menuRecommendationPanel").innerHTML = menuRecommendationHTML(audit);
  $("warehouseConclusion").innerHTML = warehouseConclusionHTML(audit);
  $("pdfFullBreakdown").innerHTML = fullDetailSheetHTML(audit);
  $("saveResultButton").textContent=audit.saved?"✓ Hasil Audit Tersimpan":"Simpan Hasil Audit";
@@ -1378,6 +1851,7 @@ function openHistory(i){
  historyViewing=JSON.parse(JSON.stringify(auditHistory[i]));
  $("historyDetail").classList.remove("hidden");
  $("historyResultInfo").innerHTML=`<b>Mode Audit:</b> <span class="tag loc-tag">${esc(locationLabel(historyViewing.lokasi||"KEDUANYA"))}</span> ${historyViewing.balanced?'<span class="tag bal-tag">SUDAH DIKOMPAIR RAW ↔ KONVERSI</span>':''}<br><b>Nama Auditor:</b> ${esc(historyViewing.auditor)}<br><b>Tanggal Audit:</b> ${esc(historyViewing.tanggal)}<br><b>Mulai Audit:</b> ${dateTimeText(historyViewing.mulaiPada)}<br><b>Selesai Audit:</b> ${dateTimeText(historyViewing.selesaiPada)}<br><b>Durasi Audit:</b> ${durationText(historyViewing.mulaiPada,historyViewing.selesaiPada)}`;
+ $("historyMenuRecommendation").innerHTML = menuRecommendationHTML(historyViewing);
  $("historyWarehouseConclusion").innerHTML = warehouseConclusionHTML(historyViewing);
  $("historyFullBreakdown").innerHTML = fullDetailSheetHTML(historyViewing);
  renderHistoryDetail();
@@ -1412,7 +1886,7 @@ function exportPDF(fromHistory=false){
   finishAudit(true); report = audit; if(!report || report.status !== "completed") return;
  }
  currentReport=report; const oldAudit=audit; audit=report;
- $("pageHistory").classList.add("hidden"); $("pageAudit").classList.remove("hidden");
+ $("pageHistory").classList.add("hidden"); $("pageRecipes").classList.add("hidden"); $("pageAudit").classList.remove("hidden");
  $("auditStart").classList.add("hidden");$("auditWorkspace").classList.add("hidden");$("auditResult").classList.remove("hidden");
  renderCurrentResult();
  window.print();
@@ -1488,7 +1962,8 @@ async function flushPendingQueue(){
    const payload = {
     action: "saveBundle",
     master: masterPLU,
-    history: auditHistory
+    history: auditHistory,
+    recipes: menuRecipes
    };
    await fetch(SHEETS_API, {
     method: "POST",
@@ -1519,7 +1994,8 @@ async function pullFromCloud(silent = true){
   if(!data || !data.ok) throw new Error(data?.error || "Respons database tidak valid.");
   const remoteMaster = Array.isArray(data.master) ? data.master : [];
   const remoteHistory = Array.isArray(data.history) ? data.history : [];
-  const sig = JSON.stringify({ m: remoteMaster, h: remoteHistory });
+  const remoteRecipes = Array.isArray(data.recipes) ? data.recipes : [];
+  const sig = JSON.stringify({ m: remoteMaster, h: remoteHistory, r: remoteRecipes });
 
   const changed = sig !== lastCloudSignature;
   lastCloudSignature = sig;
@@ -1527,10 +2003,16 @@ async function pullFromCloud(silent = true){
   if(changed){
    masterPLU = remoteMaster;
    auditHistory = remoteHistory;
+   if(remoteRecipes.length > 0 || menuRecipes.length === 0){
+    menuRecipes = remoteRecipes;
+    localStorage.setItem("poinMenuRecipes", JSON.stringify(menuRecipes));
+   }
    localStorage.setItem("masterPLU", JSON.stringify(masterPLU));
    localStorage.setItem("poinAuditHistory", JSON.stringify(auditHistory));
 
    if(!$("pageMaster").classList.contains("hidden")) renderMaster();
+   if(!$("pageRecipes").classList.contains("hidden")){ renderRecipeFormRows(); renderRecipes(); }
+   if(!$("pageAudit").classList.contains("hidden") && audit && audit.status === "completed") renderCurrentResult();
    if(!$("pageHistory").classList.contains("hidden")){
     renderHistory();
     if(historyViewing && historyViewing.historyId){
@@ -1541,7 +2023,7 @@ async function pullFromCloud(silent = true){
   }
 
   const jam = new Date().toLocaleTimeString("id-ID", { hour:"2-digit", minute:"2-digit", second:"2-digit" });
-  setSyncStatus("Terhubung real-time — data sinkron dengan Google Sheets (" + jam + ").", "ok");
+  setSyncStatus("Terhubung real-time — Master PLU, Resep Menu & Riwayat Audit sinkron (" + jam + ").", "ok");
   setBusyIndicator(false, "Live · " + jam, "ok");
  } catch (e) {
   setSyncStatus("Gagal menarik data Google Sheets: " + e.message, "bad");
@@ -1569,6 +2051,8 @@ setInterval(() => {
 }, 5000);
 
 renderMaster();
+renderRecipeFormRows();
+renderRecipes();
 if(pendingQueue.length > 0) flushPendingQueue();
 else pullFromCloud(false);
 if(audit) renderAudit();
