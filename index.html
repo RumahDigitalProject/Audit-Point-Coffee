@@ -23,9 +23,10 @@ main{flex:1;min-width:0;padding:26px}
 .panel{background:#fff;padding:22px;border-radius:12px;margin-bottom:18px;box-shadow:0 3px 12px #00000008}
 .panel h3{margin:0 0 17px;font-size:17px}
 .form-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:15px}
-.field{display:flex;flex-direction:column;gap:7px;min-width:0}
-.field label{font-size:12px;font-weight:bold}
-input,select{width:100%;min-width:0;padding:11px;border:1px solid #dce3dd;border-radius:7px;background:#fff;outline-color:#537e60;font-size:14px;color:var(--text)}
+.field{display:flex;flex-direction:column;gap:6px;min-width:0}
+.field label{font-size:11px;font-weight:bold;color:#44564b}
+input,select,textarea{width:100%;min-width:0;padding:10px 11px;border:1px solid #dce3dd;border-radius:7px;background:#fff;outline-color:#537e60;font-size:14px;color:var(--text)}
+input:focus,select:focus,textarea:focus{border-color:#244b36;box-shadow:0 0 0 2px #244b3618}
 small,.muted{color:#89948b;font-size:11px}
 .full{grid-column:1/-1}
 .actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:17px}
@@ -37,35 +38,92 @@ small,.muted{color:#89948b;font-size:11px}
 .delete{background:#fae9e7;color:#a63d36}
 .blue{background:var(--blue);color:#fff}
 .gold{background:var(--gold);color:var(--green)}
+.warn-btn{background:#fff3df;color:#865711;border:1px solid #e6bd73}
+.zero-btn{background:#eef2ef;color:#3d5245;border:1px solid #d4ddd7;padding:5px 9px;border-radius:6px;font-size:11px;font-weight:bold;cursor:pointer}
+.zero-btn:hover{background:#dfe7e1}
 .stats{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px;margin-bottom:18px}
 .stat{background:#fff;padding:17px;border-radius:10px;min-width:0}
 .stat p{font-size:11px;color:var(--muted);margin:0 0 8px}
 .stat h2{margin:0;font-size:25px;overflow-wrap:anywhere}
 .hidden{display:none!important}
-.tag{display:inline-block;padding:4px 8px;border-radius:20px;font-size:10px;font-weight:bold;white-space:nowrap}
-.raw{background:#e6f2e8;color:#26713b}.konversi{background:#e7effb;color:#315e9b}
+.tag{display:inline-block;padding:3px 8px;border-radius:20px;font-size:10px;font-weight:bold;white-space:nowrap}
+.raw{background:#e6f2e8;color:#26713b}.konversi{background:#e7effb;color:#315e9b}.loc-tag{background:#f5efe3;color:#7b581e}.bal-tag{background:#e5f2ee;color:#1d634d}
 .plus{color:#21834b;font-weight:bold}.minus{color:#c13c36;font-weight:bold}.same{color:#587263;font-weight:bold}
 .notice{background:#edf4ee;color:#31563c;border-radius:9px;padding:12px;font-size:12px;line-height:1.55;margin-bottom:15px}
 .notice.warn{background:#fff3df;color:#865711}
-.notice.danger{background:#fbe9e7;color:#9b302d}
-.seal-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;grid-column:1/-1;background:#f7f9f7;border:1px solid var(--line);padding:10px;border-radius:8px}.seal-grid .field label{font-size:10px}.seal-grid input{padding:8px;font-size:12px}.sync-status{font-size:11px;color:var(--muted);margin-top:8px}.sync-status.ok{color:#26713b}.sync-status.bad{color:#a63d36}
-@media(max-width:560px){.seal-grid{grid-template-columns:1fr}}
+.sync-status{font-size:11px;color:var(--muted);margin-top:8px}.sync-status.ok{color:#26713b}.sync-status.bad{color:#a63d36}
 .table-wrap{width:100%;overflow-x:auto}
 table{width:100%;border-collapse:collapse}
 th,td{padding:11px 9px;border-bottom:1px solid #edf0ed;text-align:left;font-size:12px;vertical-align:middle}
 th{background:#f3f6f3;color:#526357}
 .master-table{min-width:700px}
-.audit-list{display:grid;gap:9px}
-.audit-row{display:grid;grid-template-columns:42px minmax(100px,.65fr) minmax(130px,1.4fr) minmax(110px,.65fr) minmax(105px,.7fr);gap:10px;align-items:center;border:1px solid var(--line);border-radius:9px;padding:11px;background:#fff}
-.audit-row.physical{grid-template-columns:38px minmax(95px,.7fr) minmax(130px,1.5fr) minmax(115px,.8fr)}
-.audit-row.conv-physical{grid-template-columns:30px minmax(75px,.7fr) minmax(110px,1.2fr) minmax(0,2fr)}
-.audit-row .number{font-size:11px;color:#879188}
-.audit-row .plu{font-size:12px;font-weight:bold;overflow-wrap:anywhere}
-.audit-row .item-name{font-size:12px;overflow-wrap:anywhere}
-.audit-row .unit{font-size:11px;color:var(--muted)}
-.audit-row input{padding:9px;font-size:13px}
-.audit-head{display:grid;grid-template-columns:42px minmax(100px,.65fr) minmax(130px,1.4fr) minmax(110px,.65fr) minmax(105px,.7fr);gap:10px;padding:0 11px 8px;color:#738076;font-size:10px;font-weight:bold}
-.audit-head.physical{grid-template-columns:38px minmax(95px,.7fr) minmax(130px,1.5fr) minmax(115px,.8fr)}
+
+.raw-multi-box{border:1px solid #dce3dd;border-radius:7px;padding:9px;max-height:145px;overflow-y:auto;background:#fafcfa;display:grid;gap:6px}
+.raw-multi-item{display:flex;align-items:center;gap:8px;font-size:12px;cursor:pointer}
+.raw-multi-item input{width:auto;margin:0}
+
+.audit-toolbar{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:14px;align-items:center;background:#f7f9f7;padding:12px;border-radius:9px;border:1px solid var(--line)}
+.audit-toolbar input{flex:1;min-width:200px;background:#fff}
+.filter-pills{display:flex;gap:6px;flex-wrap:wrap}
+.pill{padding:7px 11px;border-radius:20px;border:1px solid #dce3dd;background:#fff;font-size:11px;font-weight:bold;color:#526357;cursor:pointer}
+.pill.active{background:var(--green2);color:#fff;border-color:var(--green2)}
+
+/* Tampilan 1 per 1 Stok Komputer yang nyaman di mata */
+.comp-top-nav{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:14px;padding:10px;background:#f3f6f3;border-radius:9px;border:1px solid var(--line)}
+.comp-switch-btn{padding:9px 14px;border-radius:8px;border:1px solid #cdd7cf;background:#fff;color:#263a2e;font-size:12px;font-weight:bold;cursor:pointer}
+.comp-switch-btn.active{background:var(--green2);color:#fff;border-color:var(--green2)}
+
+.comp-cards{display:grid;gap:12px}
+.comp-card{border:1px solid #dce3dd;border-left:5px solid var(--green2);border-radius:10px;padding:14px;background:#fff;display:grid;grid-template-columns:minmax(0,1.5fr) minmax(210px,.95fr);gap:12px;align-items:center}
+.comp-card.is-konv{border-left-color:var(--blue)}
+.comp-card.filled{background:#fbfdfb;border-color:#c7dccd}
+.comp-card-top{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:6px}
+.comp-seq{font-size:11px;font-weight:bold;color:var(--muted)}
+.plu-highlight{display:inline-block;background:#fff1cc;color:#5c3d00;border:1px solid #e5bd67;padding:3px 9px;border-radius:6px;font-size:13px;font-weight:800;font-family:monospace;letter-spacing:.4px}
+.comp-name{font-size:15px;font-weight:bold;color:var(--green);line-height:1.35}
+.comp-sub{font-size:11px;color:var(--muted);margin-top:4px}
+.comp-input-wrap{display:flex;flex-direction:column;gap:6px}
+.comp-input-wrap label{font-size:11px;font-weight:bold;color:#44564b}
+.comp-input-row{display:flex;gap:8px;align-items:stretch}
+.comp-input-row input{font-size:15px;font-weight:bold;padding:10px 12px;flex:1}
+.minus-toggle-btn{flex-shrink:0;padding:0 13px;border-radius:7px;border:1px solid #d5c1be;background:#fdf2f1;color:#9e2a25;font-size:13px;font-weight:800;cursor:pointer;white-space:nowrap}
+.minus-toggle-btn:hover{background:#fae2df}
+.minus-toggle-btn.is-minus{background:#b73535;color:#fff;border-color:#b73535}
+
+.audit-list{display:grid;gap:10px}
+.paired-card{border:1px solid #dce3dd;border-radius:10px;padding:13px;background:#fff;transition:border-color .15s}
+.paired-card.done{border-left:4px solid #26713b;background:#fafcfa}
+.paired-header{display:flex;justify-content:space-between;align-items:flex-start;gap:8px;margin-bottom:10px;padding-bottom:8px;border-bottom:1px dashed #e7ece8}
+.paired-title{font-size:14px;font-weight:bold;color:var(--green)}
+.paired-sub{font-size:11px;color:var(--muted);margin-top:3px;display:flex;gap:6px;flex-wrap:wrap;align-items:center}
+.paired-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:10px}
+.box-wh{background:#f9f5ec;border:1px solid #e5d8bc;border-radius:8px;padding:10px}
+.box-raw{background:#f3f8f4;border:1px solid #d5e7d9;border-radius:8px;padding:10px}
+.box-konv{background:#f3f6fb;border:1px solid #d5e0f2;border-radius:8px;padding:10px}
+.box-title{font-size:11px;font-weight:bold;margin-bottom:8px;display:flex;justify-content:space-between;align-items:center;gap:6px}
+.box-wh .box-title{color:#7b581e}
+.box-raw .box-title{color:#26713b}
+.box-konv .box-title{color:#315e9b}
+.satset-row{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;margin-bottom:8px}
+.satset-row.single{grid-template-columns:1fr}
+.satset-row.triple{grid-template-columns:minmax(0,1.3fr) minmax(0,1.3fr) minmax(72px,.6fr)}
+.calc-preview{margin-top:6px;font-size:11px;color:#44564b;background:#ffffffb8;padding:6px 8px;border-radius:6px;line-height:1.45}
+.rule-hint{font-size:10px;color:#627368;margin-top:5px;line-height:1.4}
+
+.warehouse-box{background:#f7faf7;border:1px solid #cfe0d3;border-radius:10px;padding:15px;margin-top:16px}
+.warehouse-box h4{margin:0 0 10px;font-size:15px;color:var(--green)}
+.compare-box{background:#fffaf0;border:1px solid #e6c585;border-radius:10px;padding:15px;margin-top:16px}
+.compare-box h4{margin:0 0 8px;font-size:15px;color:#7b5312}
+.compare-summary-bar{display:flex;gap:8px;flex-wrap:wrap;margin:10px 0}
+.compare-pill{background:#fff;border:1px solid #ead1a2;border-radius:7px;padding:6px 10px;font-size:11px;font-weight:bold;color:#6c470b}
+.compare-item{background:#fff;border:1px solid #f0dec0;border-radius:8px;padding:10px 12px;margin-top:8px;font-size:11px;line-height:1.55;display:flex;gap:10px;align-items:flex-start}
+.compare-item input[type="checkbox"]{width:16px;height:16px;margin-top:2px;flex-shrink:0;cursor:pointer}
+.compare-item-body{flex:1;min-width:0}
+.manual-compare-box{background:#fff;border:1px dashed #d7b26d;border-radius:8px;padding:11px;margin-top:12px}
+.manual-compare-grid{display:grid;grid-template-columns:1.3fr 1.3fr .8fr auto;gap:8px;align-items:end;margin-top:8px}
+.wh-summary-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:9px;margin-bottom:12px}
+.wh-item-row{display:flex;justify-content:space-between;align-items:center;gap:10px;padding:8px 10px;background:#fff;border:1px solid #e4ebe5;border-radius:7px;font-size:12px}
+
 .progress{height:8px;background:#e9eee9;border-radius:20px;overflow:hidden;margin:10px 0}
 .progress-bar{height:100%;background:#43825a;transition:width .2s}
 .steps{display:flex;gap:6px;flex-wrap:wrap;margin:13px 0}
@@ -84,45 +142,42 @@ th{background:#f3f6f3;color:#526357}
 .result-card .metric span{display:block;font-size:9px;color:var(--muted);margin-bottom:4px}
 .result-card .metric strong{font-size:12px;overflow-wrap:anywhere}
 .flag{border:1px solid #e6bd73;background:#fff8eb;color:#80530e;border-radius:7px;padding:9px;margin-top:7px;font-size:10px;line-height:1.5}
+.flag.rev{border-color:#d8a39d;background:#fdf1ef;color:#8f2c24}
+.bal-note{border:1px solid #b5d9ce;background:#eef8f4;color:#1d634d;border-radius:7px;padding:8px 10px;margin-top:7px;font-size:10px;line-height:1.45}
 .history-card{border:1px solid var(--line);border-radius:9px;padding:14px;margin-bottom:9px;display:flex;justify-content:space-between;gap:12px;align-items:center}
 .history-card strong{font-size:13px}.history-card p{font-size:11px;color:var(--muted);margin:5px 0 0}
 .empty{text-align:center;padding:25px;color:#89948b;font-size:12px}
 .sort-row{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:14px}
 .sort-row label{font-size:11px;font-weight:bold}
 .sort-row select{width:auto;min-width:180px;padding:8px;font-size:12px}
+
+.pdf-detail-sheet{margin-top:18px;border:1px solid #d5dfd8;border-radius:10px;padding:16px;background:#fcfdfb}
+.pdf-detail-sheet h4{margin:0 0 10px;font-size:15px;color:var(--green)}
+.pdf-table{width:100%;border-collapse:collapse;margin-top:8px;margin-bottom:14px}
+.pdf-table th,.pdf-table td{border:1px solid #d8e0da;padding:7px 8px;font-size:11px;text-align:left}
+.pdf-table th{background:#eef3ef;color:#263a2e}
+
 @media(max-width:850px){
  .layout{display:block}.sidebar{width:100%;display:flex;gap:5px;flex-wrap:wrap;padding:9px}
  .menu-title{display:none}.sidebar button{width:auto;flex:1;text-align:center;font-size:11px;padding:11px 7px}
- main{padding:14px}.panel{padding:15px}.form-grid{grid-template-columns:1fr}
+ main{padding:14px}.panel{padding:15px}.form-grid,.manual-compare-grid,.comp-card{grid-template-columns:1fr}
 }
 @media(max-width:560px){
- header{padding:17px}.stats{grid-template-columns:repeat(2,minmax(0,1fr))}
- .audit-head{display:none}
- .audit-row,.audit-row.physical{grid-template-columns:25px minmax(0,.8fr) minmax(0,1.4fr);gap:7px;padding:10px}
- .audit-row.conv-physical{grid-template-columns:25px minmax(0,.8fr) minmax(0,1.4fr)}
- .audit-row.conv-physical .seal-grid{grid-column:2/-1}
- .audit-row .computer-cell,.audit-row .physical-cell{grid-column:2/-1;display:flex;align-items:center;gap:8px}
- .audit-row .computer-cell:before{content:"Stok komputer";font-size:10px;color:var(--muted);min-width:85px}
- .audit-row .physical-cell:before{content:"Hasil fisik";font-size:10px;color:var(--muted);min-width:85px}
- .audit-row .unit-cell{grid-column:2/-1;font-size:10px;color:var(--muted)}
- .audit-row input{max-width:180px}
+ header{padding:17px}.stats,.wh-summary-grid{grid-template-columns:repeat(2,minmax(0,1fr))}
+ .satset-row.triple{grid-template-columns:1fr 1fr}
+ .satset-row.triple .open-qty-col{grid-column:1/-1}
  .result-card{grid-template-columns:repeat(3,minmax(0,1fr))}
  .result-card .name{grid-column:1/-1}
  .result-card .metric strong{font-size:11px}
  .history-card{align-items:flex-start;flex-direction:column}
+ .wh-item-row{flex-direction:column;align-items:flex-start}
 }
-/* Penanda visual ketika audit sedang berjalan */
-body.audit-active::before{content:"";position:fixed;inset:0;border:6px solid #c62828;z-index:9998;pointer-events:none}
-body.audit-active::after{content:"● AUDIT SEDANG BERLANGSUNG";position:fixed;top:8px;left:50%;transform:translateX(-50%);z-index:9999;background:#b71c1c;color:#fff;padding:8px 15px;border-radius:0 0 9px 9px;box-shadow:0 3px 12px #0003;font-size:11px;font-weight:800;letter-spacing:.7px;pointer-events:none;white-space:nowrap}
-.audit-status-actions{display:flex;justify-content:flex-end;margin:0 0 12px}
+.audit-status-actions{display:flex;justify-content:flex-end;gap:8px;flex-wrap:wrap;margin:0 0 12px}
 .audit-cancel{background:#b73535;color:#fff}
-.condition-select{grid-column:1/-1;display:flex;flex-direction:column;gap:7px}
-.condition-select select{font-weight:bold;background:#f7f9f7}
-.condition-note{grid-column:1/-1;background:#f7f9f7;border-radius:7px;padding:9px;font-size:11px;line-height:1.5;color:#647168}
-@media(max-width:560px){body.audit-active::before{border-width:4px}.audit-status-actions{justify-content:stretch}.audit-status-actions .btn{width:100%}body.audit-active::after{top:4px;font-size:9px;padding:7px 10px}}
+@media(max-width:560px){.audit-status-actions{justify-content:stretch}.audit-status-actions .btn{width:100%}}
+
 @media print{
- body.audit-active::before,body.audit-active::after{display:none!important}
- @page{size:A4 portrait;margin:12mm}
+ @page{size:A4 portrait;margin:10mm}
  body{background:#fff;color:#111}
  header,.sidebar,.no-print,#pageMaster,#pageAuditStart,#pageHistory,.page-title,.screen-only{display:none!important}
  .layout{display:block;min-height:0}
@@ -130,16 +185,17 @@ body.audit-active::after{content:"● AUDIT SEDANG BERLANGSUNG";position:fixed;t
  #pageAudit{display:block!important}
  #auditStart,#auditWorkspace{display:none!important}
  #auditResult{display:block!important}
- .panel{box-shadow:none;border:0;padding:0;margin:0 0 12px}
- .result-section{break-inside:avoid;margin-bottom:0}
- .result-section.conversion-print{break-before:page;page-break-before:always}
- .result-card{border:1px solid #bbb;break-inside:avoid;padding:8px}
+ .panel{box-shadow:none;border:0;padding:0;margin:0 0 10px}
+ .result-section{break-inside:avoid;margin-bottom:12px}
+ .result-card{border:1px solid #bbb;break-inside:avoid;padding:7px}
  .result-grid{grid-template-columns:repeat(3,1fr)}
- .result-list{gap:5px}
+ .result-list{gap:4px}
  .flag{border:1px solid #999;color:#111;background:#fff}
+ .pdf-detail-sheet{border:1px solid #888;background:#fff;padding:10px;break-inside:avoid}
+ .pdf-table th,.pdf-table td{font-size:9px;padding:5px 6px}
  .print-heading{display:block!important}
- .print-meta{font-size:10px;margin-bottom:12px}
- .result-section h3{font-size:16px;border-bottom:1px solid #333;padding-bottom:7px}
+ .print-meta{font-size:10px;margin-bottom:10px}
+ .result-section h3{font-size:15px;border-bottom:1px solid #333;padding-bottom:6px}
  .result-card .name{font-size:10px}
  .result-card .sub,.result-card .metric span{font-size:8px}
  .result-card .metric strong{font-size:10px}
@@ -168,18 +224,22 @@ body.audit-active::after{content:"● AUDIT SEDANG BERLANGSUNG";position:fixed;t
  <div class="page-title"><h2>Master PLU</h2><p>Pengelolaan data utama bahan baku Poin Coffee</p></div>
  <section class="panel">
   <h3>Database Google Sheets</h3>
-  <div class="notice">Hubungkan website ke Google Sheets agar Master PLU dan Riwayat Audit dapat dibagikan antarperangkat. Masukkan URL Web App dari Google Apps Script setelah deployment.</div>
-  <div class="field"><label>URL Google Apps Script Web App</label><input id="apiUrl" type="url" placeholder="https://script.google.com/macros/s/.../exec"></div>
-  <div class="actions"><button class="btn save" onclick="connectSheets()">Simpan & Hubungkan</button><button class="btn blue" onclick="syncFromCloud()">Muat Ulang dari Cloud</button></div>
-  <div id="syncStatus" class="sync-status">Database belum dihubungkan. Data sementara tersimpan di browser ini.</div>
+  <div class="notice">Terhubung langsung ke database Google Sheets Poin Coffee. Setiap perubahan Master PLU dan Riwayat Audit disinkronkan secara otomatis antarperangkat.</div>
+  <div class="actions" style="margin-top:0"><button class="btn blue" type="button" onclick="syncFromCloud()">↻ Muat Ulang dari Cloud</button></div>
+  <div id="syncStatus" class="sync-status">Menghubungkan ke database Google Sheets...</div>
  </section>
- <section class="panel">
-  <h3>Impor Master PLU Sekaligus</h3>
-  <div class="notice">Pilih file CSV hasil pembacaan daftar RAW dan KONVERSI. Sistem akan memasukkan PLU dan nama barang sekaligus. Data yang PLU-nya sudah terdaftar akan dilewati agar tidak membuat duplikat. Satuan awal KONVERSI diisi PCS dan dapat diedit nanti.</div>
-  <div class="field"><label>File CSV Master PLU</label><input type="file" id="masterImportFile" accept=".csv,text/csv"></div>
-  <div class="actions"><button class="btn blue" type="button" onclick="previewMasterImport()">Periksa File</button><button class="btn save" type="button" id="importMasterButton" onclick="applyMasterImport()" disabled>Impor ke Master PLU</button></div>
-  <div id="masterImportStatus" class="sync-status">Belum ada file yang dipilih.</div>
+
+ <!-- FITUR INJEKSI DATA CEPAT -->
+ <section class="panel" style="border: 2px dashed #244b36;">
+  <h3>⚡ Injeksi Data Instan</h3>
+  <div class="notice">Tempel (Paste) kode JSON di bawah ini ke dalam kotak, lalu klik tombol untuk memasukkan atau memperbarui seluruh daftar barang sekaligus ke daftar Master PLU dan memicu penyimpanan ke database.</div>
+  <div class="field">
+   <label>Kotak Kode Injeksi Data (JSON)</label>
+   <textarea id="dataInjectionBox" rows="4" placeholder='Tempel kode JSON di sini, contoh: [{"plu":"20080424","nama":"Coffee Bean","kategori":"RAW","satuan":"PCS"}]'></textarea>
+  </div>
+  <div class="actions"><button class="btn save" onclick="injectDataFromCode()">▼ Terapkan &amp; Masukkan Semua Data</button></div>
  </section>
+
  <div class="stats">
   <div class="stat"><p>Total Master PLU</p><h2 id="total">0</h2></div>
   <div class="stat"><p>Kategori RAW</p><h2 id="totalRaw">0</h2></div>
@@ -191,18 +251,18 @@ body.audit-active::after{content:"● AUDIT SEDANG BERLANGSUNG";position:fixed;t
    <div class="form-grid">
     <div class="field"><label>1. Nomor PLU</label><input id="plu" required placeholder="Masukkan nomor PLU"></div>
     <div class="field"><label>2. Nama Barang</label><input id="nama" required placeholder="Masukkan nama barang"></div>
-    <div class="field"><label>3. Kategori</label><select id="kategori" required><option value="">Pilih Kategori</option><option>RAW</option><option>KONVERSI</option></select></div>
+    <div class="field"><label>3. Kategori di Daftar Sistem</label><select id="kategori" required><option value="">Pilih Kategori</option><option>RAW</option><option>KONVERSI</option></select><small>Mengikuti daftar &amp; satuan stok di sistem (RAW = unit utuh, KONVERSI = satuan takaran/konversi).</small></div>
     <div class="field hidden" id="satuanField">
      <label>4. Satuan</label>
      <input id="satuan" list="pilihanSatuan" placeholder="Pilih atau ketik satuan">
      <datalist id="pilihanSatuan"><option value="ML"><option value="Liter"><option value="Gram"><option value="Kg"><option value="Pcs"><option value="Pack"><option value="Box"><option value="Bottle"><option value="Cup"></datalist>
     </div>
-    <div class="field hidden" id="beratField"><label>5. Berat Kemasan per Botol/Wadah (Opsional)</label><input type="number" id="berat" min="0" step="any" placeholder="Contoh: 35"><small>Berat tara satu wadah. Saat audit dikalikan jumlah wadah yang sudah dibuka.</small></div>
-    <div class="field hidden" id="isiBersihField"><label>6. Isi Bersih per Kemasan Segel (Opsional)</label><input type="number" id="isiBersih" min="0" step="any" placeholder="Contoh: 750"><small>Isi bersih yang tertulis pada label. Botol segel dihitung dari angka ini, tanpa mengurangi berat kemasan.</small></div>
+    <div class="field hidden" id="beratField"><label>5. Berat Kemasan per Botol/Wadah (Opsional)</label><input type="number" id="berat" min="0" step="any" placeholder="Contoh: 35"><small>Berat tara satu wadah. Dipakai di Kabinet/Booth untuk sisa terbuka.</small></div>
+    <div class="field hidden" id="isiBersihField"><label>6. Isi Bersih per Kemasan Segel (Rasio Kompair)</label><input type="number" id="isiBersih" min="0" step="any" placeholder="Contoh: 750"><small>Isi bersih kemasan utuh/segel (misal 750 ML = 1 RAW). Dipakai untuk kompair dua arah RAW ↔ KONVERSI.</small></div>
     <div class="field full hidden" id="rawLinkField">
-     <label>7. PLU RAW Terkait (Opsional, untuk deteksi indikasi konversi)</label>
-     <select id="rawLink"><option value="">Tidak dihubungkan</option></select>
-     <small>Pilih bahan RAW asal dari barang KONVERSI ini agar sistem dapat mendeteksi indikasi selisih silang.</small>
+     <label>7. PLU RAW Terkait (Bisa pilih 1 atau lebih agar semua yang berkendala bisa dikompair)</label>
+     <div id="rawLinkContainer" class="raw-multi-box"></div>
+     <small>Centang semua bahan RAW asal yang terhubung ke item konversi ini.</small>
     </div>
    </div>
    <div class="actions">
@@ -225,13 +285,26 @@ body.audit-active::after{content:"● AUDIT SEDANG BERLANGSUNG";position:fixed;t
 
 <!-- AUDIT -->
 <div id="pageAudit" class="hidden">
- <div class="page-title"><h2>Audit Mandiri</h2><p>Proses pemeriksaan stok komputer dan stok fisik bahan baku</p></div>
+ <div class="page-title"><h2>Audit Mandiri</h2><p>Audit Gudang, Kabinet / Booth, atau Gabungan bertahap (Gudang dulu lalu Kabinet / Booth dalam 1 audit)</p></div>
  <div id="auditStart" class="panel">
   <h3>Mulai Audit Baru</h3>
-  <div class="notice">Sistem mengambil data dari Master PLU. Pastikan data master sudah benar sebelum memulai.</div>
+  <div class="notice">
+   Pilih mode audit sesuai kebutuhan:<br>
+   • <b>Gudang Saja:</b> Hanya input stok fisik <b>RAW</b> (semua segel). Tanpa input konversi.<br>
+   • <b>Kabinet / Booth Saja:</b> Input fisik <b>RAW</b> dan <b>KONVERSI</b>.<br>
+   • <b>Gabungan (Gudang → Kabinet/Booth):</b> Input semua barang di <b>Gudang</b> dulu (khusus RAW), lalu pindah ke <b>Kabinet / Booth</b> (RAW + KONVERSI) dalam satu sesi audit.
+  </div>
   <div class="form-grid">
+   <div class="field">
+    <label>Area / Mode Audit</label>
+    <select id="auditLocation">
+     <option value="GUDANG">Gudang Saja (Hanya RAW — Tanpa Konversi)</option>
+     <option value="KABINET">Kabinet / Booth Saja (RAW + Wajib Konversi)</option>
+     <option value="KEDUANYA">Gabungan (Gudang Dulu → Pindah ke Kabinet / Booth)</option>
+    </select>
+   </div>
    <div class="field"><label>Tanggal Audit</label><input type="date" id="auditDate"></div>
-   <div class="field"><label>Nama Auditor</label><input id="auditPerson" placeholder="Masukkan nama auditor"></div>
+   <div class="field full"><label>Nama Auditor</label><input id="auditPerson" placeholder="Masukkan nama auditor"></div>
   </div>
   <div class="actions"><button class="btn primary" onclick="startAudit()">+ Mulai Audit Mandiri</button></div>
   <div id="noMaster" class="notice warn hidden">Master PLU masih kosong. Silakan masukkan data terlebih dahulu.</div>
@@ -239,22 +312,28 @@ body.audit-active::after{content:"● AUDIT SEDANG BERLANGSUNG";position:fixed;t
  <div id="auditWorkspace" class="hidden">
   <section class="panel">
    <h3>Informasi Audit</h3><div id="auditInfo"></div>
-    <div class="audit-status-actions no-print"><button class="btn audit-cancel" type="button" onclick="cancelAudit()">✕ BATALKAN AUDIT</button></div>
+   <div class="audit-status-actions no-print">
+    <button class="btn gold" type="button" onclick="finishAuditEarly()">✓ Selesaikan Audit Sekarang</button>
+    <button class="btn blue" type="button" onclick="exportPDF()">⬇ Download / Cetak PDF</button>
+    <button class="btn audit-cancel" type="button" onclick="cancelAudit()">✕ BATALKAN AUDIT</button>
+   </div>
    <div class="steps" id="stepIndicator"></div>
    <div class="progress"><div class="progress-bar" id="progressBar" style="width:0%"></div></div>
    <small id="progressText">Progres: 0%</small>
   </section>
   <section class="panel">
    <h3 id="auditHeading">Input Stok Komputer RAW</h3>
+   <div id="compTopNav" class="comp-top-nav hidden no-print"></div>
    <div class="notice" id="auditInstruction"></div>
-   <div id="auditTableHead" class="audit-head"></div>
+   <div id="auditToolbar" class="audit-toolbar hidden"></div>
+   <div id="auditTableHead" class="hidden"></div>
    <div id="auditTableBody" class="audit-list"></div>
    <div class="actions" id="auditActions"></div>
   </section>
  </div>
  <div id="auditResult" class="hidden">
   <section class="panel">
-   <div class="print-heading"><h2>POIN COFFEE — LAPORAN AUDIT BAHAN BAKU</h2></div>
+   <div class="print-heading"><h2>POIN COFFEE — LAPORAN DETAIL AUDIT BAHAN BAKU (GUDANG, BOOTH &amp; KOMPAIR)</h2></div>
    <h3>Ringkasan Hasil Audit</h3>
    <div id="resultInfo"></div>
    <div class="stats" style="margin-top:14px">
@@ -262,10 +341,13 @@ body.audit-active::after{content:"● AUDIT SEDANG BERLANGSUNG";position:fixed;t
     <div class="stat"><p>Jumlah PLUS</p><h2 id="resultPlus">0</h2></div>
     <div class="stat"><p>Jumlah MINUS</p><h2 id="resultMinus">0</h2></div>
    </div>
-   <div class="notice">PLUS = stok fisik lebih besar dari stok komputer. MINUS = stok fisik lebih kecil. SESUAI = stok fisik sama dengan stok komputer.</div>
+   <div id="comparePanel"></div>
+   <div id="warehouseConclusion"></div>
+   <div id="pdfFullBreakdown"></div>
+   <div class="notice" style="margin-top:14px">PLUS = stok fisik lebih besar dari stok komputer. MINUS = stok fisik lebih kecil. SESUAI = stok fisik sama dengan stok komputer.</div>
    <div class="actions no-print">
     <button class="btn save" id="saveResultButton" onclick="saveAuditResult()">Simpan Hasil Audit</button>
-    <button class="btn blue" onclick="exportPDF()">Export PDF / Cetak</button>
+    <button class="btn blue" onclick="exportPDF()">⬇ Download / Cetak PDF Lengkap</button>
     <button class="btn cancel" onclick="showPage('history')">Lihat Riwayat Audit</button>
     <button class="btn cancel" onclick="newAudit()">Audit Baru</button>
    </div>
@@ -286,7 +368,7 @@ body.audit-active::after{content:"● AUDIT SEDANG BERLANGSUNG";position:fixed;t
     <div class="result-grid" id="rawSummary"></div>
     <div class="result-list" id="rawResults"></div>
    </section>
-   <section class="result-section conversion-print">
+   <section class="result-section" id="resultConvSection">
     <h3>DATA HASIL AUDIT KONVERSI <span class="tag konversi" id="konversiCount">0 PLU</span></h3>
     <div class="result-grid" id="konversiSummary"></div>
     <div class="result-list" id="konversiResults"></div>
@@ -308,11 +390,13 @@ body.audit-active::after{content:"● AUDIT SEDANG BERLANGSUNG";position:fixed;t
   <div class="panel">
    <div class="actions no-print" style="margin-top:0">
     <button class="btn cancel" onclick="closeHistoryDetail()">← Kembali ke Riwayat</button>
-    <button class="btn blue" onclick="exportPDF(true)">Export PDF / Cetak</button>
+    <button class="btn blue" onclick="exportPDF(true)">⬇ Download / Cetak PDF Lengkap</button>
    </div>
-   <div class="print-heading"><h2>POIN COFFEE — LAPORAN AUDIT BAHAN BAKU</h2></div>
+   <div class="print-heading"><h2>POIN COFFEE — LAPORAN DETAIL AUDIT BAHAN BAKU (GUDANG, BOOTH &amp; KOMPAIR)</h2></div>
    <h3>Detail Hasil Audit</h3>
    <div id="historyResultInfo"></div>
+   <div id="historyWarehouseConclusion"></div>
+   <div id="historyFullBreakdown"></div>
    <div class="sort-row no-print">
     <label>Urutkan data:</label>
     <select id="historySort" onchange="renderHistoryDetail()">
@@ -328,7 +412,7 @@ body.audit-active::after{content:"● AUDIT SEDANG BERLANGSUNG";position:fixed;t
     <div class="result-grid" id="historyRawSummary"></div>
     <div class="result-list" id="historyRawResults"></div>
    </section>
-   <section class="result-section conversion-print">
+   <section class="result-section" id="historyConvSection">
     <h3>DATA HASIL AUDIT KONVERSI</h3>
     <div class="result-grid" id="historyKonversiSummary"></div>
     <div class="result-list" id="historyKonversiResults"></div>
@@ -340,6 +424,7 @@ body.audit-active::after{content:"● AUDIT SEDANG BERLANGSUNG";position:fixed;t
 </div>
 
 <script>
+const DEFAULT_SHEETS_API = "https://script.google.com/macros/s/AKfycbyGS_W8JCIxOMNic7Xay6X74PFjmV2sUi_CvriaEkwkfBx-Xh-yKhq_kQy5zYObj8Lf/exec";
 const $ = id => document.getElementById(id);
 const today = () => new Date().toLocaleDateString("en-CA");
 let masterPLU = JSON.parse(localStorage.getItem("masterPLU") || "[]");
@@ -347,9 +432,19 @@ let audit = JSON.parse(localStorage.getItem("poinAuditMandiri") || "null");
 let auditHistory = JSON.parse(localStorage.getItem("poinAuditHistory") || "[]");
 let editId = null;
 let historyViewing = null;
-let SHEETS_API = localStorage.getItem("poinSheetsApi") || "";
+let SHEETS_API = (localStorage.getItem("poinSheetsApi") || DEFAULT_SHEETS_API).replace(/^Https:/i, "https:");
+localStorage.setItem("poinSheetsApi", SHEETS_API);
 let cloudBusy = false;
 let cloudTimer = null;
+let physicalSearch = "";
+let physicalFilter = "ALL";
+let selectedCompareKeys = new Set();
+
+function parseRawLinks(rawLinkVal){
+ if(!rawLinkVal) return [];
+ if(Array.isArray(rawLinkVal)) return rawLinkVal.map(v=>String(v).trim()).filter(Boolean);
+ return String(rawLinkVal).split(",").map(v=>v.trim()).filter(Boolean);
+}
 
 function saveMaster(){localStorage.setItem("masterPLU",JSON.stringify(masterPLU));queueCloudSync()}
 function saveAudit(){localStorage.setItem("poinAuditMandiri",JSON.stringify(audit))}
@@ -360,6 +455,11 @@ function safeDate(v){return esc(v||"-")}
 function dateTimeText(value){if(!value)return "-";const d=new Date(value);return Number.isNaN(d.getTime())?"-":d.toLocaleString("id-ID",{dateStyle:"medium",timeStyle:"medium"})}
 function timeText(value){if(!value)return "-";const d=new Date(value);return Number.isNaN(d.getTime())?"-":d.toLocaleTimeString("id-ID",{hour:"2-digit",minute:"2-digit",second:"2-digit"})}
 function durationText(start,end){if(!start||!end)return "-";const a=new Date(start).getTime(),b=new Date(end).getTime();if(!Number.isFinite(a)||!Number.isFinite(b)||b<a)return "-";const sec=Math.floor((b-a)/1000),h=Math.floor(sec/3600),m=Math.floor((sec%3600)/60),ss=sec%60;return [h?`${h} jam`:"",m?`${m} menit`:"",`${ss} detik`].filter(Boolean).join(" ")}
+function locationLabel(loc){
+ if(loc==="GUDANG")return "Gudang Saja (Hanya RAW — Tanpa Konversi)";
+ if(loc==="KABINET")return "Kabinet / Booth Saja (RAW + Konversi)";
+ return "Gabungan (Gudang Dulu → Kabinet / Booth)";
+}
 
 function showPage(page){
  ["master","audit","history"].forEach(p=>{
@@ -372,7 +472,6 @@ function showPage(page){
 }
 
 $("auditDate").value=today();
-$("apiUrl").value=SHEETS_API;
 if(SHEETS_API)syncFromCloud();
 $("kategori").addEventListener("change",categoryChanged);
 function categoryChanged(){
@@ -381,83 +480,113 @@ function categoryChanged(){
  $("beratField").classList.toggle("hidden",k!=="KONVERSI");
  $("isiBersihField").classList.toggle("hidden",k!=="KONVERSI");
  $("rawLinkField").classList.toggle("hidden",k!=="KONVERSI");
- if(k==="RAW"){$("satuan").value="PCS";$("berat").value="";$("isiBersih").value="";$("rawLink").value=""}
+ if(k==="RAW"){$("satuan").value="PCS";$("berat").value="";$("isiBersih").value="";populateRawLinks([])}
  if(k==="KONVERSI"){
-  if(!editId){$("satuan").value="";$("berat").value="";$("isiBersih").value="";$("rawLink").value=""}
-  populateRawLinks();
+  if(!editId){$("satuan").value="";$("berat").value="";$("isiBersih").value="";populateRawLinks([])}
+  else populateRawLinks(parseRawLinks(masterPLU.find(a=>a.id===editId)?.rawLink));
  }
 }
-function populateRawLinks(selected=""){
- const raw=masterPLU.filter(x=>x.kategori==="RAW");
- $("rawLink").innerHTML='<option value="">Tidak dihubungkan</option>'+raw.map(x=>`<option value="${esc(x.plu)}">${esc(x.plu)} — ${esc(x.nama)}</option>`).join("");
- $("rawLink").value=selected;
+function populateRawLinks(selectedArr=[]){
+ const selSet = new Set(parseRawLinks(selectedArr));
+ const raw = masterPLU.filter(x=>x.kategori==="RAW");
+ const box = $("rawLinkContainer");
+ if(!box) return;
+ if(!raw.length){
+  box.innerHTML = '<div class="muted">Belum ada data kategori RAW.</div>';
+  return;
+ }
+ box.innerHTML = raw.map(x=>`
+  <label class="raw-multi-item">
+   <input type="checkbox" name="rawLinkCheck" value="${esc(x.plu)}" ${selSet.has(String(x.plu))?'checked':''}>
+   <span><b>${esc(x.plu)}</b> — ${esc(x.nama)}</span>
+  </label>
+ `).join("");
 }
+function getSelectedRawLinks(){
+ return Array.from(document.querySelectorAll('input[name="rawLinkCheck"]:checked')).map(el=>el.value.trim()).filter(Boolean).join(", ");
+}
+
+/* LOGIKA INJEKSI DATA JSON INSTAN */
+function injectDataFromCode(){
+ const rawInput = $("dataInjectionBox").value.trim();
+ if(!rawInput){alert("Kotak Injeksi Data masih kosong!");return;}
+
+ let parsedData;
+ try {
+  const trimmedStart = rawInput.replace(/^\s+/, "");
+  if(trimmedStart.startsWith("[") || trimmedStart.startsWith("{")){
+   parsedData = JSON.parse(rawInput);
+  } else {
+   const cleanedBase64 = rawInput.replace(/\s+/g, "");
+   parsedData = JSON.parse(atob(cleanedBase64));
+  }
+ } catch (e) {
+  alert("Kode tidak valid atau terpotong. Pastikan Anda menyalin seluruh teks JSON dengan benar.");
+  return;
+ }
+
+ const items = Array.isArray(parsedData) ? parsedData : [parsedData];
+ let added = 0;
+ let updated = 0;
+
+ items.forEach((item, index) => {
+  if(!item || typeof item !== "object") return;
+  const pluStr = String(item.plu || "").trim();
+  const namaStr = String(item.nama || "").trim();
+  const katStr = String(item.kategori || "").trim().toUpperCase();
+  if(!pluStr || !namaStr || (katStr !== "RAW" && katStr !== "KONVERSI")) return;
+
+  const satuanStr = String(item.satuan || (katStr === "RAW" ? "PCS" : "ML")).trim();
+  const beratNum = item.berat !== undefined && item.berat !== null && item.berat !== "" ? Number(item.berat) : null;
+  const isiNum = item.isiBersih !== undefined && item.isiBersih !== null && item.isiBersih !== "" ? Number(item.isiBersih) : null;
+  const rawLinkStr = Array.isArray(item.rawLink) ? item.rawLink.join(", ") : String(item.rawLink || "").trim();
+
+  const existingIdx = masterPLU.findIndex(x => String(x.plu).toLowerCase() === pluStr.toLowerCase());
+  const payload = {
+   id: existingIdx >= 0 ? masterPLU[existingIdx].id : Date.now() + index,
+   plu: pluStr,
+   nama: namaStr,
+   kategori: katStr,
+   satuan: satuanStr,
+   berat: Number.isFinite(beratNum) && beratNum >= 0 ? beratNum : null,
+   isiBersih: Number.isFinite(isiNum) && isiNum >= 0 ? isiNum : null,
+   rawLink: rawLinkStr
+  };
+
+  if(existingIdx >= 0){
+   masterPLU[existingIdx] = payload;
+   updated++;
+  } else {
+   masterPLU.push(payload);
+   added++;
+  }
+ });
+
+ saveMaster();
+ renderMaster();
+ $("dataInjectionBox").value = "";
+ alert(`Selesai! ${added} Master PLU baru ditambahkan, ${updated} Master PLU diperbarui.`);
+}
+
 $("pluForm").addEventListener("submit",e=>{
  e.preventDefault();
  const plu=$("plu").value.trim(),nama=$("nama").value.trim(),kategori=$("kategori").value;
  const satuan=kategori==="RAW"?"PCS":$("satuan").value.trim();
  const berat=kategori==="KONVERSI"&&$("berat").value!==""?Number($("berat").value):null;
  const isiBersih=kategori==="KONVERSI"&&$("isiBersih").value!==""?Number($("isiBersih").value):null;
- const rawLink=kategori==="KONVERSI"?$("rawLink").value:"";
+ const rawLink=kategori==="KONVERSI"?getSelectedRawLinks():"";
  if(kategori==="KONVERSI"&&!satuan){alert("Masukkan satuan!");return}
  if(berat!==null&&(!Number.isFinite(berat)||berat<0)){alert("Berat kemasan tidak valid!");return}
  if(isiBersih!==null&&(!Number.isFinite(isiBersih)||isiBersih<0)){alert("Isi bersih segel tidak valid!");return}
- if(rawLink&&!masterPLU.some(x=>x.kategori==="RAW"&&x.plu===rawLink)){alert("PLU RAW terkait tidak ditemukan.");return}
+ const links = parseRawLinks(rawLink);
+ for(const lk of links){
+  if(!masterPLU.some(x=>x.kategori==="RAW"&&x.plu===lk)){alert(`PLU RAW terkait (${lk}) tidak ditemukan.`);return}
+ }
  if(masterPLU.some(x=>x.plu.toLowerCase()===plu.toLowerCase()&&x.id!==editId)){alert("Nomor PLU sudah terdaftar!");return}
  const item={id:editId||Date.now(),plu,nama,kategori,satuan,berat,isiBersih,rawLink};
  if(editId)masterPLU=masterPLU.map(x=>x.id===editId?item:x);else masterPLU.push(item);
  saveMaster();resetForm();renderMaster();alert("Master PLU berhasil disimpan.");
 });
-let pendingMasterImport=[];
-function parseCSVText(text){
- const rows=[];let row=[],cell="",quoted=false;
- for(let i=0;i<text.length;i++){
-  const c=text[i],n=text[i+1];
-  if(c==='"'&&quoted&&n==='"'){cell+='"';i++}
-  else if(c==='"')quoted=!quoted;
-  else if(c===','&&!quoted){row.push(cell);cell=""}
-  else if((c==='\n'||c==='\r')&&!quoted){if(c==='\r'&&n==='\n')i++;row.push(cell);if(row.some(v=>v.trim()!==""))rows.push(row);row=[];cell=""}
-  else cell+=c;
- }
- if(cell!==""||row.length){row.push(cell);if(row.some(v=>v.trim()!==""))rows.push(row)}
- return rows;
-}
-function previewMasterImport(){
- const file=$("masterImportFile").files[0];
- if(!file){alert("Pilih file CSV terlebih dahulu.");return}
- const reader=new FileReader();
- reader.onload=()=>{
-  try{
-   const rows=parseCSVText(String(reader.result||"").replace(/^\uFEFF/,""));
-   if(rows.length<2)throw new Error("File tidak berisi baris data.");
-   const headers=rows[0].map(x=>x.trim().toLowerCase());
-   const ix={plu:headers.indexOf("plu"),nama:headers.indexOf("nama barang"),kategori:headers.indexOf("kategori"),satuan:headers.indexOf("satuan")};
-   if(ix.plu<0||ix.nama<0||ix.kategori<0)throw new Error("Kolom wajib harus bernama PLU, Nama Barang, dan Kategori.");
-   pendingMasterImport=rows.slice(1).map(r=>({plu:(r[ix.plu]||"").trim(),nama:(r[ix.nama]||"").trim(),kategori:(r[ix.kategori]||"").trim().toUpperCase(),satuan:ix.satuan>=0?(r[ix.satuan]||"").trim():""})).filter(x=>x.plu&&x.nama&&(x.kategori==="RAW"||x.kategori==="KONVERSI"));
-   if(!pendingMasterImport.length)throw new Error("Tidak ditemukan data valid. Periksa isi CSV.");
-   const seen=new Set(masterPLU.map(x=>String(x.plu)));
-   let add=0,dup=0;const batch=new Set();
-   pendingMasterImport.forEach(x=>{if(seen.has(x.plu)||batch.has(x.plu))dup++;else{add++;batch.add(x.plu)}});
-   $("masterImportStatus").textContent=`File terbaca: ${pendingMasterImport.length} baris valid. Akan ditambahkan ${add} PLU; ${dup} baris dilewati karena PLU sudah ada atau berulang.`;
-   $("importMasterButton").disabled=add===0;
-  }catch(err){pendingMasterImport=[];$("importMasterButton").disabled=true;$("masterImportStatus").textContent="Gagal membaca file: "+err.message}
- };
- reader.onerror=()=>{$("masterImportStatus").textContent="File tidak dapat dibaca."};
- reader.readAsText(file,"UTF-8");
-}
-function applyMasterImport(){
- if(!pendingMasterImport.length)return;
- const seen=new Set(masterPLU.map(x=>String(x.plu))),toAdd=[];
- pendingMasterImport.forEach((x,i)=>{
-  if(seen.has(x.plu))return;seen.add(x.plu);
-  toAdd.push({id:Date.now()+i,plu:x.plu,nama:x.nama,kategori:x.kategori,satuan:x.kategori==="RAW"?"PCS":(x.satuan||"PCS"),berat:null,isiBersih:null,rawLink:""});
- });
- if(!toAdd.length){alert("Tidak ada PLU baru untuk ditambahkan.");return}
- if(!confirm(`Tambahkan ${toAdd.length} Master PLU? Data yang sudah ada tidak akan ditimpa.`))return;
- masterPLU=masterPLU.concat(toAdd);saveMaster();renderMaster();populateRawLinks();
- $("masterImportStatus").textContent=`Berhasil menambahkan ${toAdd.length} PLU. Data tersimpan di browser${SHEETS_API?" dan dikirim ke Google Sheets":" ini"}.`;
- pendingMasterImport=[];$("importMasterButton").disabled=true;$("masterImportFile").value="";
-}
 function renderMaster(){
  const q=$("search").value.toLowerCase();
  const rows=masterPLU.filter(x=>x.plu.toLowerCase().includes(q)||x.nama.toLowerCase().includes(q));
@@ -476,7 +605,7 @@ function editData(id){
  const x=masterPLU.find(a=>a.id===id);if(!x)return;
  editId=id;$("plu").value=x.plu;$("nama").value=x.nama;$("kategori").value=x.kategori;
  categoryChanged();
- if(x.kategori==="KONVERSI"){$("satuan").value=x.satuan;$("berat").value=x.berat??"";$("isiBersih").value=x.isiBersih??"";populateRawLinks(x.rawLink||"")}
+ if(x.kategori==="KONVERSI"){$("satuan").value=x.satuan;$("berat").value=x.berat??"";$("isiBersih").value=x.isiBersih??"";populateRawLinks(parseRawLinks(x.rawLink))}
  $("formTitle").textContent="Edit Master PLU";$("saveButton").textContent="Simpan Perubahan";$("cancelButton").classList.remove("hidden");
  window.scrollTo({top:0,behavior:"smooth"});
 }
@@ -485,8 +614,10 @@ function deleteData(id){
  if(audit&&audit.status!=="completed"&&audit.items.some(a=>a.id===id)){alert("PLU ini sedang digunakan dalam audit yang belum selesai. Selesaikan atau batalkan audit terlebih dahulu.");return}
  if(!confirm("Hapus Master PLU ini?"))return;
  masterPLU=masterPLU.filter(a=>a.id!==id);
- // Lepaskan referensi konversi yang menunjuk ke RAW yang dihapus
- masterPLU.forEach(a=>{if(a.rawLink===x.plu)a.rawLink=""});
+ masterPLU.forEach(a=>{
+  const links = parseRawLinks(a.rawLink).filter(plu => plu !== x.plu);
+  a.rawLink = links.join(", ");
+ });
  saveMaster();renderMaster();
 }
 function resetForm(){
@@ -494,18 +625,41 @@ function resetForm(){
  $("formTitle").textContent="Tambah Master PLU";$("saveButton").textContent="+ Simpan Master PLU";$("cancelButton").classList.add("hidden");
 }
 
-// Audit flow states
-const stages=["computer_raw","computer_konversi","physical_konversi","physical_raw","completed"];
-const stageNames=["Stok Komputer RAW","Stok Komputer KONVERSI","Audit Fisik KONVERSI","Audit Fisik RAW","Hasil Akhir"];
+function isWarehouseOnly(){return audit && audit.lokasi === "GUDANG"}
+function isBoothOnly(){return audit && audit.lokasi === "KABINET"}
+function isCombinedMode(){return audit && audit.lokasi === "KEDUANYA"}
+
 function categoryItems(cat){return audit.items.filter(x=>x.kategori===cat)}
 function startAudit(){
  if(!masterPLU.length){$("noMaster").classList.remove("hidden");return}
  const person=$("auditPerson").value.trim();if(!person){alert("Masukkan nama auditor!");return}
+ const lokasi=$("auditLocation").value||"KEDUANYA";
+ if(lokasi==="GUDANG" && !masterPLU.some(x=>x.kategori==="RAW")){
+  alert("Belum ada item kategori RAW di Master PLU untuk diaudit di Gudang.");return;
+ }
  if(audit&&audit.status!=="completed"&&!confirm("Ada audit yang belum selesai. Mulai audit baru dan hapus progres sebelumnya?"))return;
- audit={tanggal:$("auditDate").value||today(),auditor:person,mulaiPada:new Date().toISOString(),status:"computer_raw",saved:false,items:masterPLU.map(x=>({
-  id:x.id,plu:x.plu,nama:x.nama,kategori:x.kategori,satuan:x.satuan,berat:x.berat??null,isiBersih:x.isiBersih??null,rawLink:x.rawLink||"",
-  komputer:null,fisikKotor:null,modeFisik:"",qtySegel:null,isiSegel:null,jumlahTerbuka:null,fisikKotorTerbuka:null,fisikBersih:null,selisih:null,hasilStatus:null
- }))};
+ physicalSearch="";physicalFilter="ALL";selectedCompareKeys.clear();
+ audit={
+  lokasi,
+  tanggal:$("auditDate").value||today(),
+  auditor:person,
+  mulaiPada:new Date().toISOString(),
+  status:"computer_raw",
+  combinedZone:"GUDANG",
+  balanced:false,
+  compareLogs:[],
+  manualCompares:[],
+  saved:false,
+  items:masterPLU.map(x=>({
+   id:x.id,plu:x.plu,nama:x.nama,kategori:x.kategori,satuan:x.satuan,berat:x.berat??null,isiBersih:x.isiBersih??null,rawLink:x.rawLink||"",
+   komputer:null,
+   gudangRaw:null,
+   boothRaw:null,
+   fisikKotor:null,modeFisik:"",qtySegel:null,isiSegel:null,jumlahTerbuka:null,fisikKotorTerbuka:null,
+   fisikBersihAsli:null,selisihAsli:null,hasilStatusAsli:null,
+   fisikBersih:null,selisih:null,hasilStatus:null,penyeimbangRAW:0
+  }))
+ };
  saveAudit();renderAudit();
 }
 function newAudit(){
@@ -517,170 +671,1229 @@ function cancelAudit(){
  if(!confirm(`Batalkan audit yang sedang berlangsung oleh ${audit.auditor||"auditor"}? Seluruh progres audit ini akan dihapus dan tidak masuk riwayat.`))return;
  audit=null;saveAudit();$("auditPerson").value="";$("auditDate").value=today();renderAudit();
 }
-function setStage(s){audit.status=s;saveAudit();renderAudit()}
-function filled(items,key){return items.every(x=>x[key]!==null&&x[key]!==undefined&&Number.isFinite(Number(x[key]))&&Number(x[key])>=0)}
+function setStage(s){
+ if(s==="physical_konversi"||s==="physical_raw")s="physical_all";
+ audit.status=s;saveAudit();renderAudit();
+}
+function isCombinedWarehouseDone(){
+ return categoryItems("RAW").every(x => x.gudangRaw!==null && x.gudangRaw!==undefined && Number.isFinite(Number(x.gudangRaw)) && Number(x.gudangRaw)>=0);
+}
+function isCombinedBoothItemDone(x){
+ if(x.kategori==="RAW"){
+  return x.boothRaw!==null && x.boothRaw!==undefined && Number.isFinite(Number(x.boothRaw)) && Number(x.boothRaw)>=0;
+ }
+ return isConvBoothFilled(x);
+}
+function isItemPhysicalDone(x){
+ if(isWarehouseOnly()){
+  if(x.kategori==="KONVERSI") return true;
+  return x.gudangRaw!==null && x.gudangRaw!==undefined && Number.isFinite(Number(x.gudangRaw)) && Number(x.gudangRaw)>=0;
+ }
+ if(isBoothOnly()){
+  if(x.kategori==="RAW"){
+   return x.boothRaw!==null && x.boothRaw!==undefined && Number.isFinite(Number(x.boothRaw)) && Number(x.boothRaw)>=0;
+  }
+  return isConvBoothFilled(x);
+ }
+ if(audit.combinedZone === "GUDANG"){
+  if(x.kategori==="KONVERSI") return true;
+  return x.gudangRaw!==null && x.gudangRaw!==undefined && Number.isFinite(Number(x.gudangRaw)) && Number(x.gudangRaw)>=0;
+ }
+ return isCombinedBoothItemDone(x);
+}
+
+function isConvBoothFilled(x){
+ const hasSegel = x.qtySegel!==null && x.qtySegel!==undefined;
+ const hasIsi = x.isiSegel!==null && x.isiSegel!==undefined;
+ const hasOpen = x.jumlahTerbuka!==null && x.jumlahTerbuka!==undefined;
+ const hasGross = x.fisikKotorTerbuka!==null && x.fisikKotorTerbuka!==undefined;
+ if(!hasSegel && !hasIsi && !hasOpen && !hasGross) return false;
+ const q = Number(x.qtySegel)||0;
+ const open = Number(x.jumlahTerbuka)||0;
+ if(q>0 && x.isiBersih==null && !hasIsi) return false;
+ if(open>0 && !hasGross) return false;
+ return true;
+}
+
+/* Mendukung angka minus (contoh: -125) & desimal untuk stok komputer */
+function parseSignedNumber(val){
+ if(val === null || val === undefined) return null;
+ const s = String(val).trim().replace(/,/g, ".");
+ if(s === "" || s === "-" || s === "+") return null;
+ const n = Number(s);
+ return Number.isFinite(n) ? n : null;
+}
+
+function syncMinusButtonVisual(id, valStr){
+ const btn = $("minus-btn-" + id);
+ if(!btn) return;
+ const isMinus = String(valStr ?? "").trim().startsWith("-");
+ btn.classList.toggle("is-minus", isMinus);
+ btn.textContent = isMinus ? "− MINUS" : "+/− Minus";
+}
+
+function updateComputerValue(id, val){
+ const x=audit.items.find(a=>a.id===id);if(!x)return;
+ const s = String(val).trim();
+ if(s === "" || s === "-"){
+  x.komputer = null;
+ } else {
+  const n = parseSignedNumber(s);
+  x.komputer = n;
+ }
+ syncMinusButtonVisual(id, s);
+ saveAudit();
+ updateProgressOnly();
+ const card = document.querySelector(`[data-comp-card="${id}"]`);
+ if(card){
+  card.classList.toggle("filled", x.komputer !== null && x.komputer !== undefined);
+ }
+}
+
+function toggleComputerMinus(id){
+ const inp = $("comp-inp-" + id);
+ const x = audit.items.find(a=>a.id===id);
+ if(!inp || !x) return;
+
+ let cur = String(inp.value ?? "").trim();
+ if(cur === ""){
+  cur = "-0";
+ } else if(cur.startsWith("-")){
+  cur = cur.slice(1);
+ } else {
+  cur = "-" + cur;
+ }
+
+ inp.value = cur;
+ if(cur === "" || cur === "-" || cur === "-0"){
+  x.komputer = cur === "-0" ? -0 : null;
+  if(cur === "-0"){
+   const n = Number(cur);
+   x.komputer = Number.isFinite(n) ? n : null;
+  }
+ } else {
+  const n = parseSignedNumber(cur);
+  x.komputer = n;
+ }
+
+ syncMinusButtonVisual(id, cur);
+ saveAudit();
+ updateProgressOnly();
+ const card = document.querySelector(`[data-comp-card="${id}"]`);
+ if(card){
+  card.classList.toggle("filled", x.komputer !== null && x.komputer !== undefined);
+ }
+ inp.focus();
+}
+
 function updateAuditValue(id,key,val){
  const x=audit.items.find(a=>a.id===id);if(!x)return;
  if(val==="")x[key]=null;
  else {const n=Number(val);x[key]=Number.isFinite(n)&&n>=0?n:null}
  saveAudit();updateProgressOnly();
- // Aktifkan tombol tahap berikutnya segera setelah semua angka terisi.
- if(audit.status==="computer_konversi"){
-  const b=$("auditActions").querySelector("button.primary");
-  if(b)b.disabled=!(filled(categoryItems("RAW"),"komputer")&&filled(categoryItems("KONVERSI"),"komputer"));
- }
- if(audit.status==="physical_konversi"){
-  const b=$("auditActions").querySelector("button.primary");
-  if(b)b.disabled=!filled(categoryItems("KONVERSI"),"fisikKotor");
- }
- if(audit.status==="physical_raw"){
-  const b=$("auditActions").querySelector("button.gold");
-  if(b)b.disabled=!filled(categoryItems("RAW"),"fisikKotor");
+ if(audit.status==="physical_all"){
+  const card = document.querySelector(`[data-group-item="${id}"]`);
+  if(card){
+   const group = buildPairedGroups().find(gr => (gr.raw && gr.raw.id===id) || gr.convs.some(c=>c.id===id));
+   if(group){
+    const allItems = [group.raw, ...group.convs].filter(Boolean);
+    card.classList.toggle("done", allItems.every(isItemPhysicalDone));
+   }
+  }
  }
 }
+
+function activeAuditItems(){
+ if(isWarehouseOnly()) return categoryItems("RAW");
+ if(isCombinedMode() && audit.combinedZone === "GUDANG") return categoryItems("RAW");
+ return audit.items;
+}
+
 function progress(){
- let done=0,total=audit.items.length*2;
- audit.items.forEach(x=>{if(x.komputer!==null)done++;if(x.kategori==="KONVERSI"?conversionPhysicalFilled([x]):x.fisikKotor!==null)done++});
+ const items = activeAuditItems();
+ let done=0,total=items.length*2;
+ items.forEach(x=>{
+  if(x.komputer!==null)done++;
+  if(isItemPhysicalDone(x))done++;
+ });
  return total?Math.round(done/total*100):0;
 }
 function updateProgressOnly(){$("progressBar").style.width=progress()+"%";$("progressText").textContent="Progres pengisian: "+progress()+"%"}
+
 function renderAudit(){
- const active=!!audit&&audit.status!=="completed";
- document.body.classList.toggle("audit-active",active);
+ if(audit && (audit.status==="physical_konversi"||audit.status==="physical_raw")) audit.status="physical_all";
+ if(audit && isCombinedMode() && !audit.combinedZone) audit.combinedZone="GUDANG";
+ document.body.classList.remove("audit-active");
  if(!audit){$("auditStart").classList.remove("hidden");$("auditWorkspace").classList.add("hidden");$("auditResult").classList.add("hidden");return}
  $("auditStart").classList.add("hidden");
  if(audit.status==="completed"){$("auditWorkspace").classList.add("hidden");$("auditResult").classList.remove("hidden");renderCurrentResult();return}
  $("auditWorkspace").classList.remove("hidden");$("auditResult").classList.add("hidden");
- $("auditInfo").innerHTML=`<b>Nama Auditor:</b> ${esc(audit.auditor)} &nbsp; | &nbsp; <b>Tanggal:</b> ${safeDate(audit.tanggal)}<br><b>Mulai audit:</b> ${dateTimeText(audit.mulaiPada)}<br><b>Total PLU:</b> ${audit.items.length}`;
- const idx=stages.indexOf(audit.status);
- $("stepIndicator").innerHTML=stageNames.map((n,i)=>`<span class="step ${i<idx?"done":i===idx?"active":""}">${i+1}. ${n}</span>`).join("");
+
+ const whOnly = isWarehouseOnly();
+ const comb = isCombinedMode();
+ const zoneText = comb ? (audit.combinedZone==="GUDANG" ? " · Tahap Aktif: GUDANG (RAW)" : " · Tahap Aktif: KABINET / BOOTH (RAW + KONVERSI)") : "";
+ $("auditInfo").innerHTML=`<b>Mode Audit:</b> <span class="tag loc-tag">${esc(locationLabel(audit.lokasi))}${esc(zoneText)}</span> &nbsp; | &nbsp; <b>Auditor:</b> ${esc(audit.auditor)} &nbsp; | &nbsp; <b>Tanggal:</b> ${safeDate(audit.tanggal)}<br><b>Mulai audit:</b> ${dateTimeText(audit.mulaiPada)}<br><b>Item Tahap Ini:</b> ${activeAuditItems().length} PLU`;
+
+ const activeStages = whOnly
+  ? [{id:"computer_raw",label:"1. Stok Komputer RAW"},{id:"physical_all",label:"2. Catat Fisik Gudang (RAW)"},{id:"completed",label:"3. Hasil Akhir"}]
+  : comb
+   ? [{id:"computer_raw",label:"1. Komputer RAW"},{id:"computer_konversi",label:"2. Komputer KONVERSI"},{id:"physical_wh",label:"3. Fisik Gudang (RAW)"},{id:"physical_bt",label:"4. Fisik Kabinet / Booth"},{id:"completed",label:"5. Hasil Akhir"}]
+   : [{id:"computer_raw",label:"1. Stok Komputer RAW"},{id:"computer_konversi",label:"2. Stok Komputer KONVERSI"},{id:"physical_all",label:"3. Catat Fisik Booth"},{id:"completed",label:"4. Hasil Akhir"}];
+
+ let currentStageKey = audit.status;
+ if(comb && audit.status==="physical_all"){
+  currentStageKey = audit.combinedZone==="GUDANG" ? "physical_wh" : "physical_bt";
+ }
+ const idx = activeStages.findIndex(s=>s.id===currentStageKey);
+ $("stepIndicator").innerHTML=activeStages.map((s,i)=>`<span class="step ${i<idx?"done":i===idx?"active":""}">${s.label}</span>`).join("");
+
  updateProgressOnly();
  if(audit.status==="computer_raw")renderComputer("RAW");
- if(audit.status==="computer_konversi")renderComputer("KONVERSI");
- if(audit.status==="physical_konversi")renderPhysical("KONVERSI");
- if(audit.status==="physical_raw")renderPhysical("RAW");
+ if(audit.status==="computer_konversi"){
+  if(whOnly){setStage("physical_all");return}
+  renderComputer("KONVERSI");
+ }
+ if(audit.status==="physical_all")renderPhysicalAll();
 }
+
+function countUnfilledComputer(cat){
+ return categoryItems(cat).filter(x => x.komputer === null || x.komputer === undefined || !Number.isFinite(Number(x.komputer))).length;
+}
+
+function switchComputerTab(targetStage){
+ if(!audit) return;
+ const currentCat = audit.status === "computer_raw" ? "RAW" : "KONVERSI";
+ const targetCat = targetStage === "computer_raw" ? "RAW" : "KONVERSI";
+ if(currentCat === targetCat) return;
+
+ const unfilled = countUnfilledComputer(currentCat);
+ if(unfilled > 0){
+  const ok = confirm(
+   `PERINGATAN:\nMasih ada ${unfilled} item stok komputer ${currentCat} yang belum diinput.\n\nApakah Anda tetap ingin pindah ke Stok Komputer ${targetCat}?`
+  );
+  if(!ok) return;
+ }
+ setStage(targetStage);
+ window.scrollTo({top:0,behavior:"smooth"});
+}
+
 function renderComputer(cat){
  const items=categoryItems(cat);
+ const whOnly=isWarehouseOnly();
+ $("auditToolbar").classList.add("hidden");
+ $("auditTableHead").className="hidden";
+
+ const topNav = $("compTopNav");
+ if(!whOnly && categoryItems("KONVERSI").length > 0){
+  topNav.classList.remove("hidden");
+  topNav.innerHTML = `
+   <button type="button" class="comp-switch-btn ${cat==='RAW'?'active':''}" onclick="switchComputerTab('computer_raw')">📦 Input Stok Komputer RAW (${categoryItems("RAW").length})</button>
+   <button type="button" class="comp-switch-btn ${cat==='KONVERSI'?'active':''}" onclick="switchComputerTab('computer_konversi')">⚡ Input Stok Komputer KONVERSI (${categoryItems("KONVERSI").length})</button>
+  `;
+ } else {
+  topNav.classList.add("hidden");
+  topNav.innerHTML = "";
+ }
+
  $("auditHeading").textContent="Input Stok Komputer "+cat;
- $("auditInstruction").textContent="Isi stok komputer untuk setiap barang. Semua kolom wajib diisi angka; masukkan 0 jika stok sistem memang nol.";
- $("auditTableHead").className="audit-head";
- $("auditTableHead").innerHTML="<span>No</span><span>PLU</span><span>Nama Barang</span><span>Satuan</span><span>Stok Komputer</span>";
- $("auditTableBody").innerHTML=items.map((x,i)=>`<div class="audit-row">
- <div class="number">${i+1}</div><div class="plu">${esc(x.plu)}</div><div class="item-name">${esc(x.nama)}</div>
- <div class="unit unit-cell">${esc(x.satuan)}</div>
- <div class="computer-cell"><input type="number" min="0" step="any" placeholder="Isi angka" value="${x.komputer??""}" onchange="updateAuditValue(${Number(x.id)},'komputer',this.value)"></div>
- </div>`).join("")||'<div class="empty">Tidak ada PLU kategori '+cat+'.</div>';
+ $("auditInstruction").innerHTML="Ditampilkan <b>1 per 1</b> dengan <b>PLU menonjol</b>. Ketik angka stoknya lalu tekan tombol <b>+/− Minus</b> di samping kolom jika stoknya minus (misal ketik <b>125</b> lalu tekan <b>+/− Minus</b> → <b>-125</b>).";
+
+ $("auditTableBody").className="comp-cards";
+ $("auditTableBody").innerHTML=items.map((x,i)=>{
+  const hasVal = x.komputer !== null && x.komputer !== undefined && Number.isFinite(Number(x.komputer));
+  const isMinus = hasVal && Number(x.komputer) < 0;
+  return `<div class="comp-card ${cat==='KONVERSI'?'is-konv':''} ${hasVal?'filled':''}" data-comp-card="${Number(x.id)}">
+   <div>
+    <div class="comp-card-top">
+     <span class="comp-seq">#${i+1}</span>
+     <span class="plu-highlight">PLU: ${esc(x.plu)}</span>
+     <span class="tag ${cat==='RAW'?'raw':'konversi'}">${esc(cat)}</span>
+    </div>
+    <div class="comp-name">${esc(x.nama)}</div>
+    <div class="comp-sub">Satuan: <b>${esc(x.satuan)}</b>${x.isiBersih!=null?` · Rasio Segel: ${fmt(x.isiBersih)} ${esc(x.satuan)}`:""}</div>
+   </div>
+   <div class="comp-input-wrap">
+    <label for="comp-inp-${Number(x.id)}">Stok Komputer (${esc(x.satuan)})</label>
+    <div class="comp-input-row">
+     <input id="comp-inp-${Number(x.id)}" type="number" inputmode="decimal" step="any" autocomplete="off" placeholder="Ketik angka..." value="${x.komputer??""}" oninput="updateComputerValue(${Number(x.id)},this.value)">
+     <button type="button" id="minus-btn-${Number(x.id)}" class="minus-toggle-btn ${isMinus?'is-minus':''}" onclick="toggleComputerMinus(${Number(x.id)})">${isMinus?'− MINUS':'+/− Minus'}</button>
+    </div>
+   </div>
+  </div>`;
+ }).join("")||'<div class="empty">Tidak ada PLU kategori '+cat+'.</div>';
+
  if(cat==="RAW"){
-  $("auditActions").innerHTML='<button class="btn primary" onclick="nextComputerRaw()">Lanjut Input Stok Komputer KONVERSI →</button>';
- }else{
-  $("auditActions").innerHTML='<button class="btn cancel" onclick="setStage(\'computer_raw\')">← Kembali ke RAW</button><button class="btn primary" onclick="nextComputerKonversi()">Jalankan Audit</button>';
-  $("auditActions").lastElementChild.disabled=!(filled(categoryItems("RAW"),"komputer")&&filled(categoryItems("KONVERSI"),"komputer"));
- }
-}
-function nextComputerRaw(){if(!filled(categoryItems("RAW"),"komputer")){alert("Lengkapi seluruh stok komputer RAW terlebih dahulu.");return}setStage("computer_konversi")}
-function nextComputerKonversi(){if(!filled(categoryItems("RAW"),"komputer")||!filled(categoryItems("KONVERSI"),"komputer")){alert("Lengkapi seluruh stok komputer RAW dan KONVERSI terlebih dahulu.");return}setStage("physical_konversi")}
-function renderPhysical(cat){
- const items=categoryItems(cat);
- $("auditHeading").textContent="Audit Fisik "+cat;
- if(cat==="KONVERSI"){
-  $("auditInstruction").innerHTML="Pilih kondisi stok setiap PLU. <b>SEGEL:</b> hitung dari isi bersih label tanpa mengurangi tara. <b>TERBUKA:</b> masukkan jumlah wadah terbuka dan total berat kotor, lalu sistem mengurangi tara. <b>CAMPURAN:</b> isi data segel dan terbuka. <b>KOSONG:</b> pilih jika tidak ada stok fisik.";
-  $("auditTableHead").className="audit-head physical";$("auditTableHead").innerHTML="<span>No</span><span>PLU</span><span>Nama Barang</span><span>Kondisi Stok Fisik</span>";
-  $("auditTableBody").innerHTML=items.map((x,i)=>{
-   const mode=x.modeFisik||"";
-   const sealedFields=`
-    <div class="field"><label>Jumlah botol/wadah masih segel</label><input type="number" min="0" step="1" placeholder="Contoh: 2" value="${x.qtySegel??""}" onchange="updateConversionPhysical(${Number(x.id)},'qtySegel',this.value)"></div>
-    <div class="field"><label>${x.isiBersih!=null?"Isi bersih segel (otomatis)":"Total isi bersih semua botol segel"}</label><input type="number" min="0" step="any" ${x.isiBersih!=null?"disabled":""} placeholder="${x.isiBersih!=null?"Dihitung dari label":"Masukkan total isi bersih"}" value="${x.isiSegel??""}" onchange="updateConversionPhysical(${Number(x.id)},'isiSegel',this.value)"></div>
-    ${x.isiBersih!=null?`<div class="condition-note">Isi label: <b>${fmt(x.isiBersih)} ${esc(x.satuan)}</b> per kemasan. Total segel dihitung otomatis dari jumlah kemasan × isi label.</div>`:`<div class="condition-note">Isi bersih segel belum diatur di Master PLU. Masukkan total isi bersih seluruh kemasan yang masih segel.</div>`}`;
-   const openedFields=`
-    <div class="field"><label>Jumlah botol/wadah sudah dibuka</label><input type="number" min="0" step="1" placeholder="Contoh: 1" value="${x.jumlahTerbuka??""}" onchange="updateConversionPhysical(${Number(x.id)},'jumlahTerbuka',this.value)"></div>
-    <div class="field"><label>Total berat kotor wadah terbuka (${esc(x.satuan)})</label><input type="number" min="0" step="any" placeholder="Berat total di timbangan" value="${x.fisikKotorTerbuka??""}" onchange="updateConversionPhysical(${Number(x.id)},'fisikKotorTerbuka',this.value)"></div>
-    <div class="condition-note">Tara per wadah: <b>${x.berat!=null?fmt(x.berat)+" "+esc(x.satuan):"Belum diatur"}</b>. ${x.berat==null?"Atur tara di Master PLU atau isi 0 jika wadah memang tidak memiliki tara.":"Berat bersih terbuka = berat kotor total − (tara × jumlah wadah terbuka)."}</div>`;
-   let fields="";
-   if(mode==="SEGEL")fields=sealedFields;
-   if(mode==="TERBUKA")fields=openedFields;
-   if(mode==="CAMPURAN")fields=sealedFields+openedFields;
-   if(mode==="KOSONG")fields='<div class="condition-note">Stok fisik untuk PLU ini dicatat 0. Tidak perlu mengisi jumlah segel maupun wadah terbuka.</div>';
-   return `<div class="audit-row physical conv-physical">
-    <div class="number">${i+1}</div><div class="plu">${esc(x.plu)}</div>
-    <div class="item-name">${esc(x.nama)}<div class="unit">${esc(x.satuan)} · Tara ${x.berat!=null?fmt(x.berat):"belum diatur"}</div></div>
-    <div class="seal-grid">
-     <div class="field condition-select"><label>Kondisi stok fisik</label><select onchange="changeConversionMode(${Number(x.id)},this.value)"><option value="">-- Pilih kondisi --</option><option value="SEGEL" ${mode==="SEGEL"?"selected":""}>Masih segel semua</option><option value="TERBUKA" ${mode==="TERBUKA"?"selected":""}>Sudah dibuka semua</option><option value="CAMPURAN" ${mode==="CAMPURAN"?"selected":""}>Campuran segel dan terbuka</option><option value="KOSONG" ${mode==="KOSONG"?"selected":""}>Tidak ada stok (kosong)</option></select></div>
-     ${fields}
-    </div></div>`;
-  }).join("")||'<div class="empty">Tidak ada PLU kategori KONVERSI.</div>';
-  $("auditActions").innerHTML='<button class="btn cancel" onclick="setStage(\'computer_konversi\')">← Kembali</button><button class="btn primary" onclick="nextPhysicalKonversi()">Tampilkan Data RAW →</button>';
-  $("auditActions").lastElementChild.disabled=!conversionPhysicalFilled(items);
- }else{
-  $("auditInstruction").textContent="Masukkan jumlah fisik RAW (PCS) satu per satu.";
-  $("auditTableHead").className="audit-head physical";$("auditTableHead").innerHTML="<span>No</span><span>PLU</span><span>Nama Barang</span><span>Hasil Fisik</span>";
-  $("auditTableBody").innerHTML=items.map((x,i)=>`<div class="audit-row physical"><div class="number">${i+1}</div><div class="plu">${esc(x.plu)}</div><div class="item-name">${esc(x.nama)}</div><div class="physical-cell"><input type="number" min="0" step="any" placeholder="Isi angka" value="${x.fisikKotor??""}" onchange="updateAuditValue(${Number(x.id)},'fisikKotor',this.value)"></div></div>`).join("")||'<div class="empty">Tidak ada PLU kategori RAW.</div>';
-  $("auditActions").innerHTML='<button class="btn cancel" onclick="setStage(\'physical_konversi\')">← Kembali ke KONVERSI</button><button class="btn gold" onclick="finishAudit()">✓ Selesaikan Audit</button>';
-  $("auditActions").lastElementChild.disabled=!filled(items,"fisikKotor");
- }
-}
-function changeConversionMode(id,mode){
- const x=audit.items.find(a=>a.id===id);if(!x)return;
- x.modeFisik=mode;
- if(mode==="SEGEL"){x.jumlahTerbuka=0;x.fisikKotorTerbuka=0;if(x.isiBersih!=null)x.isiSegel=0}
- if(mode==="TERBUKA"){x.qtySegel=0;x.isiSegel=0}
- if(mode==="CAMPURAN"&&x.isiBersih!=null)x.isiSegel=(Number(x.qtySegel)||0)*Number(x.isiBersih);
- if(mode==="KOSONG"){x.qtySegel=0;x.isiSegel=0;x.jumlahTerbuka=0;x.fisikKotorTerbuka=0}
- x.fisikKotor=null;saveAudit();renderPhysical("KONVERSI");updateProgressOnly();
-}
-function updateConversionPhysical(id,key,val){
- const x=audit.items.find(a=>a.id===id);if(!x)return;
- if(val==="")x[key]=null;
- else{
-  const n=Number(val);
-  if(!Number.isFinite(n)||n<0){alert("Masukkan angka yang valid dan tidak boleh negatif.");return}
-  if((key==="qtySegel"||key==="jumlahTerbuka")&&!Number.isInteger(n)){alert("Jumlah botol/wadah harus berupa bilangan bulat.");return}
-  x[key]=n;
- }
- if(key==="qtySegel"&&x.isiBersih!=null)x.isiSegel=(Number(x.qtySegel)||0)*Number(x.isiBersih);
- x.fisikKotor=null;saveAudit();updateProgressOnly();
- const b=$("auditActions").querySelector("button.primary");if(b)b.disabled=!conversionPhysicalFilled(categoryItems("KONVERSI"));
-}
-function conversionPhysicalFilled(items){
- return items.every(x=>{
-  const mode=x.modeFisik;if(!mode)return false;
-  if(mode==="KOSONG")return true;
-  if(mode==="SEGEL"||mode==="CAMPURAN"){
-   const q=x.qtySegel;
-   if(q===null||q===undefined||!Number.isInteger(Number(q))||Number(q)<0)return false;
-   if(Number(q)>0&&x.isiBersih==null&&(x.isiSegel===null||x.isiSegel===undefined||!Number.isFinite(Number(x.isiSegel))||Number(x.isiSegel)<0))return false;
+  if(whOnly){
+   $("auditActions").innerHTML='<button class="btn primary" onclick="nextComputerRaw()">Lanjut Catat Fisik Gudang (Hanya RAW) →</button>';
+  } else {
+   $("auditActions").innerHTML='<button class="btn primary" onclick="nextComputerRaw()">Lanjut ke Stok Komputer KONVERSI →</button>';
   }
-  if(mode==="TERBUKA"||mode==="CAMPURAN"){
-   const opened=x.jumlahTerbuka,gross=x.fisikKotorTerbuka;
-   if(opened===null||opened===undefined||!Number.isInteger(Number(opened))||Number(opened)<0)return false;
-   if(Number(opened)>0&&(x.berat==null||gross===null||gross===undefined||!Number.isFinite(Number(gross))||Number(gross)<0))return false;
+ }else{
+  const nextLabel = isCombinedMode() ? "Mulai Catat Fisik Gudang Dulu →" : "Mulai Catat Fisik Kabinet / Booth →";
+  $("auditActions").innerHTML='<button class="btn cancel" onclick="switchComputerTab(\'computer_raw\')">← Kembali ke RAW</button><button class="btn primary" onclick="nextComputerKonversi()">'+nextLabel+'</button>';
+ }
+}
+function nextComputerRaw(){
+ if(isWarehouseOnly()) setStage("physical_all");
+ else switchComputerTab("computer_konversi");
+}
+function nextComputerKonversi(){
+ if(isCombinedMode()) audit.combinedZone="GUDANG";
+ setStage("physical_all");
+}
+
+function buildPairedGroups(){
+ const whOnly = isWarehouseOnly();
+ const isCombWh = isCombinedMode() && audit.combinedZone === "GUDANG";
+ const hideConv = whOnly || isCombWh;
+
+ const raws = audit.items.filter(x=>x.kategori==="RAW");
+ const convs = hideConv ? [] : audit.items.filter(x=>x.kategori==="KONVERSI");
+ const usedConvIds = new Set();
+ const groups = [];
+
+ raws.forEach(raw => {
+  const linkedConvs = convs.filter(c => parseRawLinks(c.rawLink).includes(raw.plu));
+  linkedConvs.forEach(c => usedConvIds.add(c.id));
+  groups.push({
+   key: "raw-" + raw.id,
+   title: raw.nama,
+   raw: raw,
+   convs: linkedConvs
+  });
+ });
+
+ convs.filter(c => !usedConvIds.has(c.id)).forEach(conv => {
+  groups.push({
+   key: "conv-" + conv.id,
+   title: conv.nama,
+   raw: null,
+   convs: [conv]
+  });
+ });
+
+ return groups;
+}
+
+function calcConvNet(x){
+ const q = Number(x.qtySegel)||0;
+ const sealed = x.isiBersih!=null ? q*Number(x.isiBersih) : (Number(x.isiSegel)||0);
+ const gross = Number(x.fisikKotorTerbuka)||0;
+ const openCount = x.jumlahTerbuka!==null && x.jumlahTerbuka!==undefined
+  ? (Number(x.jumlahTerbuka)||0)
+  : (gross > 0 ? 1 : 0);
+ const tara = (Number(x.berat)||0)*openCount;
+ const opened = openCount>0 ? Math.max(0, gross - tara) : 0;
+ return { sealed, opened, openCount, total: sealed + opened };
+}
+
+function renderPhysicalAll(){
+ const whOnly = isWarehouseOnly();
+ const isCombWh = isCombinedMode() && audit.combinedZone === "GUDANG";
+ const isCombBt = isCombinedMode() && audit.combinedZone === "BOOTH";
+ const showWhInput = whOnly || isCombWh;
+
+ $("compTopNav").classList.add("hidden");
+ $("auditTableBody").className="audit-list";
+
+ if(whOnly){
+  $("auditHeading").textContent = "Catat Fisik Gudang (Khusus RAW — Semua Segel)";
+  $("auditInstruction").innerHTML = "<b>Mode Gudang Saja:</b> Isi jumlah stok fisik <b>RAW</b> (segel) di gudang. Bisa diselesaikan kapan saja.";
+ } else if(isCombWh){
+  $("auditHeading").textContent = "Tahap 1/2: Catat Fisik di GUDANG (Khusus RAW)";
+  $("auditInstruction").innerHTML = "<b>Gabungan — Bagian Gudang Dulu:</b> Isi barang <b>RAW</b> di gudang, lalu klik <b>Selesai Gudang → Pindah ke Kabinet / Booth</b> (atau selesaikan audit kapan saja).";
+ } else if(isCombBt){
+  $("auditHeading").textContent = "Tahap 2/2: Catat Fisik di KABINET / BOOTH (RAW + KONVERSI)";
+  $("auditInstruction").innerHTML = "<b>Gabungan — Bagian Kabinet / Booth:</b> Isi fisik <b>RAW</b> dan <b>KONVERSI</b> di booth. Saat selesai, stok Gudang + Booth otomatis digabung jadi 1 laporan.";
+ } else {
+  $("auditHeading").textContent = "Catat Fisik Kabinet / Booth (RAW + KONVERSI)";
+  $("auditInstruction").innerHTML = "<b>Mode Kabinet / Booth Saja:</b> Isi stok fisik <b>RAW</b> dan <b>KONVERSI</b> (segel atau sisa terbuka/timbangan).";
+ }
+
+ $("auditTableHead").className="hidden";
+
+ const toolbar = $("auditToolbar");
+ toolbar.classList.remove("hidden");
+ toolbar.innerHTML = `
+  <input id="physSearchInput" type="search" placeholder="🔍 Ketik nama barang atau PLU yang sedang kamu pegang..." value="${esc(physicalSearch)}" oninput="onPhysSearch(this.value)">
+  <div class="filter-pills">
+   <button type="button" class="pill ${physicalFilter==='ALL'?'active':''}" onclick="setPhysFilter('ALL')">Semua</button>
+   <button type="button" class="pill ${physicalFilter==='UNFILLED'?'active':''}" onclick="setPhysFilter('UNFILLED')">Belum Diisi</button>
+   ${!showWhInput ? `
+    <button type="button" class="pill ${physicalFilter==='RAW'?'active':''}" onclick="setPhysFilter('RAW')">Daftar RAW</button>
+    <button type="button" class="pill ${physicalFilter==='KONVERSI'?'active':''}" onclick="setPhysFilter('KONVERSI')">Daftar KONVERSI</button>
+   ` : ``}
+  </div>
+ `;
+
+ renderPairedCards();
+
+ let actionButtons = "";
+ if(whOnly){
+  actionButtons = `
+   <button class="btn cancel" onclick="setStage('computer_raw')">← Kembali</button>
+   <button class="btn warn-btn" type="button" onclick="fillRemainingZeros()">⚡ Set Sisa Kosong = 0</button>
+   <button class="btn gold" id="btnFinishAudit" onclick="finishAudit()">✓ Selesaikan Audit Gudang</button>
+  `;
+ } else if(isCombWh){
+  actionButtons = `
+   <button class="btn cancel" onclick="setStage('computer_konversi')">← Kembali</button>
+   <button class="btn warn-btn" type="button" onclick="fillRemainingZeros()">⚡ Set Sisa Kosong = 0</button>
+   <button class="btn primary" id="btnFinishAudit" onclick="proceedToBoothZone()">Selesai Gudang → Pindah ke Kabinet / Booth</button>
+  `;
+ } else if(isCombBt){
+  actionButtons = `
+   <button class="btn cancel" onclick="backToWarehouseZone()">← Kembali ke Gudang</button>
+   <button class="btn warn-btn" type="button" onclick="fillRemainingZeros()">⚡ Set Sisa Kosong = 0</button>
+   <button class="btn gold" id="btnFinishAudit" onclick="finishAudit()">✓ Selesaikan Audit Gabungan</button>
+  `;
+ } else {
+  actionButtons = `
+   <button class="btn cancel" onclick="setStage('computer_konversi')">← Kembali</button>
+   <button class="btn warn-btn" type="button" onclick="fillRemainingZeros()">⚡ Set Sisa Kosong = 0</button>
+   <button class="btn gold" id="btnFinishAudit" onclick="finishAudit()">✓ Selesaikan Audit Booth</button>
+  `;
+ }
+ $("auditActions").innerHTML = actionButtons;
+}
+
+function proceedToBoothZone(){
+ audit.combinedZone = "BOOTH";
+ physicalSearch = "";
+ physicalFilter = "ALL";
+ saveAudit();
+ renderAudit();
+ window.scrollTo({top:0,behavior:"smooth"});
+}
+
+function backToWarehouseZone(){
+ audit.combinedZone = "GUDANG";
+ physicalSearch = "";
+ physicalFilter = "ALL";
+ saveAudit();
+ renderAudit();
+ window.scrollTo({top:0,behavior:"smooth"});
+}
+
+function onPhysSearch(val){
+ physicalSearch = val;
+ renderPairedCards();
+}
+function setPhysFilter(f){
+ physicalFilter = f;
+ renderPhysicalAll();
+}
+
+function setRawZero(id){
+ const x = audit.items.find(a=>a.id===id); if(!x) return;
+ if(isWarehouseOnly() || (isCombinedMode() && audit.combinedZone==="GUDANG")) x.gudangRaw = 0;
+ else x.boothRaw = 0;
+ saveAudit(); updateProgressOnly(); renderPairedCards();
+}
+
+function setConvZero(id){
+ const x = audit.items.find(a=>a.id===id); if(!x) return;
+ x.qtySegel = 0; x.isiSegel = 0; x.jumlahTerbuka = 0; x.fisikKotorTerbuka = 0; x.modeFisik = "KOSONG";
+ saveAudit(); updateProgressOnly(); renderPairedCards();
+}
+
+function renderPairedCards(){
+ const whOnly = isWarehouseOnly();
+ const isCombWh = isCombinedMode() && audit.combinedZone === "GUDANG";
+ const showWhInput = whOnly || isCombWh;
+
+ const q = physicalSearch.trim().toLowerCase();
+ const groups = buildPairedGroups().filter(g => {
+  const allItems = [g.raw, ...g.convs].filter(Boolean);
+  if(physicalFilter==="RAW" && !g.raw) return false;
+  if(physicalFilter==="KONVERSI" && g.convs.length===0) return false;
+  if(physicalFilter==="UNFILLED" && allItems.every(isItemPhysicalDone)) return false;
+  if(!q) return true;
+  return allItems.some(it => it.nama.toLowerCase().includes(q) || it.plu.toLowerCase().includes(q));
+ });
+
+ if(!groups.length){
+  $("auditTableBody").innerHTML='<div class="empty">Tidak ada barang yang cocok dengan pencarian/filter.</div>';
+  return;
+ }
+
+ $("auditTableBody").innerHTML = groups.map((g, idx) => {
+  const allItems = [g.raw, ...g.convs].filter(Boolean);
+  const allDone = allItems.every(isItemPhysicalDone);
+  const mainId = g.raw ? g.raw.id : g.convs[0].id;
+
+  let rawHTML = "";
+  if(g.raw){
+   const r = g.raw;
+   if(showWhInput){
+    rawHTML = `
+     <div class="box-wh" data-card-item="${r.id}">
+      <div class="box-title">
+       <span>📦 GUDANG · RAW (${esc(r.satuan)} · PLU ${esc(r.plu)})</span>
+       <button type="button" class="zero-btn" onclick="setRawZero(${Number(r.id)})">Kosong (0)</button>
+      </div>
+      <div class="field">
+       <label>Jumlah Segel di Gudang (${esc(r.satuan)})</label>
+       <input type="number" inputmode="decimal" min="0" step="any" placeholder="Isi jumlah fisik gudang..." value="${r.gudangRaw??""}" oninput="updateAuditValue(${Number(r.id)},'gudangRaw',this.value)">
+      </div>
+      <div class="rule-hint">Gudang khusus RAW (semua segel, tanpa konversi).</div>
+     </div>`;
+   } else {
+    rawHTML = `
+     <div class="box-raw" data-card-item="${r.id}">
+      <div class="box-title">
+       <span>🏪 KABINET / BOOTH · RAW (${esc(r.satuan)} · PLU ${esc(r.plu)})</span>
+       <button type="button" class="zero-btn" onclick="setRawZero(${Number(r.id)})">Kosong (0)</button>
+      </div>
+      <div class="field">
+       <label>Jumlah Utuh / Kemasan di Booth (${esc(r.satuan)})</label>
+       <input type="number" inputmode="decimal" min="0" step="any" placeholder="Isi jumlah fisik booth..." value="${r.boothRaw??""}" oninput="updateAuditValue(${Number(r.id)},'boothRaw',this.value)">
+      </div>
+      <div class="rule-hint">Masuk ke rekap <b>RAW</b> (${esc(r.satuan)}).</div>
+     </div>`;
+   }
   }
-  return true;
+
+  let convHTML = showWhInput ? "" : g.convs.map(c => {
+   const hasIsi = c.isiBersih !== null && c.isiBersih !== undefined;
+   const hasTara = c.berat !== null && c.berat !== undefined;
+   const calc = calcConvNet(c);
+   const openDisplay = c.jumlahTerbuka!==null && c.jumlahTerbuka!==undefined ? c.jumlahTerbuka : (Number(c.fisikKotorTerbuka)>0 ? 1 : "");
+
+   return `
+    <div class="box-konv" data-card-item="${c.id}">
+     <div class="box-title">
+      <span>⚡ BOOTH · KONVERSI (${esc(c.satuan)} · PLU ${esc(c.plu)})</span>
+      <button type="button" class="zero-btn" onclick="setConvZero(${Number(c.id)})">Kosong (0)</button>
+     </div>
+
+     <div class="satset-row ${hasIsi?'single':''}">
+      <div class="field">
+       <label>${hasIsi ? `Jml Wadah Segel (× ${fmt(c.isiBersih)} ${esc(c.satuan)})` : `Jml Wadah Segel`}</label>
+       <input type="number" inputmode="numeric" min="0" step="1" placeholder="0 wadah" value="${c.qtySegel??""}" oninput="updateConvSatset(${Number(c.id)},'qtySegel',this.value)">
+      </div>
+      ${!hasIsi ? `
+      <div class="field">
+       <label>Atau Total Isi Segel (${esc(c.satuan)})</label>
+       <input type="number" inputmode="decimal" min="0" step="any" placeholder="0 ${esc(c.satuan)}" value="${c.isiSegel??""}" oninput="updateConvSatset(${Number(c.id)},'isiSegel',this.value)">
+      </div>` : ``}
+     </div>
+
+     <div class="satset-row triple">
+      <div class="field">
+       <label>Berat Kotor Terbuka (${esc(c.satuan)})</label>
+       <input type="number" inputmode="decimal" min="0" step="any" placeholder="0" value="${c.fisikKotorTerbuka??""}" oninput="updateConvSatset(${Number(c.id)},'fisikKotorTerbuka',this.value)">
+      </div>
+      <div class="field open-qty-col">
+       <label>Jml Wadah Terbuka</label>
+       <input type="number" inputmode="numeric" min="0" step="1" placeholder="Otomatis 1" value="${openDisplay}" oninput="updateConvSatset(${Number(c.id)},'jumlahTerbuka',this.value)">
+      </div>
+     </div>
+
+     <div class="calc-preview" id="prev-${c.id}">
+      Total Bersih Booth: <b>${fmt(calc.total)} ${esc(c.satuan)}</b>
+      (Segel: ${fmt(calc.sealed)} + Terbuka: ${fmt(calc.opened)})
+      ${hasTara?` · Tara: ${fmt(c.berat)}/wadah`:""}
+     </div>
+     <div class="rule-hint">Tip sat-set: isi <b>Berat Kotor Terbuka</b> saja jika wadah terbukanya 1 (otomatis dihitung 1 wadah). Isi <b>0</b> jika tidak ada stok.</div>
+    </div>`;
+  }).join("");
+
+  return `
+   <div class="paired-card ${allDone?'done':''}" data-group-item="${mainId}" id="group-${g.key}">
+    <div class="paired-header">
+     <div>
+      <div class="paired-title">${idx+1}. ${esc(g.title)}</div>
+      <div class="paired-sub">
+       ${g.raw ? `<span class="tag raw">RAW: ${esc(g.raw.plu)}</span>` : ''}
+       ${!showWhInput ? g.convs.map(c => `<span class="tag konversi">KONVERSI: ${esc(c.plu)}</span>`).join(' ') : ''}
+      </div>
+     </div>
+    </div>
+    <div class="paired-grid">
+     ${rawHTML}
+     ${convHTML}
+    </div>
+   </div>`;
+ }).join("");
+}
+
+function updateConvSatset(id, key, val){
+ const x = audit.items.find(a=>a.id===id); if(!x) return;
+ if(val==="") x[key]=null;
+ else {
+  const n = Number(val);
+  if(!Number.isFinite(n) || n<0) return;
+  x[key] = (key==="qtySegel"||key==="jumlahTerbuka") ? Math.floor(n) : n;
+ }
+ if(key==="qtySegel" && x.isiBersih!=null){
+  x.isiSegel = (Number(x.qtySegel)||0) * Number(x.isiBersih);
+ }
+ saveAudit();
+ updateProgressOnly();
+
+ const prev = $("prev-"+id);
+ if(prev){
+  const calc = calcConvNet(x);
+  const hasTara = x.berat !== null && x.berat !== undefined;
+  prev.innerHTML = `Total Bersih Booth: <b>${fmt(calc.total)} ${esc(x.satuan)}</b> (Segel: ${fmt(calc.sealed)} + Terbuka: ${fmt(calc.opened)})${hasTara?` · Tara: ${fmt(x.berat)}/wadah`:""}`;
+ }
+ const card = document.querySelector(`[data-group-item="${id}"]`);
+ if(card){
+  const group = buildPairedGroups().find(gr => (gr.raw && gr.raw.id===id) || gr.convs.some(c=>c.id===id));
+  if(group){
+   const allItems = [group.raw, ...group.convs].filter(Boolean);
+   card.classList.toggle("done", allItems.every(isItemPhysicalDone));
+  }
+ }
+}
+
+function fillRemainingZeros(){
+ const items = activeAuditItems();
+ const unfilled = items.filter(x => !isItemPhysicalDone(x));
+ if(!unfilled.length){
+  alert("Semua barang pada tahap ini sudah terisi.");
+  return;
+ }
+ if(!confirm(`Terdapat ${unfilled.length} item yang belum diisi. Isi otomatis dengan angka 0 (stok kosong)?`)) return;
+
+ const whOnly = isWarehouseOnly();
+ const isCombWh = isCombinedMode() && audit.combinedZone === "GUDANG";
+ const showWhInput = whOnly || isCombWh;
+
+ audit.items.forEach(x => {
+  if(showWhInput){
+   if(x.kategori==="RAW" && (x.gudangRaw===null || x.gudangRaw===undefined)) x.gudangRaw = 0;
+  } else {
+   if(x.kategori==="RAW" && (x.boothRaw===null || x.boothRaw===undefined)) x.boothRaw = 0;
+   if(x.kategori==="KONVERSI" && !isConvBoothFilled(x)){
+    if(x.qtySegel==null) x.qtySegel = 0;
+    if(x.isiSegel==null) x.isiSegel = 0;
+    if(x.jumlahTerbuka==null) x.jumlahTerbuka = 0;
+    if(x.fisikKotorTerbuka==null) x.fisikKotorTerbuka = 0;
+    x.modeFisik = "KOSONG";
+   }
+  }
+ });
+ saveAudit();
+ updateProgressOnly();
+ renderPairedCards();
+}
+
+function finishAuditEarly(){
+ if(!audit || audit.status==="completed") return;
+ finishAudit(true);
+}
+
+function finishAudit(forceEarly = false){
+ const whOnly = isWarehouseOnly();
+ const btOnly = isBoothOnly();
+
+ const missingComp = audit.items.filter(x => {
+  if(whOnly && x.kategori==="KONVERSI") return false;
+  return x.komputer===null || x.komputer===undefined || !Number.isFinite(Number(x.komputer));
+ }).length;
+
+ const missingPhys = audit.items.filter(x => {
+  if(whOnly && x.kategori==="KONVERSI") return false;
+  if(whOnly) return x.gudangRaw===null || x.gudangRaw===undefined;
+  if(btOnly){
+   if(x.kategori==="RAW") return x.boothRaw===null || x.boothRaw===undefined;
+   return !isConvBoothFilled(x);
+  }
+  const hasWh = x.kategori==="RAW" && x.gudangRaw!==null && x.gudangRaw!==undefined;
+  const hasBt = x.kategori==="RAW" ? (x.boothRaw!==null && x.boothRaw!==undefined) : isConvBoothFilled(x);
+  return !(hasWh || hasBt);
+ }).length;
+
+ if(missingComp > 0 || missingPhys > 0 || forceEarly){
+  const msg =
+   `PERINGATAN SELESAIKAN AUDIT:\n` +
+   `• Stok komputer belum diisi: ${missingComp} item\n` +
+   `• Stok fisik belum diisi: ${missingPhys} item\n\n` +
+   `Item yang belum diisi akan otomatis dianggap 0. Apakah Anda menyetujui untuk menyelesaikan audit sekarang?`;
+  if(!confirm(msg)) return;
+ }
+
+ if(!whOnly){
+  const invalidOpened = categoryItems("KONVERSI").find(x => {
+   const calc = calcConvNet(x);
+   const gross = Number(x.fisikKotorTerbuka)||0;
+   const tara = (Number(x.berat)||0) * calc.openCount;
+   return calc.openCount > 0 && gross < tara;
+  });
+  if(invalidOpened){
+   alert(`Berat kotor terbuka untuk PLU ${invalidOpened.plu} (${invalidOpened.nama}) lebih kecil dari total berat kemasan (tara). Periksa kembali angkanya.`);
+   return;
+  }
+ }
+
+ audit.items.forEach(x => {
+  if(x.komputer===null || x.komputer===undefined || !Number.isFinite(Number(x.komputer))){
+   x.komputer = 0;
+  }
+  if(whOnly){
+   if(x.kategori==="RAW"){
+    const gRaw = Number(x.gudangRaw)||0;
+    x.gudangRaw = gRaw;
+    x.boothRaw = 0;
+    x.fisikKotor = gRaw;
+    x.fisikBersih = gRaw;
+    x.modeFisik = gRaw>0 ? "GUDANG (SEGEL)" : "KOSONG";
+   } else {
+    x.qtySegel = 0; x.isiSegel = 0; x.jumlahTerbuka = 0; x.fisikKotorTerbuka = 0;
+    x.fisikKotor = 0; x.fisikBersih = 0;
+    x.modeFisik = "TIDAK DIAUDIT (GUDANG)";
+   }
+  } else if(btOnly){
+   if(x.kategori==="RAW"){
+    const bRaw = Number(x.boothRaw)||0;
+    x.gudangRaw = 0;
+    x.boothRaw = bRaw;
+    x.fisikKotor = bRaw;
+    x.fisikBersih = bRaw;
+    x.modeFisik = bRaw>0 ? "BOOTH" : "KOSONG";
+   } else {
+    applyConvBoothCalculation(x);
+   }
+  } else {
+   if(x.kategori==="RAW"){
+    const gRaw = Number(x.gudangRaw)||0;
+    const bRaw = Number(x.boothRaw)||0;
+    x.gudangRaw = gRaw;
+    x.boothRaw = bRaw;
+    const tot = gRaw + bRaw;
+    x.fisikKotor = tot;
+    x.fisikBersih = tot;
+    x.modeFisik = `Gudang: ${fmt(gRaw)} + Booth: ${fmt(bRaw)}`;
+   } else {
+    applyConvBoothCalculation(x);
+   }
+  }
+  x.fisikBersihAsli = x.fisikBersih;
+  x.selisihAsli = x.fisikBersihAsli - Number(x.komputer);
+  x.hasilStatusAsli = x.selisihAsli>0 ? "PLUS" : x.selisihAsli<0 ? "MINUS" : "SESUAI";
+  x.penyeimbangRAW = 0;
+  x.selisih = x.selisihAsli;
+  x.hasilStatus = x.hasilStatusAsli;
+ });
+
+ audit.balanced = false;
+ audit.compareLogs = [];
+ audit.manualCompares = [];
+ selectedCompareKeys.clear();
+ audit.status="completed";
+ audit.selesaiPada=new Date().toISOString();
+ audit.saved=false;
+ saveAudit();
+ renderAudit();
+}
+
+function applyConvBoothCalculation(x){
+ const calc = calcConvNet(x);
+ x.qtySegel = Number(x.qtySegel)||0;
+ x.isiSegel = calc.sealed;
+ x.jumlahTerbuka = calc.openCount;
+ x.fisikKotorTerbuka = Number(x.fisikKotorTerbuka)||0;
+ x.fisikBersih = calc.total;
+ x.fisikKotor = calc.sealed + x.fisikKotorTerbuka;
+
+ if(x.qtySegel>0 && calc.openCount>0) x.modeFisik = "BOOTH CAMPURAN";
+ else if(x.qtySegel>0) x.modeFisik = "BOOTH SEGEL";
+ else if(calc.openCount>0) x.modeFisik = "BOOTH TERBUKA";
+ else x.modeFisik = "KOSONG";
+}
+
+function resetAuditToOriginal(report){
+ report.items.forEach(x => {
+  if(x.fisikBersihAsli !== null && x.fisikBersihAsli !== undefined){
+   x.fisikBersih = Number(x.fisikBersihAsli);
+  }
+  x.penyeimbangRAW = 0;
+  x.selisih = Number(x.fisikBersih) - Number(x.komputer||0);
+  x.hasilStatus = x.selisih>0 ? "PLUS" : x.selisih<0 ? "MINUS" : "SESUAI";
+ });
+ report.balanced = false;
+ report.compareLogs = [];
+}
+
+function getAllCompareCandidates(report){
+ const items = report.items || [];
+ const rawByPlu = new Map(items.filter(x=>x.kategori==="RAW").map(x=>[x.plu, x]));
+ const candidates = [];
+ const usedPairIds = new Set();
+
+ items.filter(x=>x.kategori==="KONVERSI").forEach(conv => {
+  const links = parseRawLinks(conv.rawLink);
+  links.forEach(rawPlu => {
+   const raw = rawByPlu.get(rawPlu);
+   if(!raw) return;
+   const key = `LINK_${raw.id}_${conv.id}`;
+   if(usedPairIds.has(key)) return;
+   usedPairIds.add(key);
+
+   const ratio = Number(conv.isiBersih);
+   const validRatio = Number.isFinite(ratio) && ratio > 0;
+
+   if(raw.selisih > 0 && conv.selisih < 0){
+    candidates.push({key,source:"AUTO",direction:"RAW_TO_CONV",raw,conv,ratio,validRatio});
+   } else if(conv.selisih > 0 && raw.selisih < 0){
+    candidates.push({key,source:"AUTO",direction:"CONV_TO_RAW",raw,conv,ratio,validRatio});
+   }
+  });
+ });
+
+ (report.manualCompares || []).forEach((mc, idx) => {
+  const plusItem = items.find(x=>x.id===mc.plusId);
+  const minusItem = items.find(x=>x.id===mc.minusId);
+  if(!plusItem || !minusItem) return;
+  const key = `MANUAL_${idx}_${plusItem.id}_${minusItem.id}`;
+  const ratio = Number(mc.ratio) || 1;
+  candidates.push({
+   key,
+   source:"MANUAL",
+   direction:plusItem.kategori==="RAW"?"RAW_TO_CONV":"CONV_TO_RAW",
+   raw:plusItem.kategori==="RAW"?plusItem:minusItem,
+   conv:plusItem.kategori==="KONVERSI"?plusItem:minusItem,
+   plusItem,
+   minusItem,
+   ratio,
+   validRatio:Number.isFinite(ratio) && ratio > 0
+  });
+ });
+
+ const simSelisih = new Map(items.map(x => [x.id, Number(x.selisih)||0]));
+
+ return candidates.map(c => {
+  if(c.source === "MANUAL"){
+   const pSel = simSelisih.get(c.plusItem.id) || 0;
+   const mSel = simSelisih.get(c.minusItem.id) || 0;
+   let plusShift = 0, minusShift = 0;
+   if(c.validRatio && pSel > 0 && mSel < 0){
+    const maxFromPlus = pSel * c.ratio;
+    const neededByMinus = Math.abs(mSel);
+    minusShift = Math.min(maxFromPlus, neededByMinus);
+    plusShift = minusShift / c.ratio;
+    simSelisih.set(c.plusItem.id, pSel - plusShift);
+    simSelisih.set(c.minusItem.id, mSel + minusShift);
+   }
+   return { ...c, rawShift: plusShift, convShift: minusShift, plusShift, minusShift };
+  }
+
+  const rSel = simSelisih.get(c.raw.id) || 0;
+  const cSel = simSelisih.get(c.conv.id) || 0;
+  let rawShift = 0, convShift = 0;
+
+  if(c.validRatio){
+   if(c.direction === "RAW_TO_CONV" && rSel > 0 && cSel < 0){
+    const convDeficitInRaw = Math.abs(cSel) / c.ratio;
+    rawShift = Math.min(rSel, convDeficitInRaw);
+    convShift = rawShift * c.ratio;
+    simSelisih.set(c.raw.id, rSel - rawShift);
+    simSelisih.set(c.conv.id, cSel + convShift);
+   } else if(c.direction === "CONV_TO_RAW" && cSel > 0 && rSel < 0){
+    const convSurplusInRaw = cSel / c.ratio;
+    rawShift = Math.min(Math.abs(rSel), convSurplusInRaw);
+    convShift = rawShift * c.ratio;
+    simSelisih.set(c.raw.id, rSel + rawShift);
+    simSelisih.set(c.conv.id, cSel - convShift);
+   }
+  }
+
+  return { ...c, rawShift, convShift };
  });
 }
-function nextPhysicalKonversi(){
- if(!conversionPhysicalFilled(categoryItems("KONVERSI"))){alert("Pilih kondisi dan lengkapi rincian setiap PLU KONVERSI. Pilih KOSONG jika stok memang tidak ada. Untuk wadah terbuka, pastikan berat tara sudah diatur di Master PLU.");return}
- const invalid=categoryItems("KONVERSI").find(x=>(x.modeFisik==="TERBUKA"||x.modeFisik==="CAMPURAN")&&(Number(x.fisikKotorTerbuka)||0)<((Number(x.berat)||0)*(Number(x.jumlahTerbuka)||0)));
- if(invalid){alert("Berat kotor terbuka untuk PLU "+invalid.plu+" lebih kecil daripada total berat kemasannya. Periksa jumlah wadah dan berat tara.");return}
- setStage("physical_raw");
+
+function toggleCompareKey(key, checked){
+ if(checked) selectedCompareKeys.add(key);
+ else selectedCompareKeys.delete(key);
 }
-function finishAudit(){
- if(!filled(categoryItems("RAW"),"fisikKotor")){alert("Lengkapi semua hasil fisik RAW terlebih dahulu.");return}
- if(!conversionPhysicalFilled(categoryItems("KONVERSI"))){alert("Pilih kondisi dan lengkapi rincian stok setiap PLU KONVERSI.");return}
- const invalidOpened=categoryItems("KONVERSI").find(x=>(x.modeFisik==="TERBUKA"||x.modeFisik==="CAMPURAN")&&(Number(x.fisikKotorTerbuka)||0)<((Number(x.berat)||0)*(Number(x.jumlahTerbuka)||0)));
- if(invalidOpened){alert("Berat kotor terbuka untuk PLU "+invalidOpened.plu+" lebih kecil daripada total berat kemasannya. Periksa jumlah wadah dan berat tara.");return}
- audit.items.forEach(x=>{
-  if(x.kategori==="KONVERSI"){
-   const sealed=(x.modeFisik==="SEGEL"||x.modeFisik==="CAMPURAN")?(x.isiBersih!=null?(Number(x.qtySegel)||0)*Number(x.isiBersih):(Number(x.isiSegel)||0)):0;
-   const opened=(x.modeFisik==="TERBUKA"||x.modeFisik==="CAMPURAN")?(Number(x.fisikKotorTerbuka||0)-((Number(x.berat)||0)*(Number(x.jumlahTerbuka)||0))):0;
-   x.fisikBersih=sealed+opened;
-   x.fisikKotor=sealed+((x.modeFisik==="TERBUKA"||x.modeFisik==="CAMPURAN")?(Number(x.fisikKotorTerbuka)||0):0);
-  }else x.fisikBersih=Number(x.fisikKotor);
-  x.selisih=x.fisikBersih-Number(x.komputer);
-  x.hasilStatus=x.selisih>0?"PLUS":x.selisih<0?"MINUS":"SESUAI";
+
+function toggleAllCompareKeys(checked){
+ if(!audit) return;
+ const list = getAllCompareCandidates(audit);
+ selectedCompareKeys.clear();
+ if(checked) list.forEach(c => selectedCompareKeys.add(c.key));
+ renderCurrentResult();
+}
+
+function addManualCompare(){
+ if(!audit) return;
+ const plusId = Number($("mcPlusSelect")?.value);
+ const minusId = Number($("mcMinusSelect")?.value);
+ const ratio = Number($("mcRatioInput")?.value);
+ if(!plusId || !minusId){alert("Pilih item PLUS dan item MINUS terlebih dahulu.");return}
+ if(plusId === minusId){alert("Item PLUS dan MINUS tidak boleh sama.");return}
+ if(!Number.isFinite(ratio) || ratio <= 0){alert("Masukkan rasio konversi yang valid (contoh: 750 jika 1 RAW = 750 ML/Gram).");return}
+ audit.manualCompares = audit.manualCompares || [];
+ audit.manualCompares.push({plusId, minusId, ratio});
+ saveAudit();
+ renderCurrentResult();
+}
+
+function removeManualCompare(idx){
+ if(!audit || !audit.manualCompares) return;
+ audit.manualCompares.splice(idx, 1);
+ saveAudit();
+ renderCurrentResult();
+}
+
+function applyCompareBalance(applyAll = true){
+ if(!audit || audit.status!=="completed") return;
+ resetAuditToOriginal(audit);
+
+ const allCandidates = getAllCompareCandidates(audit);
+ const targets = applyAll
+  ? allCandidates
+  : allCandidates.filter(c => selectedCompareKeys.has(c.key));
+
+ let adjustedCount = 0;
+ const missingRatio = [];
+ const logs = [];
+
+ targets.forEach(c => {
+  if(!c.validRatio){
+   missingRatio.push(c.conv ? c.conv.nama : c.minusItem.nama);
+   return;
+  }
+
+  if(c.source === "MANUAL"){
+   const pItem = audit.items.find(x=>x.id===c.plusItem.id);
+   const mItem = audit.items.find(x=>x.id===c.minusItem.id);
+   if(!pItem || !mItem) return;
+   const livePlus = Number(pItem.selisih)||0;
+   const liveMinus = Number(mItem.selisih)||0;
+   if(livePlus <= 0 || liveMinus >= 0) return;
+
+   const minusShift = Math.min(livePlus * c.ratio, Math.abs(liveMinus));
+   const plusShift = minusShift / c.ratio;
+   if(plusShift <= 0) return;
+
+   pItem.fisikBersih = Number(pItem.fisikBersih) - plusShift;
+   pItem.penyeimbangRAW = Number(pItem.penyeimbangRAW||0) - plusShift;
+   pItem.selisih = Number(pItem.fisikBersih) - Number(pItem.komputer||0);
+   pItem.hasilStatus = pItem.selisih>0 ? "PLUS" : pItem.selisih<0 ? "MINUS" : "SESUAI";
+
+   mItem.fisikBersih = Number(mItem.fisikBersih) + minusShift;
+   mItem.penyeimbangRAW = Number(mItem.penyeimbangRAW||0) + minusShift;
+   mItem.selisih = Number(mItem.fisikBersih) - Number(mItem.komputer||0);
+   mItem.hasilStatus = mItem.selisih>0 ? "PLUS" : mItem.selisih<0 ? "MINUS" : "SESUAI";
+   adjustedCount++;
+   logs.push({
+    tipe: "MANUAL",
+    fromNama: `${pItem.nama} (${pItem.kategori})`,
+    toNama: `${mItem.nama} (${mItem.kategori})`,
+    fromDelta: -plusShift,
+    fromSatuan: pItem.satuan,
+    toDelta: minusShift,
+    toSatuan: mItem.satuan,
+    rasio: c.ratio,
+    selisihAkhirFrom: pItem.selisih,
+    selisihAkhirTo: mItem.selisih
+   });
+   return;
+  }
+
+  const raw = audit.items.find(x=>x.id===c.raw.id);
+  const conv = audit.items.find(x=>x.id===c.conv.id);
+  if(!raw || !conv) return;
+
+  const liveRawSel = Number(raw.selisih)||0;
+  const liveConvSel = Number(conv.selisih)||0;
+
+  if(c.direction === "RAW_TO_CONV" && liveRawSel > 0 && liveConvSel < 0){
+   const rawShift = Math.min(liveRawSel, Math.abs(liveConvSel) / c.ratio);
+   const convShift = rawShift * c.ratio;
+   if(rawShift <= 0) return;
+
+   raw.fisikBersih = Number(raw.fisikBersih) - rawShift;
+   raw.penyeimbangRAW = Number(raw.penyeimbangRAW||0) - rawShift;
+   raw.selisih = Number(raw.fisikBersih) - Number(raw.komputer||0);
+   raw.hasilStatus = raw.selisih>0 ? "PLUS" : raw.selisih<0 ? "MINUS" : "SESUAI";
+
+   conv.fisikBersih = Number(conv.fisikBersih) + convShift;
+   conv.penyeimbangRAW = Number(conv.penyeimbangRAW||0) + convShift;
+   conv.selisih = Number(conv.fisikBersih) - Number(conv.komputer||0);
+   conv.hasilStatus = conv.selisih>0 ? "PLUS" : conv.selisih<0 ? "MINUS" : "SESUAI";
+   adjustedCount++;
+   logs.push({
+    tipe: "RAW → KONVERSI",
+    fromNama: `${raw.nama} (RAW · PLU ${raw.plu})`,
+    toNama: `${conv.nama} (KONVERSI · PLU ${conv.plu})`,
+    fromDelta: -rawShift,
+    fromSatuan: raw.satuan,
+    toDelta: convShift,
+    toSatuan: conv.satuan,
+    rasio: c.ratio,
+    selisihAkhirFrom: raw.selisih,
+    selisihAkhirTo: conv.selisih
+   });
+  } else if(c.direction === "CONV_TO_RAW" && liveConvSel > 0 && liveRawSel < 0){
+   const rawShift = Math.min(Math.abs(liveRawSel), liveConvSel / c.ratio);
+   const convShift = rawShift * c.ratio;
+   if(rawShift <= 0) return;
+
+   raw.fisikBersih = Number(raw.fisikBersih) + rawShift;
+   raw.penyeimbangRAW = Number(raw.penyeimbangRAW||0) + rawShift;
+   raw.selisih = Number(raw.fisikBersih) - Number(raw.komputer||0);
+   raw.hasilStatus = raw.selisih>0 ? "PLUS" : raw.selisih<0 ? "MINUS" : "SESUAI";
+
+   conv.fisikBersih = Number(conv.fisikBersih) - convShift;
+   conv.penyeimbangRAW = Number(conv.penyeimbangRAW||0) - convShift;
+   conv.selisih = Number(conv.fisikBersih) - Number(conv.komputer||0);
+   conv.hasilStatus = conv.selisih>0 ? "PLUS" : conv.selisih<0 ? "MINUS" : "SESUAI";
+   adjustedCount++;
+   logs.push({
+    tipe: "KONVERSI → RAW",
+    fromNama: `${conv.nama} (KONVERSI · PLU ${conv.plu})`,
+    toNama: `${raw.nama} (RAW · PLU ${raw.plu})`,
+    fromDelta: -convShift,
+    fromSatuan: conv.satuan,
+    toDelta: rawShift,
+    toSatuan: raw.satuan,
+    rasio: c.ratio,
+    selisihAkhirFrom: conv.selisih,
+    selisihAkhirTo: raw.selisih
+   });
+  }
  });
- audit.status="completed";audit.selesaiPada=new Date().toISOString();audit.saved=false;saveAudit();renderAudit();
+
+ if(adjustedCount===0){
+  let msg = "Tidak ada item kendala yang dapat dikompair.";
+  if(missingRatio.length){
+   msg += " Isi dulu 'Isi Bersih per Kemasan Segel' di Master PLU untuk: " + [...new Set(missingRatio)].join(", ");
+  }
+  alert(msg);
+  return;
+ }
+
+ audit.balanced = true;
+ audit.compareLogs = logs;
+ audit.saved = false;
+ saveAudit();
+ renderCurrentResult();
+ alert(`Berhasil mengompair ${adjustedCount} pasangan item. Hasil audit dan selisih langsung diperbarui!`);
 }
+
+function undoCompareBalance(){
+ if(!audit || !audit.balanced) return;
+ resetAuditToOriginal(audit);
+ audit.saved = false;
+ saveAudit();
+ renderCurrentResult();
+}
+
+function comparePanelHTML(report){
+ if(!report || report.lokasi === "GUDANG") return "";
+ const items = report.items || [];
+ const troubledItems = items.filter(x => Number(x.selisih) !== 0);
+ const plusItems = items.filter(x => Number(x.selisih) > 0);
+ const minusItems = items.filter(x => Number(x.selisih) < 0);
+
+ if(!troubledItems.length && !report.balanced) return "";
+
+ const candidates = getAllCompareCandidates(report);
+ if(selectedCompareKeys.size === 0 && candidates.length > 0){
+  candidates.forEach(c => selectedCompareKeys.add(c.key));
+ }
+
+ const rows = candidates.map((c, idx) => {
+  const checked = selectedCompareKeys.has(c.key) ? "checked" : "";
+  if(c.source === "MANUAL"){
+   const mIdx = (report.manualCompares||[]).findIndex(m => m.plusId===c.plusItem.id && m.minusId===c.minusItem.id);
+   return `
+    <div class="compare-item">
+     <input type="checkbox" ${checked} onchange="toggleCompareKey('${esc(c.key)}', this.checked)">
+     <div class="compare-item-body">
+      <div><b>#${idx+1} [MANUAL] ${esc(c.plusItem.nama)}</b> (PLUS +${fmt(c.plusItem.selisih)} ${esc(c.plusItem.satuan)}) ↔ <b>${esc(c.minusItem.nama)}</b> (MINUS ${fmt(c.minusItem.selisih)} ${esc(c.minusItem.satuan)}) <button type="button" class="zero-btn" style="margin-left:6px" onclick="removeManualCompare(${mIdx})">Hapus</button></div>
+      <div style="margin-top:4px">Rencana Kompair: kurangi <b>-${fmt(c.plusShift)} ${esc(c.plusItem.satuan)}</b> dari item PLUS untuk menambah <b>+${fmt(c.minusShift)} ${esc(c.minusItem.satuan)}</b> ke item MINUS (rasio 1 : ${fmt(c.ratio)}).</div>
+     </div>
+    </div>`;
+  }
+
+  const isRawPlus = c.direction === "RAW_TO_CONV";
+  const badge = isRawPlus
+   ? `<span class="tag raw">RAW PLUS</span> ↔ <span class="tag konversi">KONVERSI MINUS</span>`
+   : `<span class="tag konversi">KONVERSI PLUS</span> ↔ <span class="tag raw">RAW MINUS</span>`;
+
+  const compareLine = isRawPlus
+   ? `Komputer RAW: <b>${fmt(c.raw.komputer)} ${esc(c.raw.satuan)}</b> | Fisik RAW: <b>${fmt(c.raw.fisikBersih)} ${esc(c.raw.satuan)}</b> (Selisih +${fmt(c.raw.selisih)}) — Komputer KONVERSI: <b>${fmt(c.conv.komputer)} ${esc(c.conv.satuan)}</b> | Fisik KONVERSI: <b>${fmt(c.conv.fisikBersih)} ${esc(c.conv.satuan)}</b> (Selisih ${fmt(c.conv.selisih)})`
+   : `Komputer KONVERSI: <b>${fmt(c.conv.komputer)} ${esc(c.conv.satuan)}</b> | Fisik KONVERSI: <b>${fmt(c.conv.fisikBersih)} ${esc(c.conv.satuan)}</b> (Selisih ${fmt(c.conv.selisih)}) — Komputer RAW: <b>${fmt(c.raw.komputer)} ${esc(c.raw.satuan)}</b> | Fisik RAW: <b>${fmt(c.raw.fisikBersih)} ${esc(c.raw.satuan)}</b> (Selisih ${fmt(c.raw.selisih)})`;
+
+  const actionLine = !c.validRatio
+   ? `<span class="minus">⚠ Isi Bersih per Kemasan Segel belum diisi di Master PLU</span>`
+   : isRawPlus
+    ? `Rencana Kompair: tarik <b>-${fmt(c.rawShift)} ${esc(c.raw.satuan)}</b> fisik RAW menjadi <b>+${fmt(c.convShift)} ${esc(c.conv.satuan)}</b> KONVERSI (rasio ${fmt(c.ratio)} ${esc(c.conv.satuan)}/RAW).`
+    : `Rencana Kompair: tarik <b>-${fmt(c.convShift)} ${esc(c.conv.satuan)}</b> KONVERSI menjadi <b>+${fmt(c.rawShift)} ${esc(c.raw.satuan)}</b> RAW (rasio ${fmt(c.ratio)} ${esc(c.conv.satuan)}/RAW).`;
+
+  return `
+   <div class="compare-item">
+    <input type="checkbox" ${checked} onchange="toggleCompareKey('${esc(c.key)}', this.checked)">
+    <div class="compare-item-body">
+     <div><b>#${idx+1} ${esc(c.raw.nama)}</b> (PLU ${esc(c.raw.plu)}) &amp; <b>${esc(c.conv.nama)}</b> (PLU ${esc(c.conv.plu)}) &nbsp; ${badge}</div>
+     <div style="margin-top:4px">${compareLine}</div>
+     <div style="margin-top:4px">${actionLine}</div>
+    </div>
+   </div>`;
+ }).join("");
+
+ const unlinkedTroubled = troubledItems.filter(it =>
+  !candidates.some(c => (c.raw && c.raw.id===it.id) || (c.conv && c.conv.id===it.id) || (c.plusItem && c.plusItem.id===it.id) || (c.minusItem && c.minusItem.id===it.id))
+ );
+
+ const unlinkedBanner = unlinkedTroubled.length
+  ? `<div class="notice warn" style="margin-top:10px;margin-bottom:0">
+      <b>Terdapat ${unlinkedTroubled.length} item berkendala lainnya yang belum memiliki pasangan otomatis:</b><br>
+      ${unlinkedTroubled.map(x => `• <b>${esc(x.nama)}</b> (${esc(x.kategori)} · ${x.selisih>0?'PLUS +'+fmt(x.selisih):'MINUS '+fmt(x.selisih)} ${esc(x.satuan)})`).join("<br>")}
+      <div style="margin-top:4px">Gunakan form <b>Tambah Pasangan Kompair Manual</b> di bawah jika item tersebut tertukar dengan item PLUS/MINUS lainnya.</div>
+     </div>`
+  : "";
+
+ const manualBuilderHTML = (plusItems.length && minusItems.length) ? `
+  <div class="manual-compare-box no-print">
+   <b style="font-size:12px;color:#7b5312">+ Tambah Pasangan Kompair Manual (Untuk Item Berkendala yang Belum Terhubung)</b>
+   <div class="manual-compare-grid">
+    <div class="field">
+     <label>Item PLUS (Kelebihan Fisik)</label>
+     <select id="mcPlusSelect">
+      ${plusItems.map(x=>`<option value="${x.id}">[${esc(x.kategori)}] ${esc(x.nama)} (+${fmt(x.selisih)} ${esc(x.satuan)})</option>`).join("")}
+     </select>
+    </div>
+    <div class="field">
+     <label>Item MINUS (Kekurangan Fisik)</label>
+     <select id="mcMinusSelect">
+      ${minusItems.map(x=>`<option value="${x.id}">[${esc(x.kategori)}] ${esc(x.nama)} (${fmt(x.selisih)} ${esc(x.satuan)})</option>`).join("")}
+     </select>
+    </div>
+    <div class="field">
+     <label>Rasio (1 PLUS = ... MINUS)</label>
+     <input id="mcRatioInput" type="number" inputmode="decimal" min="0.0001" step="any" value="1" placeholder="Contoh: 750">
+    </div>
+    <button type="button" class="btn warn-btn" onclick="addManualCompare()">+ Tambahkan</button>
+   </div>
+  </div>` : "";
+
+ return `
+  <div class="compare-box">
+   <h4>⚖️ Kompair Seluruh Item Berkendala (Dua Arah RAW ↔ KONVERSI)</h4>
+   <div class="compare-summary-bar">
+    <span class="compare-pill">Total Item Berkendala: <b>${troubledItems.length} PLU</b> (${plusItems.length} PLUS · ${minusItems.length} MINUS)</span>
+    <span class="compare-pill">Siap Dikompair: <b>${candidates.length} Pasangan</b></span>
+   </div>
+   <div style="font-size:12px;line-height:1.5;color:#5c3f11">
+    Kompair akan langsung menyesuaikan stok bersih &amp; hasil selisih item (misal KONVERSI PLUS 750 ML dengan rasio 750 → menambah +1 RAW dan mengurangi 750 ML KONVERSI).
+   </div>
+   ${candidates.length ? `
+    <div class="no-print" style="margin-top:8px;font-size:11px">
+     <label style="cursor:pointer;font-weight:bold"><input type="checkbox" checked onchange="toggleAllCompareKeys(this.checked)" style="width:auto;vertical-align:middle"> Pilih / Batalkan Semua Pasangan Kompair (${candidates.length})</label>
+    </div>
+   ` : ''}
+   ${rows || '<div class="empty" style="padding:12px">Belum ada pasangan otomatis. Tambahkan pasangan manual di bawah jika ada item PLUS dan MINUS yang saling terkait.</div>'}
+   ${unlinkedBanner}
+   ${manualBuilderHTML}
+   <div class="actions no-print" style="margin-top:12px">
+    <button type="button" class="btn primary" onclick="applyCompareBalance(true)" ${candidates.length?'':'disabled'}>⚖️ Kompair Semua Item Berkendala (${candidates.length})</button>
+    <button type="button" class="btn blue" onclick="applyCompareBalance(false)" ${candidates.length?'':'disabled'}>✓ Terapkan Hanya yang Dicentang</button>
+    ${report.balanced ? `<button type="button" class="btn cancel" onclick="undoCompareBalance()">↩ Kembalikan Fisik Asli</button>` : ""}
+   </div>
+  </div>`;
+}
+
+function warehouseConclusionHTML(report){
+ if(!report || report.lokasi === "KABINET") return "";
+ const rawItems = (report.items || []).filter(x => x.kategori === "RAW");
+ const presentItems = rawItems.filter(x => {
+  if(report.lokasi === "GUDANG") return (Number(x.fisikBersih)||0) > 0;
+  return (Number(x.gudangRaw)||0) > 0;
+ });
+
+ const listRows = presentItems.map((x, i) => {
+  const qty = report.lokasi === "GUDANG" ? (Number(x.fisikBersih)||0) : (Number(x.gudangRaw)||0);
+  return `
+   <div class="wh-item-row">
+    <div><b>${i+1}. ${esc(x.nama)}</b> <span class="muted">(PLU ${esc(x.plu)})</span> <span class="tag raw">RAW</span></div>
+    <div><b>${fmt(qty)} ${esc(x.satuan)} (Segel Gudang)</b></div>
+   </div>`;
+ }).join("");
+
+ return `
+  <div class="warehouse-box">
+   <h4>📦 Kesimpulan Stok Gudang (Khusus RAW — Semua Segel)</h4>
+   <div class="wh-summary-grid">
+    <div class="mini-stat"><span>TOTAL ITEM RAW ADA DI GUDANG</span><strong>${presentItems.length} Item</strong></div>
+    <div class="mini-stat"><span>STATUS KONVERSI GUDANG</span><strong class="same">Tidak Ada (0)</strong></div>
+   </div>
+   <div class="result-list">
+    ${listRows || '<div class="empty">Tidak ada stok fisik RAW di gudang (semua 0).</div>'}
+   </div>
+  </div>`;
+}
+
+function fullDetailSheetHTML(report){
+ if(!report) return "";
+ const items = report.items || [];
+ const raws = items.filter(x => x.kategori === "RAW");
+
+ const whRows = raws.filter(x => (Number(x.gudangRaw)||0) > 0 || report.lokasi==="GUDANG");
+ const whTableRows = whRows.map((x,i) => {
+  const q = report.lokasi==="GUDANG" ? (Number(x.fisikBersih)||0) : (Number(x.gudangRaw)||0);
+  return `<tr><td>${i+1}</td><td>${esc(x.plu)}</td><td>${esc(x.nama)}</td><td>${fmt(q)} ${esc(x.satuan)}</td><td>Rak Gudang (RAW Segel)</td></tr>`;
+ }).join("") || `<tr><td colspan="5" style="text-align:center">Tidak ada stok tercatat di Gudang</td></tr>`;
+
+ const boothRows = items.filter(x => {
+  if(x.kategori==="RAW") return (Number(x.boothRaw)||0) > 0 || report.lokasi==="KABINET";
+  return (Number(x.fisikBersih)||0) > 0 || (Number(x.qtySegel)||0) > 0 || (Number(x.jumlahTerbuka)||0) > 0;
+ });
+ const boothTableRows = boothRows.map((x,i) => {
+  const isRaw = x.kategori==="RAW";
+  const stokText = isRaw
+   ? `${fmt(x.boothRaw||0)} ${esc(x.satuan)}`
+   : `Total Bersih: ${fmt(x.fisikBersih||0)} ${esc(x.satuan)} (Segel: ${fmt(x.isiSegel||0)} · Terbuka: ${fmt(x.jumlahTerbuka||0)} wadah)`;
+  const rakSaran = isRaw
+   ? "Rak/Kabinet RAW"
+   : "Rak/Kabinet KONVERSI (Pisahkan & Tata Rapi untuk Audit Berikutnya)";
+  return `<tr><td>${i+1}</td><td>${esc(x.plu)}</td><td>${esc(x.nama)}</td><td><span class="tag ${isRaw?'raw':'konversi'}">${esc(x.kategori)}</span></td><td>${stokText}</td><td>${rakSaran}</td></tr>`;
+ }).join("") || `<tr><td colspan="6" style="text-align:center">Tidak ada stok tercatat di Booth / Kabinet</td></tr>`;
+
+ const logs = Array.isArray(report.compareLogs) ? report.compareLogs : [];
+ const logTableRows = logs.length
+  ? logs.map((lg,i) => `<tr>
+      <td>${i+1}</td>
+      <td><b>${esc(lg.tipe)}</b></td>
+      <td>${esc(lg.fromNama)} (${lg.fromDelta>=0?'+':''}${fmt(lg.fromDelta)} ${esc(lg.fromSatuan)})</td>
+      <td>${esc(lg.toNama)} (${lg.toDelta>=0?'+':''}${fmt(lg.toDelta)} ${esc(lg.toSatuan)})</td>
+      <td>${fmt(lg.rasio)}</td>
+      <td>Selisih akhir: ${lg.selisihAkhirFrom>=0?'+':''}${fmt(lg.selisihAkhirFrom)} / ${lg.selisihAkhirTo>=0?'+':''}${fmt(lg.selisihAkhirTo)}</td>
+     </tr>`).join("")
+  : `<tr><td colspan="6" style="text-align:center">Belum ada item yang dikompair pada laporan ini</td></tr>`;
+
+ return `
+  <div class="pdf-detail-sheet">
+   <h4>📋 Rincian Lengkap untuk Laporan &amp; PDF (Gudang, Kabinet/Booth, Kompair &amp; Penataan Rak)</h4>
+   <div class="notice" style="margin-bottom:10px">
+    <b>Catatan Penataan Audit Berikutnya:</b> Barang yang sudah dikonversi (kategori <b>KONVERSI</b>) disarankan dipisahkan di rak/kabinet khusus konversi agar tidak tercampur dengan stok segel/RAW dan mempermudah pengecekan berikutnya.
+   </div>
+
+   <b>1. Rincian Stok di Gudang</b>
+   <table class="pdf-table">
+    <thead><tr><th>No</th><th>PLU</th><th>Nama Barang</th><th>Stok Gudang</th><th>Lokasi Penempatan</th></tr></thead>
+    <tbody>${whTableRows}</tbody>
+   </table>
+
+   <b>2. Rincian Stok di Kabinet / Booth &amp; Rekomendasi Rak</b>
+   <table class="pdf-table">
+    <thead><tr><th>No</th><th>PLU</th><th>Nama Barang</th><th>Kategori</th><th>Rincian Stok Booth</th><th>Penataan Rak / Kabinet</th></tr></thead>
+    <tbody>${boothTableRows}</tbody>
+   </table>
+
+   <b>3. Rincian Item yang Dikompair</b>
+   <table class="pdf-table">
+    <thead><tr><th>No</th><th>Arah</th><th>Item Sumber</th><th>Item Tujuan</th><th>Rasio</th><th>Hasil Akhir</th></tr></thead>
+    <tbody>${logTableRows}</tbody>
+   </table>
+  </div>`;
+}
+
 function sortedItems(items,order){
  const a=[...items];
  if(order==="minus")a.sort((x,y)=>x.selisih-y.selisih);
@@ -693,53 +1906,92 @@ function summaryHTML(items){
  const plus=items.filter(x=>x.selisih>0).length,minus=items.filter(x=>x.selisih<0).length,same=items.filter(x=>x.selisih===0).length;
  return `<div class="mini-stat"><span>PLUS</span><strong class="plus">${plus}</strong></div><div class="mini-stat"><span>MINUS</span><strong class="minus">${minus}</strong></div><div class="mini-stat"><span>SESUAI</span><strong class="same">${same}</strong></div>`;
 }
+
 function linkedFlags(items){
  const rawByPlu=new Map(items.filter(x=>x.kategori==="RAW").map(x=>[x.plu,x]));
- return items.filter(x=>x.kategori==="KONVERSI"&&x.rawLink&&x.selisih<0).map(conv=>{
-  const raw=rawByPlu.get(conv.rawLink);
-  if(raw&&raw.selisih>0)return {raw,conv};
-  return null;
- }).filter(Boolean);
+ const flags=[];
+ items.filter(x=>x.kategori==="KONVERSI"&&x.rawLink).forEach(conv=>{
+  parseRawLinks(conv.rawLink).forEach(lk => {
+   const raw=rawByPlu.get(lk);
+   if(!raw)return;
+   if(raw.selisih>0 && conv.selisih<0){
+    flags.push({type:"RAW_PLUS_CONV_MINUS",raw,conv});
+   } else if(conv.selisih>0 && raw.selisih<0){
+    flags.push({type:"CONV_PLUS_RAW_MINUS",raw,conv});
+   }
+  });
+ });
+ return flags;
 }
+
 function resultCard(x,flags){
  const cls=x.selisih>0?"plus":x.selisih<0?"minus":"same";
- const signal=flags.find(f=>f.conv.id===x.id);
- const rawSignal=flags.find(f=>f.raw.id===x.id);
+ const convMinusFlags = flags.filter(f=>f.type==="RAW_PLUS_CONV_MINUS" && f.conv.id===x.id);
+ const rawForConvMinusFlags = flags.filter(f=>f.type==="RAW_PLUS_CONV_MINUS" && f.raw.id===x.id);
+ const convPlusFlags = flags.filter(f=>f.type==="CONV_PLUS_RAW_MINUS" && f.conv.id===x.id);
+ const rawForConvPlusFlags = flags.filter(f=>f.type==="CONV_PLUS_RAW_MINUS" && f.raw.id===x.id);
+
  let flag="";
- if(signal)flag=`<div class="flag">⚠ INDIKASI KONVERSI: stok fisik RAW <b>${esc(signal.raw.nama)}</b> lebih tinggi (+${fmt(signal.raw.selisih)} ${esc(signal.raw.satuan)}), sedangkan stok KONVERSI ini minus (${fmt(x.selisih)} ${esc(x.satuan)}). Perlu verifikasi auditor.</div>`;
- if(rawSignal)flag=`<div class="flag">⚠ TERKAIT INDIKASI KONVERSI: RAW ini memiliki surplus, sedangkan PLU KONVERSI <b>${esc(rawSignal.conv.nama)}</b> yang ditautkan mengalami minus. Perlu verifikasi auditor.</div>`;
+ if(convMinusFlags.length){
+  const names = convMinusFlags.map(f=>`${esc(f.raw.nama)} (+${fmt(f.raw.selisih)})`).join(", ");
+  flag=`<div class="flag">⚠ KOMPAIR RAW PLUS ↔ KONVERSI MINUS: stok fisik RAW <b>${names}</b> PLUS, sedangkan KONVERSI ini MINUS (${fmt(x.selisih)} ${esc(x.satuan)}).</div>`;
+ } else if(rawForConvMinusFlags.length){
+  const names = rawForConvMinusFlags.map(f=>`${esc(f.conv.nama)} (${fmt(f.conv.selisih)})`).join(", ");
+  flag=`<div class="flag">⚠ KOMPAIR RAW PLUS ↔ KONVERSI MINUS: RAW ini PLUS (+${fmt(x.selisih)} ${esc(x.satuan)}), sementara KONVERSI <b>${names}</b> MINUS.</div>`;
+ } else if(convPlusFlags.length){
+  const names = convPlusFlags.map(f=>`${esc(f.raw.nama)} (${fmt(f.raw.selisih)})`).join(", ");
+  flag=`<div class="flag rev">🚨 KONVERSI PLUS &amp; RAW MINUS: KONVERSI ini PLUS (+${fmt(x.selisih)} ${esc(x.satuan)}), tetapi RAW terkait <b>${names}</b> MINUS.</div>`;
+ } else if(rawForConvPlusFlags.length){
+  const names = rawForConvPlusFlags.map(f=>`${esc(f.conv.nama)} (+${fmt(f.conv.selisih)})`).join(", ");
+  flag=`<div class="flag rev">🚨 RAW MINUS &amp; KONVERSI PLUS: RAW ini MINUS (${fmt(x.selisih)} ${esc(x.satuan)}), sedangkan KONVERSI terkait <b>${names}</b> PLUS.</div>`;
+ }
+
+ const balVal = Number(x.penyeimbangRAW)||0;
+ const balNote = balVal !== 0
+  ? `<div class="bal-note">⚖️ Hasil Kompair: ${balVal>0?`+${fmt(balVal)}`:fmt(balVal)} ${esc(x.satuan)} (Fisik awal: ${fmt(x.fisikBersihAsli)} ${esc(x.satuan)} · Selisih awal: ${x.selisihAsli>0?`+${fmt(x.selisihAsli)}`:fmt(x.selisihAsli)})</div>`
+  : "";
+
+ const openCount = Number(x.jumlahTerbuka)||0;
+ const openedNet = openCount>0 ? Math.max(0,(Number(x.fisikKotorTerbuka||0)-((Number(x.berat)||0)*openCount))) : 0;
  return `<div><div class="result-card">
- <div class="name">${esc(x.nama)}<div class="sub">PLU ${esc(x.plu)} · ${esc(x.kategori)}</div></div>
+ <div class="name">${esc(x.nama)} ${balVal!==0?'<span class="tag bal-tag">DIKOMPAIR</span>':''}<div class="sub">PLU ${esc(x.plu)} · ${esc(x.kategori)}</div></div>
  <div class="metric"><span>Komputer</span><strong>${fmt(x.komputer)} ${esc(x.satuan)}</strong></div>
- <div class="metric"><span>Fisik bersih</span><strong>${fmt(x.fisikBersih)} ${esc(x.satuan)}</strong><div class="sub">${x.kategori==="KONVERSI"?`Kondisi: ${esc(x.modeFisik||"Data lama")} · Segel: ${fmt((x.modeFisik==="SEGEL"||x.modeFisik==="CAMPURAN")?(x.isiBersih!=null?(Number(x.qtySegel)||0)*Number(x.isiBersih):(Number(x.isiSegel)||0)):0)} · Terbuka bersih: ${fmt((x.modeFisik==="TERBUKA"||x.modeFisik==="CAMPURAN")?((Number(x.fisikKotorTerbuka)||0)-((Number(x.berat)||0)*(Number(x.jumlahTerbuka)||0))):0)}`:`Fisik: ${fmt(x.fisikKotor)}`}</div></div>
+ <div class="metric"><span>Fisik bersih</span><strong>${fmt(x.fisikBersih)} ${esc(x.satuan)}</strong><div class="sub">${x.kategori==="KONVERSI"?`${esc(x.modeFisik||"-")} · Segel: ${fmt(x.isiSegel||0)} · Terbuka: ${fmt(openedNet)}`:`${esc(x.modeFisik||fmt(x.fisikKotor))}`}</div></div>
  <div class="metric"><span>Selisih</span><strong class="${cls}">${x.selisih>0?"+":""}${fmt(x.selisih)} ${esc(x.satuan)}<br>${x.hasilStatus}</strong></div>
- </div>${flag}</div>`;
+ </div>${flag}${balNote}</div>`;
 }
 function renderResultsInto(items,rawId,convId,rawSumId,convSumId,infoId,metaId,order){
+ const whOnly = currentReport && currentReport.lokasi === "GUDANG";
  const raw=sortedItems(items.filter(x=>x.kategori==="RAW"),order);
- const conv=sortedItems(items.filter(x=>x.kategori==="KONVERSI"),order);
- const flags=linkedFlags(items);
+ const conv=whOnly ? [] : sortedItems(items.filter(x=>x.kategori==="KONVERSI"),order);
+ const flags=whOnly ? [] : linkedFlags(items);
  $(rawId).innerHTML=raw.map(x=>resultCard(x,flags)).join("")||'<div class="empty">Tidak ada data RAW.</div>';
  $(convId).innerHTML=conv.map(x=>resultCard(x,flags)).join("")||'<div class="empty">Tidak ada data KONVERSI.</div>';
  $(rawSumId).innerHTML=summaryHTML(raw);$(convSumId).innerHTML=summaryHTML(conv);
  if(infoId){
-  const all=items,plus=all.filter(x=>x.selisih>0).length,minus=all.filter(x=>x.selisih<0).length;
-  $(infoId).innerHTML=`<b>Nama Auditor:</b> ${esc(currentReport.auditor)}<br><b>Tanggal Audit:</b> ${esc(currentReport.tanggal)}<br><b>Total PLU:</b> ${all.length} &nbsp; | &nbsp; <b>Plus:</b> ${plus} &nbsp; | &nbsp; <b>Minus:</b> ${minus}`;
+  const active = whOnly ? raw : items;
+  const plus=active.filter(x=>x.selisih>0).length,minus=active.filter(x=>x.selisih<0).length;
+  $(infoId).innerHTML=`<b>Mode Audit:</b> ${esc(locationLabel(currentReport.lokasi))}<br><b>Nama Auditor:</b> ${esc(currentReport.auditor)}<br><b>Tanggal Audit:</b> ${esc(currentReport.tanggal)}<br><b>Total PLU Diaudit:</b> ${active.length} &nbsp; | &nbsp; <b>Plus:</b> ${plus} &nbsp; | &nbsp; <b>Minus:</b> ${minus}`;
  }
- if(metaId)$(metaId).textContent=`Poin Coffee | Auditor: ${items.length?esc(currentReport.auditor):""} | Tanggal: ${items.length?esc(currentReport.tanggal):""} | Mulai: ${timeText(currentReport.mulaiPada)} | Selesai: ${timeText(currentReport.selesaiPada)} | Durasi: ${durationText(currentReport.mulaiPada,currentReport.selesaiPada)}`;
+ if(metaId)$(metaId).textContent=`Poin Coffee | Mode: ${items.length?esc(locationLabel(currentReport.lokasi)):""} | Auditor: ${items.length?esc(currentReport.auditor):""} | Tanggal: ${items.length?esc(currentReport.tanggal):""} | Mulai: ${timeText(currentReport.mulaiPada)} | Selesai: ${timeText(currentReport.selesaiPada)} | Durasi: ${durationText(currentReport.mulaiPada,currentReport.selesaiPada)}`;
 }
 let currentReport=null;
 function renderCurrentResult(){
  currentReport=audit;
- const items=audit.items;
+ const whOnly = isWarehouseOnly();
+ const items = whOnly ? categoryItems("RAW") : audit.items;
  const plus=items.filter(x=>x.selisih>0).length,minus=items.filter(x=>x.selisih<0).length;
- $("resultInfo").innerHTML=`<b>Nama Auditor:</b> ${esc(audit.auditor)}<br><b>Tanggal Audit:</b> ${esc(audit.tanggal)}<br><b>Mulai Audit:</b> ${dateTimeText(audit.mulaiPada)}<br><b>Selesai Audit:</b> ${dateTimeText(audit.selesaiPada)}<br><b>Durasi Audit:</b> ${durationText(audit.mulaiPada,audit.selesaiPada)}`;
+ $("resultInfo").innerHTML=`<b>Mode Audit:</b> <span class="tag loc-tag">${esc(locationLabel(audit.lokasi))}</span> ${audit.balanced?'<span class="tag bal-tag">SUDAH DIKOMPAIR RAW ↔ KONVERSI</span>':''}<br><b>Nama Auditor:</b> ${esc(audit.auditor)}<br><b>Tanggal Audit:</b> ${esc(audit.tanggal)}<br><b>Mulai Audit:</b> ${dateTimeText(audit.mulaiPada)}<br><b>Selesai Audit:</b> ${dateTimeText(audit.selesaiPada)}<br><b>Durasi Audit:</b> ${durationText(audit.mulaiPada,audit.selesaiPada)}`;
  $("resultTotal").textContent=items.length;$("resultPlus").textContent=plus;$("resultMinus").textContent=minus;
+ $("comparePanel").innerHTML = comparePanelHTML(audit);
+ $("warehouseConclusion").innerHTML = warehouseConclusionHTML(audit);
+ $("pdfFullBreakdown").innerHTML = fullDetailSheetHTML(audit);
  $("saveResultButton").textContent=audit.saved?"✓ Hasil Audit Tersimpan":"Simpan Hasil Audit";
  $("saveResultButton").disabled=!!audit.saved;
  $("rawCount").textContent=categoryItems("RAW").length+" PLU";
  $("konversiCount").textContent=categoryItems("KONVERSI").length+" PLU";
- renderResultsInto(items,"rawResults","konversiResults","rawSummary","konversiSummary",null,"resultMeta",$("sortOrder").value);
+ $("resultConvSection").classList.toggle("hidden", whOnly);
+ renderResultsInto(audit.items,"rawResults","konversiResults","rawSummary","konversiSummary",null,"resultMeta",$("sortOrder").value);
 }
 function renderResult(){if(audit)renderCurrentResult()}
 function saveAuditResult(){
@@ -754,16 +2006,24 @@ function renderHistory(){
  const list=$("historyList");
  if(!auditHistory.length){list.innerHTML='<div class="empty">Belum ada hasil audit yang disimpan.</div>';return}
  list.innerHTML=auditHistory.map((h,i)=>{
-  const p=h.items.filter(x=>x.selisih>0).length,m=h.items.filter(x=>x.selisih<0).length;
-  return `<div class="history-card"><div><strong>${esc(h.auditor)} — ${esc(h.tanggal)}</strong><p>${esc(h.items.length)} PLU · ${p} Plus · ${m} Minus</p><p>Mulai: ${timeText(h.mulaiPada)} · Selesai: ${timeText(h.selesaiPada)} · Durasi: ${durationText(h.mulaiPada,h.selesaiPada)}</p></div><div class="actions" style="margin:0"><button class="btn edit" onclick="openHistory(${i})">Lihat</button><button class="btn delete" onclick="deleteHistory(${i})">Hapus</button></div></div>`;
+  const whOnly = (h.lokasi==="GUDANG");
+  const active = whOnly ? h.items.filter(x=>x.kategori==="RAW") : h.items;
+  const p=active.filter(x=>x.selisih>0).length,m=active.filter(x=>x.selisih<0).length;
+  return `<div class="history-card"><div><strong>${esc(h.auditor)} — ${esc(h.tanggal)} <span class="tag loc-tag">${esc(locationLabel(h.lokasi||"KEDUANYA"))}</span> ${h.balanced?'<span class="tag bal-tag">DIKOMPAIR</span>':''}</strong><p>${esc(active.length)} PLU · ${p} Plus · ${m} Minus</p><p>Mulai: ${timeText(h.mulaiPada)} · Selesai: ${timeText(h.selesaiPada)} · Durasi: ${durationText(h.mulaiPada,h.selesaiPada)}</p></div><div class="actions" style="margin:0"><button class="btn edit" onclick="openHistory(${i})">Lihat</button><button class="btn blue" onclick="openHistoryAndPrint(${i})">PDF</button><button class="btn delete" onclick="deleteHistory(${i})">Hapus</button></div></div>`;
  }).join("");
 }
 function openHistory(i){
  historyViewing=JSON.parse(JSON.stringify(auditHistory[i]));
  $("historyDetail").classList.remove("hidden");
- $("historyResultInfo").innerHTML=`<b>Nama Auditor:</b> ${esc(historyViewing.auditor)}<br><b>Tanggal Audit:</b> ${esc(historyViewing.tanggal)}<br><b>Mulai Audit:</b> ${dateTimeText(historyViewing.mulaiPada)}<br><b>Selesai Audit:</b> ${dateTimeText(historyViewing.selesaiPada)}<br><b>Durasi Audit:</b> ${durationText(historyViewing.mulaiPada,historyViewing.selesaiPada)}`;
+ $("historyResultInfo").innerHTML=`<b>Mode Audit:</b> <span class="tag loc-tag">${esc(locationLabel(historyViewing.lokasi||"KEDUANYA"))}</span> ${historyViewing.balanced?'<span class="tag bal-tag">SUDAH DIKOMPAIR RAW ↔ KONVERSI</span>':''}<br><b>Nama Auditor:</b> ${esc(historyViewing.auditor)}<br><b>Tanggal Audit:</b> ${esc(historyViewing.tanggal)}<br><b>Mulai Audit:</b> ${dateTimeText(historyViewing.mulaiPada)}<br><b>Selesai Audit:</b> ${dateTimeText(historyViewing.selesaiPada)}<br><b>Durasi Audit:</b> ${durationText(historyViewing.mulaiPada,historyViewing.selesaiPada)}`;
+ $("historyWarehouseConclusion").innerHTML = warehouseConclusionHTML(historyViewing);
+ $("historyFullBreakdown").innerHTML = fullDetailSheetHTML(historyViewing);
  renderHistoryDetail();
  $("historyDetail").scrollIntoView({behavior:"smooth"});
+}
+function openHistoryAndPrint(i){
+ openHistory(i);
+ setTimeout(()=>exportPDF(true), 120);
 }
 function closeHistoryDetail(){historyViewing=null;$("historyDetail").classList.add("hidden")}
 function deleteHistory(i){
@@ -774,41 +2034,83 @@ function deleteHistory(i){
 }
 function renderHistoryDetail(){
  if(!historyViewing)return;
+ const whOnly = historyViewing.lokasi === "GUDANG";
  const items=historyViewing.items;
  const order=$("historySort").value;
- const raw=items.filter(x=>x.kategori==="RAW"),conv=items.filter(x=>x.kategori==="KONVERSI");
+ const raw=items.filter(x=>x.kategori==="RAW"),conv=whOnly?[]:items.filter(x=>x.kategori==="KONVERSI");
+ $("historyConvSection").classList.toggle("hidden", whOnly);
  $("historyRawSummary").innerHTML=summaryHTML(raw);$("historyKonversiSummary").innerHTML=summaryHTML(conv);
- const flags=linkedFlags(items);
+ const flags=whOnly?[]:linkedFlags(items);
  $("historyRawResults").innerHTML=sortedItems(raw,order).map(x=>resultCard(x,flags)).join("")||'<div class="empty">Tidak ada data RAW.</div>';
  $("historyKonversiResults").innerHTML=sortedItems(conv,order).map(x=>resultCard(x,flags)).join("")||'<div class="empty">Tidak ada data KONVERSI.</div>';
- $("historyMeta").textContent=`Poin Coffee | Auditor: ${historyViewing.auditor} | Tanggal: ${historyViewing.tanggal} | Mulai: ${timeText(historyViewing.mulaiPada)} | Selesai: ${timeText(historyViewing.selesaiPada)} | Durasi: ${durationText(historyViewing.mulaiPada,historyViewing.selesaiPada)}`;
+ $("historyMeta").textContent=`Poin Coffee | Mode: ${locationLabel(historyViewing.lokasi||"KEDUANYA")} | Auditor: ${historyViewing.auditor} | Tanggal: ${historyViewing.tanggal} | Mulai: ${timeText(historyViewing.mulaiPada)} | Selesai: ${timeText(historyViewing.selesaiPada)} | Durasi: ${durationText(historyViewing.mulaiPada,historyViewing.selesaiPada)}`;
 }
 function exportPDF(fromHistory=false){
- const report=fromHistory?historyViewing:audit;
- if(!report||report.status!=="completed"){alert("Tidak ada hasil audit untuk diekspor.");return}
- currentReport=report;
- if(fromHistory){
-  // Cetak menggunakan layout hasil audit utama agar format PDF konsisten.
-  const oldAudit=audit;
-  audit=report;
-  $("pageHistory").classList.add("hidden");
-  $("pageAudit").classList.remove("hidden");
-  $("auditStart").classList.add("hidden");$("auditWorkspace").classList.add("hidden");$("auditResult").classList.remove("hidden");
-  renderCurrentResult();
-  window.print();
-  window.onafterprint=()=>{
-   $("pageAudit").classList.add("hidden");$("pageHistory").classList.remove("hidden");
-   $("historyDetail").classList.remove("hidden");audit=oldAudit;currentReport=historyViewing;
-  };
- }else{
-  renderCurrentResult();
-  window.print();
+ let report = fromHistory ? historyViewing : audit;
+ if(!report){alert("Tidak ada data audit untuk diekspor ke PDF.");return}
+
+ if(!fromHistory && report.status !== "completed"){
+  if(!confirm("Audit masih berjalan. Selesaikan audit sekarang agar hasil akhir & kompair masuk ke PDF?")) return;
+  finishAudit(true);
+  report = audit;
+  if(!report || report.status !== "completed") return;
  }
+
+ currentReport=report;
+ const oldAudit=audit;
+ audit=report;
+ $("pageHistory").classList.add("hidden");
+ $("pageAudit").classList.remove("hidden");
+ $("auditStart").classList.add("hidden");$("auditWorkspace").classList.add("hidden");$("auditResult").classList.remove("hidden");
+ renderCurrentResult();
+ window.print();
+ window.onafterprint=()=>{
+  audit=oldAudit;
+  currentReport=fromHistory?historyViewing:audit;
+  if(fromHistory){
+   $("pageAudit").classList.add("hidden");
+   $("pageHistory").classList.remove("hidden");
+   $("historyDetail").classList.remove("hidden");
+  } else {
+   renderAudit();
+  }
+ };
 }
 function exportAllHistory(){
  if(!auditHistory.length){alert("Belum ada riwayat audit.");return}
- const rows=[["Tanggal","Nama Auditor","Waktu Mulai","Waktu Selesai","Durasi","PLU","Nama Barang","Kategori","Satuan","Stok Komputer","Kondisi Fisik","Fisik Kotor","Berat Kemasan per Wadah","Isi Bersih Segel per Wadah","Jumlah Segel","Isi Bersih Segel Total","Jumlah Terbuka","Berat Kotor Terbuka","Fisik Bersih","Selisih","Status"]];
- auditHistory.forEach(h=>h.items.forEach(x=>rows.push([h.tanggal,h.auditor,dateTimeText(h.mulaiPada),dateTimeText(h.selesaiPada),durationText(h.mulaiPada,h.selesaiPada),x.plu,x.nama,x.kategori,x.satuan,x.komputer,x.modeFisik||"",x.fisikKotor,x.berat??0,x.isiBersih??0,x.qtySegel??0,x.isiSegel??0,x.jumlahTerbuka??0,x.fisikKotorTerbuka??0,x.fisikBersih,x.selisih,x.hasilStatus])));
+ const rows=[["Tanggal","Mode Audit","Nama Auditor","Waktu Mulai","Waktu Selesai","Durasi","PLU","Nama Barang","Kategori","Satuan","Stok Komputer","Kondisi Fisik","Fisik Gudang (RAW)","Fisik Booth (RAW)","Fisik Kotor","Berat Kemasan per Wadah","Isi Bersih Segel per Wadah","Jumlah Segel","Isi Bersih Segel Total","Jumlah Terbuka","Berat Kotor Terbuka","Fisik Awal","Penyeimbang Kompair","Fisik Bersih","Selisih","Status"]];
+ auditHistory.forEach(h=>{
+  const whOnly = h.lokasi === "GUDANG";
+  const list = whOnly ? h.items.filter(x=>x.kategori==="RAW") : h.items;
+  list.forEach(x=>rows.push([
+   h.tanggal,
+   locationLabel(h.lokasi||"KEDUANYA"),
+   h.auditor,
+   dateTimeText(h.mulaiPada),
+   dateTimeText(h.selesaiPada),
+   durationText(h.mulaiPada,h.selesaiPada),
+   x.plu,
+   x.nama,
+   x.kategori,
+   x.satuan,
+   x.komputer,
+   x.modeFisik||"",
+   x.kategori==="RAW"?(x.gudangRaw??""):"",
+   x.kategori==="RAW"?(x.boothRaw??""):"",
+   x.fisikKotor,
+   x.berat??0,
+   x.isiBersih??0,
+   x.qtySegel??0,
+   x.isiSegel??0,
+   x.jumlahTerbuka??0,
+   x.fisikKotorTerbuka??0,
+   x.fisikBersihAsli ?? x.fisikBersih,
+   x.penyeimbangRAW ?? 0,
+   x.fisikBersih,
+   x.selisih,
+   x.hasilStatus
+  ]));
+ });
  downloadCSV(rows,"Riwayat-Audit-Poin-Coffee.csv");
 }
 function downloadCSV(rows,name){
@@ -817,17 +2119,14 @@ function downloadCSV(rows,name){
  const url=URL.createObjectURL(blob),a=document.createElement("a");a.href=url;a.download=name;a.click();URL.revokeObjectURL(url);
 }
 
-
 // ================= GOOGLE SHEETS CLOUD DATABASE =================
 function setSyncStatus(message,kind=''){const el=$("syncStatus");if(el){el.textContent=message;el.className='sync-status '+kind}}
-function connectSheets(){const url=$("apiUrl").value.trim();if(!/^https:\/\/script\.google\.com\/macros\/s\/.+\/exec$/.test(url)){alert('Masukkan URL Web App Google Apps Script yang berakhiran /exec.');return}SHEETS_API=url;localStorage.setItem('poinSheetsApi',url);setSyncStatus('URL tersimpan. Menghubungkan ke Google Sheets...');syncFromCloud(true)}
-function jsonp(url){return new Promise((resolve,reject)=>{const cb='poinCb'+Date.now()+Math.floor(Math.random()*10000);const script=document.createElement('script');const timer=setTimeout(()=>{cleanup();reject(new Error('Waktu koneksi habis. Periksa URL dan deployment Apps Script.'))},20000);function cleanup(){clearTimeout(timer);delete window[cb];script.remove()}window[cb]=data=>{cleanup();resolve(data)};script.onerror=()=>{cleanup();reject(new Error('Tidak dapat membaca Google Sheets.'))};script.src=url+(url.includes('?')?'&':'?')+'action=read&callback='+cb+'&_='+Date.now();document.body.appendChild(script)})}
-async function syncFromCloud(firstConnect=false){if(!SHEETS_API){setSyncStatus('Database belum dihubungkan. Data hanya tersimpan di browser ini.');return}try{setSyncStatus('Mengambil data terbaru dari Google Sheets...');const data=await jsonp(SHEETS_API);if(!data||!data.ok)throw new Error(data?.error||'Respons database tidak valid.');const remoteMaster=Array.isArray(data.master)?data.master:[];const remoteHistory=Array.isArray(data.history)?data.history:[];if(firstConnect&&remoteMaster.length===0&&remoteHistory.length===0&&(masterPLU.length||auditHistory.length)){await pushCloudData();setSyncStatus('Data lokal awal sedang dikirim ke Google Sheets. Muat ulang setelah beberapa detik.','ok');return}masterPLU=remoteMaster;auditHistory=remoteHistory;localStorage.setItem('masterPLU',JSON.stringify(masterPLU));localStorage.setItem('poinAuditHistory',JSON.stringify(auditHistory));renderMaster();renderHistory();setSyncStatus('Terhubung — data Master PLU & Riwayat Audit diperbarui dari Google Sheets.','ok');}catch(e){setSyncStatus('Gagal sinkron: '+e.message,'bad')}}
-function queueCloudSync(){if(!SHEETS_API)return;if(cloudTimer)clearTimeout(cloudTimer);cloudTimer=setTimeout(pushCloudData,900)}
-async function pushCloudData(){if(!SHEETS_API||cloudBusy)return;cloudBusy=true;try{const payload={action:'saveBundle',master:masterPLU,history:auditHistory};await fetch(SHEETS_API,{method:'POST',mode:'no-cors',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify(payload)});setSyncStatus('Perubahan dikirim ke Google Sheets. Sinkronisasi diverifikasi saat muat ulang.','ok')}catch(e){setSyncStatus('Gagal mengirim perubahan ke cloud: '+e.message,'bad')}finally{cloudBusy=false}}
-setInterval(()=>{if(SHEETS_API&&document.visibilityState==='visible')syncFromCloud()},45000);
+function jsonp(url){return new Promise((resolve,reject)=>{const cb='poinCb'+Date.now()+Math.floor(Math.random()*10000);const script=document.createElement('script');const timer=setTimeout(()=>{cleanup();reject(new Error('Waktu koneksi habis. Periksa deployment Apps Script.'))},20000);function cleanup(){clearTimeout(timer);delete window[cb];script.remove()}window[cb]=data=>{cleanup();resolve(data)};script.onerror=()=>{cleanup();reject(new Error('Tidak dapat membaca Google Sheets.'))};script.src=url+(url.includes('?')?'&':'?')+'action=read&callback='+cb+'&_='+Date.now();document.body.appendChild(script)})}
+async function syncFromCloud(firstConnect=false){if(!SHEETS_API){setSyncStatus('URL database belum diatur.');return}try{setSyncStatus('Mengambil data terbaru dari Google Sheets...');const data=await jsonp(SHEETS_API);if(!data||!data.ok)throw new Error(data?.error||'Respons database tidak valid.');const remoteMaster=Array.isArray(data.master)?data.master:[];const remoteHistory=Array.isArray(data.history)?data.history:[];if(firstConnect&&remoteMaster.length===0&&remoteHistory.length===0&&(masterPLU.length||auditHistory.length)){await pushCloudData();setSyncStatus('Data lokal awal sedang dikirim ke Google Sheets. Muat ulang setelah beberapa detik.','ok');return}masterPLU=remoteMaster;auditHistory=remoteHistory;localStorage.setItem('masterPLU',JSON.stringify(masterPLU));localStorage.setItem('poinAuditHistory',JSON.stringify(auditHistory));renderMaster();renderHistory();setSyncStatus('Terhubung real-time — data Master PLU & Riwayat Audit sinkron dengan Google Sheets.','ok');}catch(e){setSyncStatus('Gagal sinkron: '+e.message,'bad')}}
+function queueCloudSync(){if(!SHEETS_API)return;if(cloudTimer)clearTimeout(cloudTimer);cloudTimer=setTimeout(pushCloudData,600)}
+async function pushCloudData(){if(!SHEETS_API||cloudBusy)return;cloudBusy=true;setSyncStatus('Menyimpan perubahan ke Google Sheets...','');try{const payload={action:'saveBundle',master:masterPLU,history:auditHistory};await fetch(SHEETS_API,{method:'POST',mode:'no-cors',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify(payload)});setSyncStatus('Tersinkron ke Google Sheets ('+new Date().toLocaleTimeString('id-ID',{hour:'2-digit',minute:'2-digit',second:'2-digit'})+').','ok')}catch(e){setSyncStatus('Gagal mengirim perubahan ke cloud: '+e.message,'bad')}finally{cloudBusy=false}}
+setInterval(()=>{if(SHEETS_API&&document.visibilityState==='visible'&&!cloudBusy)syncFromCloud()},15000);
 
-// Startup: keep existing local master/audit data compatible with earlier version
 renderMaster();
 if(audit)renderAudit();
 else document.body.classList.remove("audit-active");
