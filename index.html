@@ -1092,8 +1092,101 @@ function saveHistory(){
 }
 
 // ==========================================
-// SINKRONISASI PLU MASTER -> RESEP MENU
+// SINKRONISASI REALTIME MASTER -> AUDIT (HANYA JIKA BELUM SELESAI) & RESEP
 // ==========================================
+function isAuditLockedCompleted(reportObj = audit){
+ return Boolean(reportObj && reportObj.status === "completed");
+}
+
+function syncActiveAuditWithMaster(oldPlu = null, updatedMasterItem = null, masterId = null){
+ // Jika audit sudah diklik selesai ("completed"), data audit DIKUNCI dan TIDAK BOLEH berubah walaupun Master PLU berubah
+ if(!audit || isAuditLockedCompleted(audit)) return false;
+ if(!Array.isArray(audit.items)) return false;
+
+ let changed = false;
+
+ // Jika ada item baru di Master PLU yang belum ada di audit aktif, tambahkan juga
+ masterPLU.forEach(m => {
+  const exists = audit.items.some(it =>
+   (m.id != null && it.id != null && String(it.id) === String(m.id)) ||
+   (m.plu && String(it.plu).toLowerCase() === String(m.plu).toLowerCase())
+  );
+  if(!exists){
+   audit.items.push({
+    id:m.id,plu:m.plu,nama:m.nama,kategori:m.kategori,satuan:m.satuan,berat:m.berat??null,isiBersih:m.isiBersih??null,rawLink:m.rawLink||"",
+    komputer:null,
+    gudangRaw:null,
+    boothRaw:null,
+    fisikKotor:null,modeFisik:"",qtySegel:null,isiSegel:null,jumlahTerbuka:null,fisikKotorTerbuka:null,
+    fisikBersihAsli:null,selisihAsli:null,hasilStatusAsli:null,
+    fisikBersih:null,selisih:null,hasilStatus:null,penyeimbangRAW:0
+   });
+   changed = true;
+  }
+ });
+
+ // Sinkronkan field master pada setiap item audit yang masih berjalan
+ audit.items.forEach(it => {
+  let m = null;
+  if(masterId != null && it.id != null && String(it.id) === String(masterId) && updatedMasterItem){
+   m = updatedMasterItem;
+  } else if(oldPlu && String(it.plu).toLowerCase() === String(oldPlu).toLowerCase() && updatedMasterItem){
+   m = updatedMasterItem;
+  } else {
+   m = masterPLU.find(x =>
+    (it.id != null && x.id != null && String(x.id) === String(it.id)) ||
+    (it.plu && String(x.plu).toLowerCase() === String(it.plu).toLowerCase())
+   );
+  }
+
+  if(m){
+   if(it.id == null && m.id != null){ it.id = m.id; changed = true; }
+   if(String(it.plu) !== String(m.plu)){ it.plu = m.plu; changed = true; }
+   if(String(it.nama) !== String(m.nama)){ it.nama = m.nama; changed = true; }
+   if(String(it.kategori) !== String(m.kategori)){ it.kategori = m.kategori; changed = true; }
+   if(String(it.satuan || "") !== String(m.satuan || "")){ it.satuan = m.satuan; changed = true; }
+
+   const nextBerat = (m.berat !== undefined && m.berat !== null && m.berat !== "") ? Number(m.berat) : null;
+   if(it.berat !== nextBerat){ it.berat = nextBerat; changed = true; }
+
+   const nextIsiBersih = (m.isiBersih !== undefined && m.isiBersih !== null && m.isiBersih !== "") ? Number(m.isiBersih) : null;
+   if(it.isiBersih !== nextIsiBersih){ it.isiBersih = nextIsiBersih; changed = true; }
+
+   const nextRawLink = m.rawLink || "";
+   if(String(it.rawLink || "") !== String(nextRawLink)){ it.rawLink = nextRawLink; changed = true; }
+
+   // Hitung ulang nilai konversi jika item konversi sudah terisi sebagian/penuh
+   if(it.kategori === "KONVERSI" && isConvBoothFilled(it)){
+    const calc = calcConvNet(it);
+    it.isiSegel = calc.sealed;
+    it.fisikBersih = calc.total;
+    it.fisikKotor = calc.sealed + (Number(it.fisikKotorTerbuka) || 0);
+    changed = true;
+   }
+  }
+ });
+
+ // Jika ada tautan PLU RAW lama yang berubah nomor PLU-nya, perbarui rawLink di item audit
+ if(oldPlu && updatedMasterItem && updatedMasterItem.kategori === "RAW" && String(oldPlu) !== String(updatedMasterItem.plu)){
+  audit.items.forEach(it => {
+   if(it.kategori === "KONVERSI" && it.rawLink){
+    const updatedLinks = parseRawLinks(it.rawLink).map(lk => String(lk) === String(oldPlu) ? String(updatedMasterItem.plu) : lk);
+    const joined = updatedLinks.join(", ");
+    if(joined !== it.rawLink){ it.rawLink = joined; changed = true; }
+   }
+  });
+ }
+
+ if(changed){
+  saveAudit();
+  const pAudit = $("pageAudit");
+  if(pAudit && !pAudit.classList.contains("hidden")){
+   renderAudit();
+  }
+ }
+ return changed;
+}
+
 function syncRecipesWithMaster(oldPlu = null, updatedMasterItem = null, masterId = null){
  let changed = false;
  menuRecipes.forEach(rec => {
@@ -1130,6 +1223,7 @@ function initFirebaseRealtime(){
    localStorage.setItem("masterPLU", JSON.stringify(masterPLU));
    const recSynced = syncRecipesWithMaster();
    if(recSynced) localStorage.setItem("poinMenuRecipes", JSON.stringify(menuRecipes));
+   syncActiveAuditWithMaster();
    const pMaster = $("pageMaster");
    const pRec = $("pageRecipes");
    if(pMaster && !pMaster.classList.contains("hidden")) renderMaster();
@@ -1236,7 +1330,7 @@ function showPage(page){
  });
  if(page==="master")renderMaster();
  if(page==="recipes"){renderRecipeFormRows();renderRecipes();}
- if(page==="audit"){onAuditModeChange();renderAudit();}
+ if(page==="audit"){onAuditModeChange();syncActiveAuditWithMaster();renderAudit();}
  if(page==="history")renderHistory();
  updateFloatingBarVisibility();
 }
@@ -1250,6 +1344,7 @@ document.addEventListener("DOMContentLoaded", () => {
  if(mKatSelect) mKatSelect.addEventListener("change", modalCategoryChanged);
 
  syncRecipesWithMaster();
+ syncActiveAuditWithMaster();
  renderMaster();
  renderRecipeFormRows();
  renderRecipes();
@@ -1273,7 +1368,7 @@ function updateFloatingBarVisibility(){
  const bar = $("floatingAuditBar");
  const ws = $("auditWorkspace");
  const pAudit = $("pageAudit");
- if(!bar || !ws || !pAudit || pAudit.classList.contains("hidden") || ws.classList.contains("hidden") || !audit || audit.status==="completed"){
+ if(!bar || !ws || !pAudit || pAudit.classList.contains("hidden") || ws.classList.contains("hidden") || !audit || isAuditLockedCompleted(audit)){
   if(bar) bar.classList.remove("is-floating");
   return;
  }
@@ -1378,6 +1473,7 @@ if(pluForm){
   if(masterPLU.some(x=>x.plu.toLowerCase()===plu.toLowerCase())){alert("Nomor PLU sudah terdaftar!");return}
   const item={id:Date.now(),plu,nama,kategori,satuan,berat,isiBersih,rawLink};
   masterPLU.push(item);
+  syncActiveAuditWithMaster(null, item, item.id);
   saveMaster();resetForm();renderMaster();
  });
 }
@@ -1530,6 +1626,9 @@ if(editPluModalForm){
    saveRecipes();
   }
 
+  // Sinkronkan ke audit yang sedang berjalan / belum selesai (tidak menyentuh audit yang sudah "completed")
+  syncActiveAuditWithMaster(oldPlu, updatedItem, editId);
+
   saveMaster();
   closeEditPluModal();
   renderMaster();
@@ -1540,7 +1639,7 @@ if(editPluModalForm){
 
 function deleteData(id){
  const x=masterPLU.find(a=>a.id===id);if(!x)return;
- if(audit&&audit.status!=="completed"&&audit.items.some(a=>a.id===id)){alert("PLU ini sedang digunakan dalam audit yang belum selesai.");return}
+ if(audit && !isAuditLockedCompleted(audit) && audit.items.some(a=>a.id===id)){alert("PLU ini sedang digunakan dalam audit yang belum selesai.");return}
  if(!confirm("Hapus Master PLU ini?"))return;
  masterPLU=masterPLU.filter(a=>a.id!==id);
  masterPLU.forEach(a=>{
@@ -1999,7 +2098,7 @@ function startAudit(){
  const personEl = $("auditPerson");
  const person = personEl ? personEl.value.trim() : "";
  if(!person){alert("Masukkan nama auditor!");return}
- if(audit&&audit.status!=="completed"&&!confirm("Ada audit yang belum selesai. Mulai baru?"))return;
+ if(audit && !isAuditLockedCompleted(audit) && !confirm("Ada audit yang belum selesai. Mulai baru?"))return;
  physicalSearch="";physicalFilter="ALL";selectedCompareKeys.clear();
  resultCatTab="BOTH";
 
@@ -2048,7 +2147,7 @@ function newAudit(){
 }
 
 function cancelAudit(){
- if(!audit||audit.status==="completed")return;
+ if(!audit || isAuditLockedCompleted(audit))return;
  if(!confirm("Yakin ingin membatalkan audit yang sedang berlangsung?"))return;
  resetAuditToInitial();
 }
@@ -2060,12 +2159,13 @@ function cancelCompletedAuditResult(){
 }
 
 function setStage(s){
+ if(!audit || isAuditLockedCompleted(audit)) return;
  if(s==="physical_konversi"||s==="physical_raw")s="physical_all";
  audit.status=s;saveAudit();renderAudit();
 }
 
 function jumpToFloatingStep(stepKey){
- if(!audit || audit.status==="completed") return;
+ if(!audit || isAuditLockedCompleted(audit)) return;
  if(stepKey === "computer_raw"){
   audit.status = "computer_raw";
  } else if(stepKey === "computer_konversi"){
@@ -2127,6 +2227,7 @@ function syncMinusButtonVisual(id, valStr){
 }
 
 function updateComputerValue(id, val){
+ if(!audit || isAuditLockedCompleted(audit)) return;
  const x=audit.items.find(a=>a.id===id);if(!x)return;
  const s = String(val).trim();
  if(s === "" || s === "-"){ x.komputer = null; } else { x.komputer = parseSignedNumber(s); }
@@ -2138,6 +2239,7 @@ function updateComputerValue(id, val){
 }
 
 function toggleComputerMinus(id){
+ if(!audit || isAuditLockedCompleted(audit)) return;
  const inp = $("comp-inp-" + id);
  const x = audit.items.find(a=>a.id===id);
  if(!inp || !x) return;
@@ -2160,6 +2262,7 @@ function toggleComputerMinus(id){
 }
 
 function updateAuditValue(id,key,val){
+ if(!audit || isAuditLockedCompleted(audit)) return;
  const x=audit.items.find(a=>a.id===id);if(!x)return;
  if(val==="")x[key]=null;
  else {const n=Number(val);x[key]=Number.isFinite(n)&&n>=0?n:null}
@@ -2220,8 +2323,10 @@ function updateProgressOnly(){
 }
 
 function renderAudit(){
- if(audit && (audit.status==="physical_konversi"||audit.status==="physical_raw")) audit.status="physical_all";
- if(audit && !audit.combinedZone) audit.combinedZone="GUDANG";
+ if(audit && !isAuditLockedCompleted(audit)){
+  if(audit.status==="physical_konversi"||audit.status==="physical_raw") audit.status="physical_all";
+  if(!audit.combinedZone) audit.combinedZone="GUDANG";
+ }
 
  const auditStart = $("auditStart");
  const auditWorkspace = $("auditWorkspace");
@@ -2235,7 +2340,7 @@ function renderAudit(){
   return;
  }
  if(auditStart) auditStart.classList.add("hidden");
- if(audit.status==="completed"){
+ if(isAuditLockedCompleted(audit)){
   if(auditWorkspace) auditWorkspace.classList.add("hidden");
   if(auditResult) auditResult.classList.remove("hidden");
   updateFloatingBarVisibility();
@@ -2267,7 +2372,7 @@ function countUnfilledComputer(cat){
 }
 
 function switchComputerTab(targetStage){
- if(!audit) return;
+ if(!audit || isAuditLockedCompleted(audit)) return;
  setStage(targetStage);
  window.scrollTo({top:0,behavior:"smooth"});
 }
@@ -2329,7 +2434,7 @@ function renderComputer(cat){
 }
 
 function nextComputerRaw(){ switchComputerTab("computer_konversi"); }
-function nextComputerKonversi(){ audit.combinedZone="GUDANG"; setStage("physical_all"); }
+function nextComputerKonversi(){ if(!audit || isAuditLockedCompleted(audit)) return; audit.combinedZone="GUDANG"; setStage("physical_all"); }
 
 function buildPairedGroups(){
  const isCombWh = audit.combinedZone === "GUDANG";
@@ -2401,12 +2506,12 @@ function renderPhysicalAll(){
  }
 }
 
-function proceedToBoothZone(){ audit.combinedZone="BOOTH"; physicalSearch=""; physicalFilter="ALL"; saveAudit(); renderAudit(); window.scrollTo({top:0,behavior:"smooth"}); }
-function backToWarehouseZone(){ audit.combinedZone="GUDANG"; physicalSearch=""; physicalFilter="ALL"; saveAudit(); renderAudit(); window.scrollTo({top:0,behavior:"smooth"}); }
+function proceedToBoothZone(){ if(!audit || isAuditLockedCompleted(audit)) return; audit.combinedZone="BOOTH"; physicalSearch=""; physicalFilter="ALL"; saveAudit(); renderAudit(); window.scrollTo({top:0,behavior:"smooth"}); }
+function backToWarehouseZone(){ if(!audit || isAuditLockedCompleted(audit)) return; audit.combinedZone="GUDANG"; physicalSearch=""; physicalFilter="ALL"; saveAudit(); renderAudit(); window.scrollTo({top:0,behavior:"smooth"}); }
 function onPhysSearch(val){ physicalSearch=val; renderPairedCards(); }
 function setPhysFilter(f){ physicalFilter=f; renderPhysicalAll(); }
-function setRawZero(id){ const x=audit.items.find(a=>a.id===id); if(!x)return; if(audit.combinedZone==="GUDANG") x.gudangRaw=0; else x.boothRaw=0; saveAudit(); updateProgressOnly(); renderPairedCards(); }
-function setConvZero(id){ const x=audit.items.find(a=>a.id===id); if(!x)return; x.qtySegel=0; x.isiSegel=0; x.jumlahTerbuka=0; x.fisikKotorTerbuka=0; x.modeFisik="KOSONG"; saveAudit(); updateProgressOnly(); renderPairedCards(); }
+function setRawZero(id){ if(!audit || isAuditLockedCompleted(audit)) return; const x=audit.items.find(a=>a.id===id); if(!x)return; if(audit.combinedZone==="GUDANG") x.gudangRaw=0; else x.boothRaw=0; saveAudit(); updateProgressOnly(); renderPairedCards(); }
+function setConvZero(id){ if(!audit || isAuditLockedCompleted(audit)) return; const x=audit.items.find(a=>a.id===id); if(!x)return; x.qtySegel=0; x.isiSegel=0; x.jumlahTerbuka=0; x.fisikKotorTerbuka=0; x.modeFisik="KOSONG"; saveAudit(); updateProgressOnly(); renderPairedCards(); }
 
 function renderPairedCards(){
  const isCombWh = audit.combinedZone === "GUDANG";
@@ -2449,6 +2554,7 @@ function renderPairedCards(){
 }
 
 function updateConvSatset(id, key, val){
+ if(!audit || isAuditLockedCompleted(audit)) return;
  const x = audit.items.find(a=>a.id===id); if(!x) return;
  if(val==="") x[key]=null;
  else { const n = Number(val); if(!Number.isFinite(n) || n<0) return; x[key] = (key==="qtySegel"||key==="jumlahTerbuka") ? Math.floor(n) : n; }
@@ -2486,7 +2592,7 @@ function collectUnfilledAuditItems(){
 }
 
 function openFinishConfirmModal(){
- if(!audit || audit.status==="completed") return;
+ if(!audit || isAuditLockedCompleted(audit)) return;
  const missing = collectUnfilledAuditItems();
  if(!missing.length){
   finishAudit(true);
@@ -2511,6 +2617,7 @@ function closeFinishConfirmModal(){
 }
 
 function skipUnfilledAndFillZero(){
+ if(!audit || isAuditLockedCompleted(audit)) return;
  audit.items.forEach(x => {
   if(x.komputer===null || x.komputer===undefined || !Number.isFinite(Number(x.komputer))) x.komputer = 0;
   if(x.kategori==="RAW"){
@@ -2535,6 +2642,7 @@ function confirmFinishAuditSkip(){
 }
 
 function fillRemainingZeros(){
+ if(!audit || isAuditLockedCompleted(audit)) return;
  const items = activeAuditItems();
  const unfilled = items.filter(x => !isItemPhysicalDone(x));
  if(!unfilled.length){ alert("Semua sudah terisi."); return; }
@@ -2554,11 +2662,19 @@ function fillRemainingZeros(){
 }
 
 function finishAudit(forceEarly = false){
+ if(!audit || isAuditLockedCompleted(audit)) return;
  audit.items.forEach(x => {
-  const masterRef = masterPLU.find(m => String(m.plu) === String(x.plu));
-  if(masterRef && x.kategori === "KONVERSI"){
-   if(masterRef.isiBersih != null && Number(masterRef.isiBersih) > 0) x.isiBersih = Number(masterRef.isiBersih);
-   if(masterRef.rawLink) x.rawLink = masterRef.rawLink;
+  const masterRef = masterPLU.find(m => (x.id != null && m.id != null && String(m.id) === String(x.id)) || String(m.plu) === String(x.plu));
+  if(masterRef){
+   x.plu = masterRef.plu;
+   x.nama = masterRef.nama;
+   x.kategori = masterRef.kategori;
+   x.satuan = masterRef.satuan;
+   x.berat = (masterRef.berat !== undefined && masterRef.berat !== null && masterRef.berat !== "") ? Number(masterRef.berat) : null;
+   if(x.kategori === "KONVERSI"){
+    if(masterRef.isiBersih != null && Number(masterRef.isiBersih) > 0) x.isiBersih = Number(masterRef.isiBersih);
+    if(masterRef.rawLink) x.rawLink = masterRef.rawLink;
+   }
   }
 
   if(x.komputer===null || x.komputer===undefined || !Number.isFinite(Number(x.komputer))) x.komputer = 0;
@@ -2609,24 +2725,30 @@ function applyConvBoothCalculation(x){
 // ============================================================================
 // MESIN SMART KOMPAIR 4 SKENARIO + CATATAN KHUSUS ITEM MINUS
 // ==========================================
-function resolvePairRatio(convItem, rawItem){
+function resolvePairRatio(convItem, rawItem, isCompletedAudit = false){
  const directRatio = Number(convItem?.isiBersih);
  if(Number.isFinite(directRatio) && directRatio > 0){
-  return { ratio: directRatio, source: "Master PLU (Isi Bersih Segel)" };
+  return { ratio: directRatio, source: isCompletedAudit ? "Snapshot Audit" : "Master PLU (Isi Bersih Segel)" };
  }
- const masterConv = masterPLU.find(m => String(m.plu) === String(convItem?.plu) && m.kategori === "KONVERSI");
- const masterRatio = Number(masterConv?.isiBersih);
- if(Number.isFinite(masterRatio) && masterRatio > 0){
-  return { ratio: masterRatio, source: "Master PLU (Isi Bersih Segel)" };
+ if(!isCompletedAudit){
+  const masterConv = masterPLU.find(m => String(m.plu) === String(convItem?.plu) && m.kategori === "KONVERSI");
+  const masterRatio = Number(masterConv?.isiBersih);
+  if(Number.isFinite(masterRatio) && masterRatio > 0){
+   return { ratio: masterRatio, source: "Master PLU (Isi Bersih Segel)" };
+  }
  }
  return { ratio: null, source: "Belum Diatur" };
 }
 
-function findLinkedRawsForConv(convItem, rawItems){
+function findLinkedRawsForConv(convItem, rawItems, isCompletedAudit = false){
  const explicitLinks = parseRawLinks(convItem?.rawLink);
- const masterConv = masterPLU.find(m => String(m.plu) === String(convItem?.plu) && m.kategori === "KONVERSI");
- const masterLinks = parseRawLinks(masterConv?.rawLink);
- const allPluLinks = Array.from(new Set([...explicitLinks, ...masterLinks]));
+ let allPluLinks = [...explicitLinks];
+
+ if(!isCompletedAudit){
+  const masterConv = masterPLU.find(m => String(m.plu) === String(convItem?.plu) && m.kategori === "KONVERSI");
+  const masterLinks = parseRawLinks(masterConv?.rawLink);
+  allPluLinks = Array.from(new Set([...explicitLinks, ...masterLinks]));
+ }
 
  const matched = [];
  allPluLinks.forEach(rPlu => {
@@ -2652,6 +2774,7 @@ function evaluateSmartKompairSystem(report){
  const items = report?.items || [];
  const rawItems = items.filter(x => x.kategori === "RAW");
  const convItems = items.filter(x => x.kategori === "KONVERSI");
+ const isCompletedAudit = isAuditLockedCompleted(report);
 
  const baseDiffMap = new Map();
  items.forEach(x => {
@@ -2671,10 +2794,10 @@ function evaluateSmartKompairSystem(report){
  const appliedSet = new Set(Array.isArray(report.appliedKeys) ? report.appliedKeys : []);
 
  convItems.forEach(conv => {
-  const linkedRaws = findLinkedRawsForConv(conv, rawItems);
+  const linkedRaws = findLinkedRawsForConv(conv, rawItems, isCompletedAudit);
   if(!linkedRaws.length) return;
 
-  const { ratio } = resolvePairRatio(conv, linkedRaws[0]);
+  const { ratio } = resolvePairRatio(conv, linkedRaws[0], isCompletedAudit);
   const convDiffAwal = baseDiffMap.get(conv.id) || 0;
 
   const relevantRaws = linkedRaws.length === 1
@@ -2695,8 +2818,8 @@ function evaluateSmartKompairSystem(report){
     const rawMinusAbs = Math.abs(rawDiffAwal);
     const convMinusAbs = Math.abs(convDiffAwal);
     const ratioInfo = ratio && ratio > 0
-     ? ` (Patokan Master PLU: 1 ${raw.satuan} RAW = ${fmt(ratio)} ${conv.satuan} Konversi)`
-     : ` (Rasio Master PLU belum diisi)`;
+     ? ` (Patokan Rasio: 1 ${raw.satuan} RAW = ${fmt(ratio)} ${conv.satuan} Konversi)`
+     : ` (Rasio belum diisi)`;
     specialMinusNotes.push({
      key: `BOTH_MINUS_${raw.id}_${conv.id}`,
      kind: "BOTH_MINUS",
@@ -2712,9 +2835,9 @@ function evaluateSmartKompairSystem(report){
      specialMinusNotes.push({
       key: `NO_RATIO_${raw.id}_${conv.id}`,
       kind: "NO_RATIO",
-      badgeText: "Rasio Master PLU Kosong",
+      badgeText: "Rasio Kosong",
       title: `${raw.nama} (PLU ${raw.plu}) ↔ ${conv.nama} (PLU ${conv.plu})`,
-      detail: `Selisih awal RAW: ${fmtSigned(rawDiffAwal)} ${raw.satuan}, Konversi: ${fmtSigned(convDiffAwal)} ${conv.satuan}. Isi "Isi Bersih per Kemasan Segel" di Master PLU agar sistem dapat menghitung rasio item ini.`
+      detail: `Selisih awal RAW: ${fmtSigned(rawDiffAwal)} ${raw.satuan}, Konversi: ${fmtSigned(convDiffAwal)} ${conv.satuan}. Isi "Isi Bersih per Kemasan Segel" agar sistem dapat menghitung rasio item ini.`
      });
     }
     return;
@@ -2954,7 +3077,7 @@ function recalculateReportItemsFromApplied(report){
    convObj.fisikBersih = Math.round((Number(convObj.fisikBersihAsli || 0) + Number(convObj.penyeimbangRAW)) * 1000) / 1000;
    convObj.selisih = Math.round((Number(convObj.fisikBersih) - (Number(convObj.komputer) || 0)) * 1000) / 1000;
    convObj.hasilStatus = convObj.selisih > 0 ? "PLUS" : convObj.selisih < 0 ? "MINUS" : "SESUAI";
-   convObj.kompairKeterangan = `${p.scenarioLabel}: ${fmtSigned(p.convDelta)} ${convObj.satuan} (Rasio 1 RAW = ${fmt(p.ratio)} ${convObj.satuan})`;
+   convObj.kompairKeterangan = `${p.scenarioLabel}: ${fmtSigned(p.convDelta)} ${convObj.satuan} (Rasio 1 RAW = ${fmt(p.ratio)} ${p.conv.satuan})`;
   }
 
   logs.push({
@@ -2984,7 +3107,7 @@ function toggleCompareKey(key, checked){
 }
 
 function applySingleKompair(key){
- if(!audit || audit.status !== "completed") return;
+ if(!audit || !isAuditLockedCompleted(audit)) return;
  audit.appliedKeys = Array.isArray(audit.appliedKeys) ? audit.appliedKeys : [];
  if(audit.appliedKeys.includes(key)){
   audit.appliedKeys = audit.appliedKeys.filter(k => k !== key);
@@ -2998,7 +3121,7 @@ function applySingleKompair(key){
 }
 
 function applyCompareBalance(applyAll = true){
- if(!audit || audit.status !== "completed") return;
+ if(!audit || !isAuditLockedCompleted(audit)) return;
  const { plans } = evaluateSmartKompairSystem(audit);
  if(!plans.length){ alert("Tidak ada notifikasi kompair aktif."); return; }
 
@@ -3015,11 +3138,11 @@ function applyCompareBalance(applyAll = true){
  audit.saved = false;
  saveAudit();
  renderCurrentResult();
- alert(`Berhasil menerapkan ${targets.length} kompair berdasarkan rasio Master PLU.`);
+ alert(`Berhasil menerapkan ${targets.length} kompair berdasarkan rasio audit.`);
 }
 
 function undoCompareBalance(){
- if(!audit) return;
+ if(!audit || !isAuditLockedCompleted(audit)) return;
  audit.appliedKeys = [];
  selectedCompareKeys.clear();
  recalculateReportItemsFromApplied(audit);
@@ -3221,7 +3344,7 @@ function resultCard(x){
 // ==========================================
 // MENCOCOKKAN & MENYEJAJARKAN RAW DENGAN KONVERSI SECARA OTOMATIS
 // ==========================================
-function buildAlignedRawKonvRows(items, order, statusFilter){
+function buildAlignedRawKonvRows(items, order, statusFilter, isCompletedAudit = false){
  const rawPool = sortedItems(filterByStatus(items.filter(x => x.kategori === "RAW"), statusFilter), order);
  const convPool = sortedItems(filterByStatus(items.filter(x => x.kategori === "KONVERSI"), statusFilter), order);
 
@@ -3229,15 +3352,16 @@ function buildAlignedRawKonvRows(items, order, statusFilter){
  const usedConvIds = new Set();
  const rows = [];
 
- // 1. Pasangkan berdasarkan tautan PLU RAW -> Konversi di Master PLU / audit item
  rawPool.forEach(r => {
   if(usedRawIds.has(r.id)) return;
   const matchedConvs = convPool.filter(c => {
    if(usedConvIds.has(c.id)) return false;
    const links = parseRawLinks(c.rawLink);
    if(links.some(lk => String(lk).toLowerCase() === String(r.plu).toLowerCase())) return true;
-   const masterC = masterPLU.find(m => m.kategori === "KONVERSI" && String(m.plu).toLowerCase() === String(c.plu).toLowerCase());
-   if(masterC && parseRawLinks(masterC.rawLink).some(lk => String(lk).toLowerCase() === String(r.plu).toLowerCase())) return true;
+   if(!isCompletedAudit){
+    const masterC = masterPLU.find(m => m.kategori === "KONVERSI" && String(m.plu).toLowerCase() === String(c.plu).toLowerCase());
+    if(masterC && parseRawLinks(masterC.rawLink).some(lk => String(lk).toLowerCase() === String(r.plu).toLowerCase())) return true;
+   }
    return false;
   });
 
@@ -3250,7 +3374,6 @@ function buildAlignedRawKonvRows(items, order, statusFilter){
   }
  });
 
- // 2. Pasangkan yang namanya sama / mirip jika belum berpasangan
  rawPool.forEach(r => {
   if(usedRawIds.has(r.id)) return;
   const rExact = String(r.nama || "").trim().toLowerCase();
@@ -3272,7 +3395,6 @@ function buildAlignedRawKonvRows(items, order, statusFilter){
   }
  });
 
- // 3. Sisa RAW yang belum berpasangan tetap ditampilkan di kolom kiri (sejajar slot kosong kanan)
  rawPool.forEach(r => {
   if(!usedRawIds.has(r.id)){
    usedRawIds.add(r.id);
@@ -3280,7 +3402,6 @@ function buildAlignedRawKonvRows(items, order, statusFilter){
   }
  });
 
- // 4. Sisa KONVERSI yang belum berpasangan tetap ditampilkan di kolom kanan (sejajar slot kosong kiri)
  convPool.forEach(c => {
   if(!usedConvIds.has(c.id)){
    usedConvIds.add(c.id);
@@ -3291,8 +3412,8 @@ function buildAlignedRawKonvRows(items, order, statusFilter){
  return rows;
 }
 
-function renderAlignedRowsHTML(items, order, statusFilter){
- const rows = buildAlignedRawKonvRows(items, order, statusFilter);
+function renderAlignedRowsHTML(items, order, statusFilter, isCompletedAudit = false){
+ const rows = buildAlignedRawKonvRows(items, order, statusFilter, isCompletedAudit);
  if(!rows.length){
   return '<div class="empty">Tidak ada item yang sesuai dengan filter.</div>';
  }
@@ -3356,12 +3477,12 @@ function setHistoryCatTab(tab){
  if(convSec) convSec.classList.toggle("hidden", tab === "RAW");
 }
 
-function renderResultsInto(items,alignedId,rawId,convId,rawSumId,convSumId,order,statusFilter="ALL"){
+function renderResultsInto(items,alignedId,rawId,convId,rawSumId,convSumId,order,statusFilter="ALL",isCompletedAudit=false){
  const rawAll = items.filter(x=>x.kategori==="RAW");
  const convAll = items.filter(x=>x.kategori==="KONVERSI");
  const raw = sortedItems(filterByStatus(rawAll, statusFilter), order);
  const conv = sortedItems(filterByStatus(convAll, statusFilter), order);
- if($(alignedId)) $(alignedId).innerHTML = renderAlignedRowsHTML(items, order, statusFilter);
+ if($(alignedId)) $(alignedId).innerHTML = renderAlignedRowsHTML(items, order, statusFilter, isCompletedAudit);
  if($(rawId)) $(rawId).innerHTML=raw.map(x=>resultCard(x)).join("")||'<div class="empty" style="grid-column:1/-1">Tidak ada item sesuai filter.</div>';
  if($(convId)) $(convId).innerHTML=conv.map(x=>resultCard(x)).join("")||'<div class="empty" style="grid-column:1/-1">Tidak ada item sesuai filter.</div>';
  if($(rawSumId)) $(rawSumId).innerHTML=summaryHTML(rawAll);
@@ -3395,14 +3516,15 @@ function renderCurrentResult(){
   "rawSummary",
   "konversiSummary",
   sortOrderEl ? sortOrderEl.value : "minus",
-  filterEl ? filterEl.value : "ALL"
+  filterEl ? filterEl.value : "ALL",
+  isAuditLockedCompleted(audit)
  );
 }
 
 function renderResult(){if(audit)renderCurrentResult()}
 
 function saveAuditResult(){
- if(!audit||audit.status!=="completed")return;
+ if(!audit || !isAuditLockedCompleted(audit))return;
  if(!confirm("Simpan data hasil audit ini ke Riwayat Audit?")) return;
  recalculateReportItemsFromApplied(audit);
  const copy=JSON.parse(JSON.stringify(audit));
@@ -3465,16 +3587,17 @@ function renderHistoryDetail(){
   "historyRawSummary",
   "historyKonversiSummary",
   order,
-  statusFilter
+  statusFilter,
+  true
  );
 }
 
 function exportPDF(fromHistory=false){
  let report = fromHistory ? historyViewing : audit;
  if(!report){alert("Tidak ada data audit.");return}
- if(!fromHistory && report.status !== "completed"){
+ if(!fromHistory && !isAuditLockedCompleted(report)){
   if(!confirm("Selesaikan audit sekarang untuk cetak PDF?")) return;
-  finishAudit(true); report = audit; if(!report || report.status !== "completed") return;
+  finishAudit(true); report = audit; if(!report || !isAuditLockedCompleted(report)) return;
  }
  currentReport=report; const oldAudit=audit; const prevTab=resultCatTab;
  audit=report; resultCatTab="BOTH";
