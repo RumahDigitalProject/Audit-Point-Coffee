@@ -8,9 +8,18 @@
 :root{--green:#19372b;--green2:#244b36;--gold:#d7b98e;--bg:#f4f6f4;--text:#263a2e;--muted:#78847b;--line:#e7ece8;--red:#b73535;--orange:#a66a13;--blue:#315e91}
 *{box-sizing:border-box;font-family:Arial,sans-serif}
 body{margin:0;background:var(--bg);color:var(--text)}
-header{background:var(--green);color:#fff;padding:20px 28px}
+header{background:var(--green);color:#fff;padding:20px 28px;display:flex;justify-content:space-between;align-items:center;gap:14px;flex-wrap:wrap}
+.brand-row{display:flex;align-items:center;gap:12px}
 header h2{margin:0;letter-spacing:1px;font-size:22px}
 header p{margin:7px 0 0;color:#bdcec2;font-size:11px;letter-spacing:2px}
+.live-badge{display:inline-flex;align-items:center;gap:8px;background:#11271e;border:1px solid #355d49;padding:7px 12px;border-radius:999px;font-size:11px;color:#d6e6dc}
+.spinner{width:14px;height:14px;border:2px solid #ffffff38;border-top-color:var(--gold);border-radius:50%;animation:spin .75s linear infinite;display:none}
+.live-badge.syncing .spinner{display:inline-block}
+.live-dot{width:8px;height:8px;border-radius:50%;background:#47c178;display:inline-block}
+.live-badge.syncing .live-dot{display:none}
+.live-badge.error .live-dot{background:#e05a52}
+@keyframes spin{to{transform:rotate(360deg)}}
+
 .layout{display:flex;min-height:calc(100vh - 78px)}
 .sidebar{width:225px;flex-shrink:0;background:#244334;padding:20px 14px;color:#fff}
 .menu-title{color:#afc0b3;font-size:10px;padding:13px 10px 7px;letter-spacing:1.2px}
@@ -68,7 +77,6 @@ th{background:#f3f6f3;color:#526357}
 .pill{padding:7px 11px;border-radius:20px;border:1px solid #dce3dd;background:#fff;font-size:11px;font-weight:bold;color:#526357;cursor:pointer}
 .pill.active{background:var(--green2);color:#fff;border-color:var(--green2)}
 
-/* Tampilan 1 per 1 Stok Komputer yang nyaman di mata */
 .comp-top-nav{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:14px;padding:10px;background:#f3f6f3;border-radius:9px;border:1px solid var(--line)}
 .comp-switch-btn{padding:9px 14px;border-radius:8px;border:1px solid #cdd7cf;background:#fff;color:#263a2e;font-size:12px;font-weight:bold;cursor:pointer}
 .comp-switch-btn.active{background:var(--green2);color:#fff;border-color:var(--green2)}
@@ -205,8 +213,17 @@ th{background:#f3f6f3;color:#526357}
 </head>
 <body>
 <header>
- <h2>☕ POIN COFFEE</h2>
- <p>RAW MATERIAL AUDIT SYSTEM</p>
+ <div class="brand-row">
+  <div>
+   <h2>☕ POIN COFFEE</h2>
+   <p>RAW MATERIAL AUDIT SYSTEM</p>
+  </div>
+  <div id="headerLiveBadge" class="live-badge" title="Status sinkronisasi otomatis Google Sheets">
+   <span class="spinner" id="headerSpinner"></span>
+   <span class="live-dot"></span>
+   <span id="headerSyncLabel">Live Sync</span>
+  </div>
+ </div>
 </header>
 
 <div class="layout">
@@ -223,16 +240,15 @@ th{background:#f3f6f3;color:#526357}
 <div id="pageMaster">
  <div class="page-title"><h2>Master PLU</h2><p>Pengelolaan data utama bahan baku Poin Coffee</p></div>
  <section class="panel">
-  <h3>Database Google Sheets</h3>
-  <div class="notice">Terhubung langsung ke database Google Sheets Poin Coffee. Setiap perubahan Master PLU dan Riwayat Audit disinkronkan secara otomatis antarperangkat.</div>
-  <div class="actions" style="margin-top:0"><button class="btn blue" type="button" onclick="syncFromCloud()">↻ Muat Ulang dari Cloud</button></div>
+  <h3>Database Google Sheets Real-Time</h3>
+  <div class="notice">Terhubung otomatis dua arah ke database Google Sheets Poin Coffee. Setiap perubahan di perangkat mana pun dikirim ke Google Sheets dan ditarik otomatis ke perangkat lain.</div>
   <div id="syncStatus" class="sync-status">Menghubungkan ke database Google Sheets...</div>
  </section>
 
  <!-- FITUR INJEKSI DATA CEPAT -->
  <section class="panel" style="border: 2px dashed #244b36;">
   <h3>⚡ Injeksi Data Instan</h3>
-  <div class="notice">Tempel (Paste) kode JSON di bawah ini ke dalam kotak, lalu klik tombol untuk memasukkan atau memperbarui seluruh daftar barang sekaligus ke daftar Master PLU dan memicu penyimpanan ke database.</div>
+  <div class="notice">Tempel (Paste) kode JSON di bawah ini ke dalam kotak, lalu klik tombol untuk memasukkan atau memperbarui seluruh daftar barang sekaligus ke daftar Master PLU dan langsung mengirimnya ke Google Sheets.</div>
   <div class="field">
    <label>Kotak Kode Injeksi Data (JSON)</label>
    <textarea id="dataInjectionBox" rows="4" placeholder='Tempel kode JSON di sini, contoh: [{"plu":"20080424","nama":"Coffee Bean","kategori":"RAW","satuan":"PCS"}]'></textarea>
@@ -430,12 +446,15 @@ const today = () => new Date().toLocaleDateString("en-CA");
 let masterPLU = JSON.parse(localStorage.getItem("masterPLU") || "[]");
 let audit = JSON.parse(localStorage.getItem("poinAuditMandiri") || "null");
 let auditHistory = JSON.parse(localStorage.getItem("poinAuditHistory") || "[]");
+let pendingQueue = JSON.parse(localStorage.getItem("poinPendingQueue") || "[]");
 let editId = null;
 let historyViewing = null;
 let SHEETS_API = (localStorage.getItem("poinSheetsApi") || DEFAULT_SHEETS_API).replace(/^Https:/i, "https:");
 localStorage.setItem("poinSheetsApi", SHEETS_API);
-let cloudBusy = false;
-let cloudTimer = null;
+let isPulling = false;
+let isPushing = false;
+let pushDebounceTimer = null;
+let lastCloudSignature = "";
 let physicalSearch = "";
 let physicalFilter = "ALL";
 let selectedCompareKeys = new Set();
@@ -446,9 +465,21 @@ function parseRawLinks(rawLinkVal){
  return String(rawLinkVal).split(",").map(v=>v.trim()).filter(Boolean);
 }
 
-function saveMaster(){localStorage.setItem("masterPLU",JSON.stringify(masterPLU));queueCloudSync()}
-function saveAudit(){localStorage.setItem("poinAuditMandiri",JSON.stringify(audit))}
-function saveHistory(){localStorage.setItem("poinAuditHistory",JSON.stringify(auditHistory));queueCloudSync()}
+function saveMaster(){
+ localStorage.setItem("masterPLU", JSON.stringify(masterPLU));
+ enqueueSyncAction("saveBundle");
+}
+function saveAudit(){
+ localStorage.setItem("poinAuditMandiri", JSON.stringify(audit));
+}
+function saveHistory(){
+ localStorage.setItem("poinAuditHistory", JSON.stringify(auditHistory));
+ enqueueSyncAction("saveBundle");
+}
+function savePendingQueue(){
+ localStorage.setItem("poinPendingQueue", JSON.stringify(pendingQueue));
+}
+
 function esc(v){return String(v??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]))}
 function fmt(v){if(v===null||v===undefined||v==="")return "-";return Number(v).toLocaleString("id-ID",{maximumFractionDigits:3})}
 function safeDate(v){return esc(v||"-")}
@@ -469,10 +500,10 @@ function showPage(page){
  if(page==="master")renderMaster();
  if(page==="audit")renderAudit();
  if(page==="history")renderHistory();
+ pullFromCloud(false);
 }
 
 $("auditDate").value=today();
-if(SHEETS_API)syncFromCloud();
 $("kategori").addEventListener("change",categoryChanged);
 function categoryChanged(){
  const k=$("kategori").value;
@@ -565,7 +596,7 @@ function injectDataFromCode(){
  saveMaster();
  renderMaster();
  $("dataInjectionBox").value = "";
- alert(`Selesai! ${added} Master PLU baru ditambahkan, ${updated} Master PLU diperbarui.`);
+ alert(`Selesai! ${added} Master PLU baru ditambahkan, ${updated} Master PLU diperbarui dan sedang dikirim ke Google Sheets.`);
 }
 
 $("pluForm").addEventListener("submit",e=>{
@@ -585,7 +616,7 @@ $("pluForm").addEventListener("submit",e=>{
  if(masterPLU.some(x=>x.plu.toLowerCase()===plu.toLowerCase()&&x.id!==editId)){alert("Nomor PLU sudah terdaftar!");return}
  const item={id:editId||Date.now(),plu,nama,kategori,satuan,berat,isiBersih,rawLink};
  if(editId)masterPLU=masterPLU.map(x=>x.id===editId?item:x);else masterPLU.push(item);
- saveMaster();resetForm();renderMaster();alert("Master PLU berhasil disimpan.");
+ saveMaster();resetForm();renderMaster();alert("Master PLU berhasil disimpan dan dikirim ke Google Sheets.");
 });
 function renderMaster(){
  const q=$("search").value.toLowerCase();
@@ -675,15 +706,6 @@ function setStage(s){
  if(s==="physical_konversi"||s==="physical_raw")s="physical_all";
  audit.status=s;saveAudit();renderAudit();
 }
-function isCombinedWarehouseDone(){
- return categoryItems("RAW").every(x => x.gudangRaw!==null && x.gudangRaw!==undefined && Number.isFinite(Number(x.gudangRaw)) && Number(x.gudangRaw)>=0);
-}
-function isCombinedBoothItemDone(x){
- if(x.kategori==="RAW"){
-  return x.boothRaw!==null && x.boothRaw!==undefined && Number.isFinite(Number(x.boothRaw)) && Number(x.boothRaw)>=0;
- }
- return isConvBoothFilled(x);
-}
 function isItemPhysicalDone(x){
  if(isWarehouseOnly()){
   if(x.kategori==="KONVERSI") return true;
@@ -701,7 +723,12 @@ function isItemPhysicalDone(x){
  }
  return isCombinedBoothItemDone(x);
 }
-
+function isCombinedBoothItemDone(x){
+ if(x.kategori==="RAW"){
+  return x.boothRaw!==null && x.boothRaw!==undefined && Number.isFinite(Number(x.boothRaw)) && Number(x.boothRaw)>=0;
+ }
+ return isConvBoothFilled(x);
+}
 function isConvBoothFilled(x){
  const hasSegel = x.qtySegel!==null && x.qtySegel!==undefined;
  const hasIsi = x.isiSegel!==null && x.isiSegel!==undefined;
@@ -715,7 +742,6 @@ function isConvBoothFilled(x){
  return true;
 }
 
-/* Mendukung angka minus (contoh: -125) & desimal untuk stok komputer */
 function parseSignedNumber(val){
  if(val === null || val === undefined) return null;
  const s = String(val).trim().replace(/,/g, ".");
@@ -723,7 +749,6 @@ function parseSignedNumber(val){
  const n = Number(s);
  return Number.isFinite(n) ? n : null;
 }
-
 function syncMinusButtonVisual(id, valStr){
  const btn = $("minus-btn-" + id);
  if(!btn) return;
@@ -731,61 +756,37 @@ function syncMinusButtonVisual(id, valStr){
  btn.classList.toggle("is-minus", isMinus);
  btn.textContent = isMinus ? "− MINUS" : "+/− Minus";
 }
-
 function updateComputerValue(id, val){
  const x=audit.items.find(a=>a.id===id);if(!x)return;
  const s = String(val).trim();
- if(s === "" || s === "-"){
-  x.komputer = null;
- } else {
-  const n = parseSignedNumber(s);
-  x.komputer = n;
- }
+ if(s === "" || s === "-"){ x.komputer = null; } else { x.komputer = parseSignedNumber(s); }
  syncMinusButtonVisual(id, s);
  saveAudit();
  updateProgressOnly();
  const card = document.querySelector(`[data-comp-card="${id}"]`);
- if(card){
-  card.classList.toggle("filled", x.komputer !== null && x.komputer !== undefined);
- }
+ if(card) card.classList.toggle("filled", x.komputer !== null && x.komputer !== undefined);
 }
-
 function toggleComputerMinus(id){
  const inp = $("comp-inp-" + id);
  const x = audit.items.find(a=>a.id===id);
  if(!inp || !x) return;
-
  let cur = String(inp.value ?? "").trim();
- if(cur === ""){
-  cur = "-0";
- } else if(cur.startsWith("-")){
-  cur = cur.slice(1);
- } else {
-  cur = "-" + cur;
- }
-
+ if(cur === "") cur = "-0";
+ else if(cur.startsWith("-")) cur = cur.slice(1);
+ else cur = "-" + cur;
  inp.value = cur;
  if(cur === "" || cur === "-" || cur === "-0"){
-  x.komputer = cur === "-0" ? -0 : null;
-  if(cur === "-0"){
-   const n = Number(cur);
-   x.komputer = Number.isFinite(n) ? n : null;
-  }
+  x.komputer = cur === "-0" ? (Number.isFinite(Number(cur)) ? Number(cur) : null) : null;
  } else {
-  const n = parseSignedNumber(cur);
-  x.komputer = n;
+  x.komputer = parseSignedNumber(cur);
  }
-
  syncMinusButtonVisual(id, cur);
  saveAudit();
  updateProgressOnly();
  const card = document.querySelector(`[data-comp-card="${id}"]`);
- if(card){
-  card.classList.toggle("filled", x.komputer !== null && x.komputer !== undefined);
- }
+ if(card) card.classList.toggle("filled", x.komputer !== null && x.komputer !== undefined);
  inp.focus();
 }
-
 function updateAuditValue(id,key,val){
  const x=audit.items.find(a=>a.id===id);if(!x)return;
  if(val==="")x[key]=null;
@@ -808,7 +809,6 @@ function activeAuditItems(){
  if(isCombinedMode() && audit.combinedZone === "GUDANG") return categoryItems("RAW");
  return audit.items;
 }
-
 function progress(){
  const items = activeAuditItems();
  let done=0,total=items.length*2;
@@ -859,30 +859,24 @@ function renderAudit(){
 function countUnfilledComputer(cat){
  return categoryItems(cat).filter(x => x.komputer === null || x.komputer === undefined || !Number.isFinite(Number(x.komputer))).length;
 }
-
 function switchComputerTab(targetStage){
  if(!audit) return;
  const currentCat = audit.status === "computer_raw" ? "RAW" : "KONVERSI";
  const targetCat = targetStage === "computer_raw" ? "RAW" : "KONVERSI";
  if(currentCat === targetCat) return;
-
  const unfilled = countUnfilledComputer(currentCat);
  if(unfilled > 0){
-  const ok = confirm(
-   `PERINGATAN:\nMasih ada ${unfilled} item stok komputer ${currentCat} yang belum diinput.\n\nApakah Anda tetap ingin pindah ke Stok Komputer ${targetCat}?`
-  );
+  const ok = confirm(`PERINGATAN:\nMasih ada ${unfilled} item stok komputer ${currentCat} yang belum diinput.\n\nApakah Anda tetap ingin pindah ke Stok Komputer ${targetCat}?`);
   if(!ok) return;
  }
  setStage(targetStage);
  window.scrollTo({top:0,behavior:"smooth"});
 }
-
 function renderComputer(cat){
  const items=categoryItems(cat);
  const whOnly=isWarehouseOnly();
  $("auditToolbar").classList.add("hidden");
  $("auditTableHead").className="hidden";
-
  const topNav = $("compTopNav");
  if(!whOnly && categoryItems("KONVERSI").length > 0){
   topNav.classList.remove("hidden");
@@ -894,10 +888,8 @@ function renderComputer(cat){
   topNav.classList.add("hidden");
   topNav.innerHTML = "";
  }
-
  $("auditHeading").textContent="Input Stok Komputer "+cat;
  $("auditInstruction").innerHTML="Ditampilkan <b>1 per 1</b> dengan <b>PLU menonjol</b>. Ketik angka stoknya lalu tekan tombol <b>+/− Minus</b> di samping kolom jika stoknya minus (misal ketik <b>125</b> lalu tekan <b>+/− Minus</b> → <b>-125</b>).";
-
  $("auditTableBody").className="comp-cards";
  $("auditTableBody").innerHTML=items.map((x,i)=>{
   const hasVal = x.komputer !== null && x.komputer !== undefined && Number.isFinite(Number(x.komputer));
@@ -921,97 +913,65 @@ function renderComputer(cat){
    </div>
   </div>`;
  }).join("")||'<div class="empty">Tidak ada PLU kategori '+cat+'.</div>';
-
  if(cat==="RAW"){
-  if(whOnly){
-   $("auditActions").innerHTML='<button class="btn primary" onclick="nextComputerRaw()">Lanjut Catat Fisik Gudang (Hanya RAW) →</button>';
-  } else {
-   $("auditActions").innerHTML='<button class="btn primary" onclick="nextComputerRaw()">Lanjut ke Stok Komputer KONVERSI →</button>';
-  }
+  if(whOnly) $("auditActions").innerHTML='<button class="btn primary" onclick="nextComputerRaw()">Lanjut Catat Fisik Gudang (Hanya RAW) →</button>';
+  else $("auditActions").innerHTML='<button class="btn primary" onclick="nextComputerRaw()">Lanjut ke Stok Komputer KONVERSI →</button>';
  }else{
   const nextLabel = isCombinedMode() ? "Mulai Catat Fisik Gudang Dulu →" : "Mulai Catat Fisik Kabinet / Booth →";
   $("auditActions").innerHTML='<button class="btn cancel" onclick="switchComputerTab(\'computer_raw\')">← Kembali ke RAW</button><button class="btn primary" onclick="nextComputerKonversi()">'+nextLabel+'</button>';
  }
 }
-function nextComputerRaw(){
- if(isWarehouseOnly()) setStage("physical_all");
- else switchComputerTab("computer_konversi");
-}
-function nextComputerKonversi(){
- if(isCombinedMode()) audit.combinedZone="GUDANG";
- setStage("physical_all");
-}
+function nextComputerRaw(){ if(isWarehouseOnly()) setStage("physical_all"); else switchComputerTab("computer_konversi"); }
+function nextComputerKonversi(){ if(isCombinedMode()) audit.combinedZone="GUDANG"; setStage("physical_all"); }
 
 function buildPairedGroups(){
  const whOnly = isWarehouseOnly();
  const isCombWh = isCombinedMode() && audit.combinedZone === "GUDANG";
  const hideConv = whOnly || isCombWh;
-
  const raws = audit.items.filter(x=>x.kategori==="RAW");
  const convs = hideConv ? [] : audit.items.filter(x=>x.kategori==="KONVERSI");
  const usedConvIds = new Set();
  const groups = [];
-
  raws.forEach(raw => {
   const linkedConvs = convs.filter(c => parseRawLinks(c.rawLink).includes(raw.plu));
   linkedConvs.forEach(c => usedConvIds.add(c.id));
-  groups.push({
-   key: "raw-" + raw.id,
-   title: raw.nama,
-   raw: raw,
-   convs: linkedConvs
-  });
+  groups.push({ key: "raw-" + raw.id, title: raw.nama, raw: raw, convs: linkedConvs });
  });
-
  convs.filter(c => !usedConvIds.has(c.id)).forEach(conv => {
-  groups.push({
-   key: "conv-" + conv.id,
-   title: conv.nama,
-   raw: null,
-   convs: [conv]
-  });
+  groups.push({ key: "conv-" + conv.id, title: conv.nama, raw: null, convs: [conv] });
  });
-
  return groups;
 }
-
 function calcConvNet(x){
  const q = Number(x.qtySegel)||0;
  const sealed = x.isiBersih!=null ? q*Number(x.isiBersih) : (Number(x.isiSegel)||0);
  const gross = Number(x.fisikKotorTerbuka)||0;
- const openCount = x.jumlahTerbuka!==null && x.jumlahTerbuka!==undefined
-  ? (Number(x.jumlahTerbuka)||0)
-  : (gross > 0 ? 1 : 0);
+ const openCount = x.jumlahTerbuka!==null && x.jumlahTerbuka!==undefined ? (Number(x.jumlahTerbuka)||0) : (gross > 0 ? 1 : 0);
  const tara = (Number(x.berat)||0)*openCount;
  const opened = openCount>0 ? Math.max(0, gross - tara) : 0;
  return { sealed, opened, openCount, total: sealed + opened };
 }
-
 function renderPhysicalAll(){
  const whOnly = isWarehouseOnly();
  const isCombWh = isCombinedMode() && audit.combinedZone === "GUDANG";
  const isCombBt = isCombinedMode() && audit.combinedZone === "BOOTH";
  const showWhInput = whOnly || isCombWh;
-
  $("compTopNav").classList.add("hidden");
  $("auditTableBody").className="audit-list";
-
  if(whOnly){
   $("auditHeading").textContent = "Catat Fisik Gudang (Khusus RAW — Semua Segel)";
   $("auditInstruction").innerHTML = "<b>Mode Gudang Saja:</b> Isi jumlah stok fisik <b>RAW</b> (segel) di gudang. Bisa diselesaikan kapan saja.";
  } else if(isCombWh){
   $("auditHeading").textContent = "Tahap 1/2: Catat Fisik di GUDANG (Khusus RAW)";
-  $("auditInstruction").innerHTML = "<b>Gabungan — Bagian Gudang Dulu:</b> Isi barang <b>RAW</b> di gudang, lalu klik <b>Selesai Gudang → Pindah ke Kabinet / Booth</b> (atau selesaikan audit kapan saja).";
+  $("auditInstruction").innerHTML = "<b>Gabungan — Bagian Gudang Dulu:</b> Isi barang <b>RAW</b> di gudang, lalu klik <b>Selesai Gudang → Pindah ke Kabinet / Booth</b>.";
  } else if(isCombBt){
   $("auditHeading").textContent = "Tahap 2/2: Catat Fisik di KABINET / BOOTH (RAW + KONVERSI)";
-  $("auditInstruction").innerHTML = "<b>Gabungan — Bagian Kabinet / Booth:</b> Isi fisik <b>RAW</b> dan <b>KONVERSI</b> di booth. Saat selesai, stok Gudang + Booth otomatis digabung jadi 1 laporan.";
+  $("auditInstruction").innerHTML = "<b>Gabungan — Bagian Kabinet / Booth:</b> Isi fisik <b>RAW</b> dan <b>KONVERSI</b> di booth.";
  } else {
   $("auditHeading").textContent = "Catat Fisik Kabinet / Booth (RAW + KONVERSI)";
   $("auditInstruction").innerHTML = "<b>Mode Kabinet / Booth Saja:</b> Isi stok fisik <b>RAW</b> dan <b>KONVERSI</b> (segel atau sisa terbuka/timbangan).";
  }
-
  $("auditTableHead").className="hidden";
-
  const toolbar = $("auditToolbar");
  toolbar.classList.remove("hidden");
  toolbar.innerHTML = `
@@ -1025,83 +985,30 @@ function renderPhysicalAll(){
    ` : ``}
   </div>
  `;
-
  renderPairedCards();
-
  let actionButtons = "";
  if(whOnly){
-  actionButtons = `
-   <button class="btn cancel" onclick="setStage('computer_raw')">← Kembali</button>
-   <button class="btn warn-btn" type="button" onclick="fillRemainingZeros()">⚡ Set Sisa Kosong = 0</button>
-   <button class="btn gold" id="btnFinishAudit" onclick="finishAudit()">✓ Selesaikan Audit Gudang</button>
-  `;
+  actionButtons = `<button class="btn cancel" onclick="setStage('computer_raw')">← Kembali</button><button class="btn warn-btn" type="button" onclick="fillRemainingZeros()">⚡ Set Sisa Kosong = 0</button><button class="btn gold" id="btnFinishAudit" onclick="finishAudit()">✓ Selesaikan Audit Gudang</button>`;
  } else if(isCombWh){
-  actionButtons = `
-   <button class="btn cancel" onclick="setStage('computer_konversi')">← Kembali</button>
-   <button class="btn warn-btn" type="button" onclick="fillRemainingZeros()">⚡ Set Sisa Kosong = 0</button>
-   <button class="btn primary" id="btnFinishAudit" onclick="proceedToBoothZone()">Selesai Gudang → Pindah ke Kabinet / Booth</button>
-  `;
+  actionButtons = `<button class="btn cancel" onclick="setStage('computer_konversi')">← Kembali</button><button class="btn warn-btn" type="button" onclick="fillRemainingZeros()">⚡ Set Sisa Kosong = 0</button><button class="btn primary" id="btnFinishAudit" onclick="proceedToBoothZone()">Selesai Gudang → Pindah ke Kabinet / Booth</button>`;
  } else if(isCombBt){
-  actionButtons = `
-   <button class="btn cancel" onclick="backToWarehouseZone()">← Kembali ke Gudang</button>
-   <button class="btn warn-btn" type="button" onclick="fillRemainingZeros()">⚡ Set Sisa Kosong = 0</button>
-   <button class="btn gold" id="btnFinishAudit" onclick="finishAudit()">✓ Selesaikan Audit Gabungan</button>
-  `;
+  actionButtons = `<button class="btn cancel" onclick="backToWarehouseZone()">← Kembali ke Gudang</button><button class="btn warn-btn" type="button" onclick="fillRemainingZeros()">⚡ Set Sisa Kosong = 0</button><button class="btn gold" id="btnFinishAudit" onclick="finishAudit()">✓ Selesaikan Audit Gabungan</button>`;
  } else {
-  actionButtons = `
-   <button class="btn cancel" onclick="setStage('computer_konversi')">← Kembali</button>
-   <button class="btn warn-btn" type="button" onclick="fillRemainingZeros()">⚡ Set Sisa Kosong = 0</button>
-   <button class="btn gold" id="btnFinishAudit" onclick="finishAudit()">✓ Selesaikan Audit Booth</button>
-  `;
+  actionButtons = `<button class="btn cancel" onclick="setStage('computer_konversi')">← Kembali</button><button class="btn warn-btn" type="button" onclick="fillRemainingZeros()">⚡ Set Sisa Kosong = 0</button><button class="btn gold" id="btnFinishAudit" onclick="finishAudit()">✓ Selesaikan Audit Booth</button>`;
  }
  $("auditActions").innerHTML = actionButtons;
 }
-
-function proceedToBoothZone(){
- audit.combinedZone = "BOOTH";
- physicalSearch = "";
- physicalFilter = "ALL";
- saveAudit();
- renderAudit();
- window.scrollTo({top:0,behavior:"smooth"});
-}
-
-function backToWarehouseZone(){
- audit.combinedZone = "GUDANG";
- physicalSearch = "";
- physicalFilter = "ALL";
- saveAudit();
- renderAudit();
- window.scrollTo({top:0,behavior:"smooth"});
-}
-
-function onPhysSearch(val){
- physicalSearch = val;
- renderPairedCards();
-}
-function setPhysFilter(f){
- physicalFilter = f;
- renderPhysicalAll();
-}
-
-function setRawZero(id){
- const x = audit.items.find(a=>a.id===id); if(!x) return;
- if(isWarehouseOnly() || (isCombinedMode() && audit.combinedZone==="GUDANG")) x.gudangRaw = 0;
- else x.boothRaw = 0;
- saveAudit(); updateProgressOnly(); renderPairedCards();
-}
-
-function setConvZero(id){
- const x = audit.items.find(a=>a.id===id); if(!x) return;
- x.qtySegel = 0; x.isiSegel = 0; x.jumlahTerbuka = 0; x.fisikKotorTerbuka = 0; x.modeFisik = "KOSONG";
- saveAudit(); updateProgressOnly(); renderPairedCards();
-}
+function proceedToBoothZone(){ audit.combinedZone="BOOTH"; physicalSearch=""; physicalFilter="ALL"; saveAudit(); renderAudit(); window.scrollTo({top:0,behavior:"smooth"}); }
+function backToWarehouseZone(){ audit.combinedZone="GUDANG"; physicalSearch=""; physicalFilter="ALL"; saveAudit(); renderAudit(); window.scrollTo({top:0,behavior:"smooth"}); }
+function onPhysSearch(val){ physicalSearch=val; renderPairedCards(); }
+function setPhysFilter(f){ physicalFilter=f; renderPhysicalAll(); }
+function setRawZero(id){ const x=audit.items.find(a=>a.id===id); if(!x)return; if(isWarehouseOnly()||(isCombinedMode()&&audit.combinedZone==="GUDANG")) x.gudangRaw=0; else x.boothRaw=0; saveAudit(); updateProgressOnly(); renderPairedCards(); }
+function setConvZero(id){ const x=audit.items.find(a=>a.id===id); if(!x)return; x.qtySegel=0; x.isiSegel=0; x.jumlahTerbuka=0; x.fisikKotorTerbuka=0; x.modeFisik="KOSONG"; saveAudit(); updateProgressOnly(); renderPairedCards(); }
 
 function renderPairedCards(){
  const whOnly = isWarehouseOnly();
  const isCombWh = isCombinedMode() && audit.combinedZone === "GUDANG";
  const showWhInput = whOnly || isCombWh;
-
  const q = physicalSearch.trim().toLowerCase();
  const groups = buildPairedGroups().filter(g => {
   const allItems = [g.raw, ...g.convs].filter(Boolean);
@@ -1111,264 +1018,94 @@ function renderPairedCards(){
   if(!q) return true;
   return allItems.some(it => it.nama.toLowerCase().includes(q) || it.plu.toLowerCase().includes(q));
  });
-
- if(!groups.length){
-  $("auditTableBody").innerHTML='<div class="empty">Tidak ada barang yang cocok dengan pencarian/filter.</div>';
-  return;
- }
-
+ if(!groups.length){ $("auditTableBody").innerHTML='<div class="empty">Tidak ada barang yang cocok dengan pencarian/filter.</div>'; return; }
  $("auditTableBody").innerHTML = groups.map((g, idx) => {
   const allItems = [g.raw, ...g.convs].filter(Boolean);
   const allDone = allItems.every(isItemPhysicalDone);
   const mainId = g.raw ? g.raw.id : g.convs[0].id;
-
   let rawHTML = "";
   if(g.raw){
    const r = g.raw;
    if(showWhInput){
-    rawHTML = `
-     <div class="box-wh" data-card-item="${r.id}">
-      <div class="box-title">
-       <span>📦 GUDANG · RAW (${esc(r.satuan)} · PLU ${esc(r.plu)})</span>
-       <button type="button" class="zero-btn" onclick="setRawZero(${Number(r.id)})">Kosong (0)</button>
-      </div>
-      <div class="field">
-       <label>Jumlah Segel di Gudang (${esc(r.satuan)})</label>
-       <input type="number" inputmode="decimal" min="0" step="any" placeholder="Isi jumlah fisik gudang..." value="${r.gudangRaw??""}" oninput="updateAuditValue(${Number(r.id)},'gudangRaw',this.value)">
-      </div>
-      <div class="rule-hint">Gudang khusus RAW (semua segel, tanpa konversi).</div>
-     </div>`;
+    rawHTML = `<div class="box-wh" data-card-item="${r.id}"><div class="box-title"><span>📦 GUDANG · RAW (${esc(r.satuan)} · PLU ${esc(r.plu)})</span><button type="button" class="zero-btn" onclick="setRawZero(${Number(r.id)})">Kosong (0)</button></div><div class="field"><label>Jumlah Segel di Gudang (${esc(r.satuan)})</label><input type="number" inputmode="decimal" min="0" step="any" placeholder="Isi jumlah fisik gudang..." value="${r.gudangRaw??""}" oninput="updateAuditValue(${Number(r.id)},'gudangRaw',this.value)"></div><div class="rule-hint">Gudang khusus RAW (semua segel, tanpa konversi).</div></div>`;
    } else {
-    rawHTML = `
-     <div class="box-raw" data-card-item="${r.id}">
-      <div class="box-title">
-       <span>🏪 KABINET / BOOTH · RAW (${esc(r.satuan)} · PLU ${esc(r.plu)})</span>
-       <button type="button" class="zero-btn" onclick="setRawZero(${Number(r.id)})">Kosong (0)</button>
-      </div>
-      <div class="field">
-       <label>Jumlah Utuh / Kemasan di Booth (${esc(r.satuan)})</label>
-       <input type="number" inputmode="decimal" min="0" step="any" placeholder="Isi jumlah fisik booth..." value="${r.boothRaw??""}" oninput="updateAuditValue(${Number(r.id)},'boothRaw',this.value)">
-      </div>
-      <div class="rule-hint">Masuk ke rekap <b>RAW</b> (${esc(r.satuan)}).</div>
-     </div>`;
+    rawHTML = `<div class="box-raw" data-card-item="${r.id}"><div class="box-title"><span>🏪 KABINET / BOOTH · RAW (${esc(r.satuan)} · PLU ${esc(r.plu)})</span><button type="button" class="zero-btn" onclick="setRawZero(${Number(r.id)})">Kosong (0)</button></div><div class="field"><label>Jumlah Utuh / Kemasan di Booth (${esc(r.satuan)})</label><input type="number" inputmode="decimal" min="0" step="any" placeholder="Isi jumlah fisik booth..." value="${r.boothRaw??""}" oninput="updateAuditValue(${Number(r.id)},'boothRaw',this.value)"></div><div class="rule-hint">Masuk ke rekap <b>RAW</b> (${esc(r.satuan)}).</div></div>`;
    }
   }
-
   let convHTML = showWhInput ? "" : g.convs.map(c => {
    const hasIsi = c.isiBersih !== null && c.isiBersih !== undefined;
    const hasTara = c.berat !== null && c.berat !== undefined;
    const calc = calcConvNet(c);
    const openDisplay = c.jumlahTerbuka!==null && c.jumlahTerbuka!==undefined ? c.jumlahTerbuka : (Number(c.fisikKotorTerbuka)>0 ? 1 : "");
-
-   return `
-    <div class="box-konv" data-card-item="${c.id}">
-     <div class="box-title">
-      <span>⚡ BOOTH · KONVERSI (${esc(c.satuan)} · PLU ${esc(c.plu)})</span>
-      <button type="button" class="zero-btn" onclick="setConvZero(${Number(c.id)})">Kosong (0)</button>
-     </div>
-
-     <div class="satset-row ${hasIsi?'single':''}">
-      <div class="field">
-       <label>${hasIsi ? `Jml Wadah Segel (× ${fmt(c.isiBersih)} ${esc(c.satuan)})` : `Jml Wadah Segel`}</label>
-       <input type="number" inputmode="numeric" min="0" step="1" placeholder="0 wadah" value="${c.qtySegel??""}" oninput="updateConvSatset(${Number(c.id)},'qtySegel',this.value)">
-      </div>
-      ${!hasIsi ? `
-      <div class="field">
-       <label>Atau Total Isi Segel (${esc(c.satuan)})</label>
-       <input type="number" inputmode="decimal" min="0" step="any" placeholder="0 ${esc(c.satuan)}" value="${c.isiSegel??""}" oninput="updateConvSatset(${Number(c.id)},'isiSegel',this.value)">
-      </div>` : ``}
-     </div>
-
-     <div class="satset-row triple">
-      <div class="field">
-       <label>Berat Kotor Terbuka (${esc(c.satuan)})</label>
-       <input type="number" inputmode="decimal" min="0" step="any" placeholder="0" value="${c.fisikKotorTerbuka??""}" oninput="updateConvSatset(${Number(c.id)},'fisikKotorTerbuka',this.value)">
-      </div>
-      <div class="field open-qty-col">
-       <label>Jml Wadah Terbuka</label>
-       <input type="number" inputmode="numeric" min="0" step="1" placeholder="Otomatis 1" value="${openDisplay}" oninput="updateConvSatset(${Number(c.id)},'jumlahTerbuka',this.value)">
-      </div>
-     </div>
-
-     <div class="calc-preview" id="prev-${c.id}">
-      Total Bersih Booth: <b>${fmt(calc.total)} ${esc(c.satuan)}</b>
-      (Segel: ${fmt(calc.sealed)} + Terbuka: ${fmt(calc.opened)})
-      ${hasTara?` · Tara: ${fmt(c.berat)}/wadah`:""}
-     </div>
-     <div class="rule-hint">Tip sat-set: isi <b>Berat Kotor Terbuka</b> saja jika wadah terbukanya 1 (otomatis dihitung 1 wadah). Isi <b>0</b> jika tidak ada stok.</div>
-    </div>`;
+   return `<div class="box-konv" data-card-item="${c.id}"><div class="box-title"><span>⚡ BOOTH · KONVERSI (${esc(c.satuan)} · PLU ${esc(c.plu)})</span><button type="button" class="zero-btn" onclick="setConvZero(${Number(c.id)})">Kosong (0)</button></div><div class="satset-row ${hasIsi?'single':''}"><div class="field"><label>${hasIsi ? `Jml Wadah Segel (× ${fmt(c.isiBersih)} ${esc(c.satuan)})` : `Jml Wadah Segel`}</label><input type="number" inputmode="numeric" min="0" step="1" placeholder="0 wadah" value="${c.qtySegel??""}" oninput="updateConvSatset(${Number(c.id)},'qtySegel',this.value)"></div>${!hasIsi ? `<div class="field"><label>Atau Total Isi Segel (${esc(c.satuan)})</label><input type="number" inputmode="decimal" min="0" step="any" placeholder="0 ${esc(c.satuan)}" value="${c.isiSegel??""}" oninput="updateConvSatset(${Number(c.id)},'isiSegel',this.value)"></div>` : ``}</div><div class="satset-row triple"><div class="field"><label>Berat Kotor Terbuka (${esc(c.satuan)})</label><input type="number" inputmode="decimal" min="0" step="any" placeholder="0" value="${c.fisikKotorTerbuka??""}" oninput="updateConvSatset(${Number(c.id)},'fisikKotorTerbuka',this.value)"></div><div class="field open-qty-col"><label>Jml Wadah Terbuka</label><input type="number" inputmode="numeric" min="0" step="1" placeholder="Otomatis 1" value="${openDisplay}" oninput="updateConvSatset(${Number(c.id)},'jumlahTerbuka',this.value)"></div></div><div class="calc-preview" id="prev-${c.id}">Total Bersih Booth: <b>${fmt(calc.total)} ${esc(c.satuan)}</b> (Segel: ${fmt(calc.sealed)} + Terbuka: ${fmt(calc.opened)})${hasTara?` · Tara: ${fmt(c.berat)}/wadah`:""}</div><div class="rule-hint">Tip sat-set: isi <b>Berat Kotor Terbuka</b> saja jika wadah terbukanya 1.</div></div>`;
   }).join("");
-
-  return `
-   <div class="paired-card ${allDone?'done':''}" data-group-item="${mainId}" id="group-${g.key}">
-    <div class="paired-header">
-     <div>
-      <div class="paired-title">${idx+1}. ${esc(g.title)}</div>
-      <div class="paired-sub">
-       ${g.raw ? `<span class="tag raw">RAW: ${esc(g.raw.plu)}</span>` : ''}
-       ${!showWhInput ? g.convs.map(c => `<span class="tag konversi">KONVERSI: ${esc(c.plu)}</span>`).join(' ') : ''}
-      </div>
-     </div>
-    </div>
-    <div class="paired-grid">
-     ${rawHTML}
-     ${convHTML}
-    </div>
-   </div>`;
+  return `<div class="paired-card ${allDone?'done':''}" data-group-item="${mainId}" id="group-${g.key}"><div class="paired-header"><div><div class="paired-title">${idx+1}. ${esc(g.title)}</div><div class="paired-sub">${g.raw ? `<span class="tag raw">RAW: ${esc(g.raw.plu)}</span>` : ''}${!showWhInput ? g.convs.map(c => `<span class="tag konversi">KONVERSI: ${esc(c.plu)}</span>`).join(' ') : ''}</div></div></div><div class="paired-grid">${rawHTML}${convHTML}</div></div>`;
  }).join("");
 }
-
 function updateConvSatset(id, key, val){
  const x = audit.items.find(a=>a.id===id); if(!x) return;
  if(val==="") x[key]=null;
- else {
-  const n = Number(val);
-  if(!Number.isFinite(n) || n<0) return;
-  x[key] = (key==="qtySegel"||key==="jumlahTerbuka") ? Math.floor(n) : n;
- }
- if(key==="qtySegel" && x.isiBersih!=null){
-  x.isiSegel = (Number(x.qtySegel)||0) * Number(x.isiBersih);
- }
- saveAudit();
- updateProgressOnly();
-
+ else { const n = Number(val); if(!Number.isFinite(n) || n<0) return; x[key] = (key==="qtySegel"||key==="jumlahTerbuka") ? Math.floor(n) : n; }
+ if(key==="qtySegel" && x.isiBersih!=null) x.isiSegel = (Number(x.qtySegel)||0) * Number(x.isiBersih);
+ saveAudit(); updateProgressOnly();
  const prev = $("prev-"+id);
- if(prev){
-  const calc = calcConvNet(x);
-  const hasTara = x.berat !== null && x.berat !== undefined;
-  prev.innerHTML = `Total Bersih Booth: <b>${fmt(calc.total)} ${esc(x.satuan)}</b> (Segel: ${fmt(calc.sealed)} + Terbuka: ${fmt(calc.opened)})${hasTara?` · Tara: ${fmt(x.berat)}/wadah`:""}`;
- }
+ if(prev){ const calc = calcConvNet(x); const hasTara = x.berat !== null && x.berat !== undefined; prev.innerHTML = `Total Bersih Booth: <b>${fmt(calc.total)} ${esc(x.satuan)}</b> (Segel: ${fmt(calc.sealed)} + Terbuka: ${fmt(calc.opened)})${hasTara?` · Tara: ${fmt(x.berat)}/wadah`:""}`; }
  const card = document.querySelector(`[data-group-item="${id}"]`);
- if(card){
-  const group = buildPairedGroups().find(gr => (gr.raw && gr.raw.id===id) || gr.convs.some(c=>c.id===id));
-  if(group){
-   const allItems = [group.raw, ...group.convs].filter(Boolean);
-   card.classList.toggle("done", allItems.every(isItemPhysicalDone));
-  }
- }
+ if(card){ const group = buildPairedGroups().find(gr => (gr.raw && gr.raw.id===id) || gr.convs.some(c=>c.id===id)); if(group){ const allItems = [group.raw, ...group.convs].filter(Boolean); card.classList.toggle("done", allItems.every(isItemPhysicalDone)); } }
 }
-
 function fillRemainingZeros(){
  const items = activeAuditItems();
  const unfilled = items.filter(x => !isItemPhysicalDone(x));
- if(!unfilled.length){
-  alert("Semua barang pada tahap ini sudah terisi.");
-  return;
- }
+ if(!unfilled.length){ alert("Semua barang pada tahap ini sudah terisi."); return; }
  if(!confirm(`Terdapat ${unfilled.length} item yang belum diisi. Isi otomatis dengan angka 0 (stok kosong)?`)) return;
-
  const whOnly = isWarehouseOnly();
  const isCombWh = isCombinedMode() && audit.combinedZone === "GUDANG";
  const showWhInput = whOnly || isCombWh;
-
  audit.items.forEach(x => {
-  if(showWhInput){
-   if(x.kategori==="RAW" && (x.gudangRaw===null || x.gudangRaw===undefined)) x.gudangRaw = 0;
-  } else {
+  if(showWhInput){ if(x.kategori==="RAW" && (x.gudangRaw===null || x.gudangRaw===undefined)) x.gudangRaw = 0; }
+  else {
    if(x.kategori==="RAW" && (x.boothRaw===null || x.boothRaw===undefined)) x.boothRaw = 0;
    if(x.kategori==="KONVERSI" && !isConvBoothFilled(x)){
-    if(x.qtySegel==null) x.qtySegel = 0;
-    if(x.isiSegel==null) x.isiSegel = 0;
-    if(x.jumlahTerbuka==null) x.jumlahTerbuka = 0;
-    if(x.fisikKotorTerbuka==null) x.fisikKotorTerbuka = 0;
-    x.modeFisik = "KOSONG";
+    if(x.qtySegel==null) x.qtySegel = 0; if(x.isiSegel==null) x.isiSegel = 0; if(x.jumlahTerbuka==null) x.jumlahTerbuka = 0; if(x.fisikKotorTerbuka==null) x.fisikKotorTerbuka = 0; x.modeFisik = "KOSONG";
    }
   }
  });
- saveAudit();
- updateProgressOnly();
- renderPairedCards();
+ saveAudit(); updateProgressOnly(); renderPairedCards();
 }
-
-function finishAuditEarly(){
- if(!audit || audit.status==="completed") return;
- finishAudit(true);
-}
-
+function finishAuditEarly(){ if(!audit || audit.status==="completed") return; finishAudit(true); }
 function finishAudit(forceEarly = false){
  const whOnly = isWarehouseOnly();
  const btOnly = isBoothOnly();
-
- const missingComp = audit.items.filter(x => {
-  if(whOnly && x.kategori==="KONVERSI") return false;
-  return x.komputer===null || x.komputer===undefined || !Number.isFinite(Number(x.komputer));
- }).length;
-
+ const missingComp = audit.items.filter(x => { if(whOnly && x.kategori==="KONVERSI") return false; return x.komputer===null || x.komputer===undefined || !Number.isFinite(Number(x.komputer)); }).length;
  const missingPhys = audit.items.filter(x => {
   if(whOnly && x.kategori==="KONVERSI") return false;
   if(whOnly) return x.gudangRaw===null || x.gudangRaw===undefined;
-  if(btOnly){
-   if(x.kategori==="RAW") return x.boothRaw===null || x.boothRaw===undefined;
-   return !isConvBoothFilled(x);
-  }
+  if(btOnly){ if(x.kategori==="RAW") return x.boothRaw===null || x.boothRaw===undefined; return !isConvBoothFilled(x); }
   const hasWh = x.kategori==="RAW" && x.gudangRaw!==null && x.gudangRaw!==undefined;
   const hasBt = x.kategori==="RAW" ? (x.boothRaw!==null && x.boothRaw!==undefined) : isConvBoothFilled(x);
   return !(hasWh || hasBt);
  }).length;
-
  if(missingComp > 0 || missingPhys > 0 || forceEarly){
-  const msg =
-   `PERINGATAN SELESAIKAN AUDIT:\n` +
-   `• Stok komputer belum diisi: ${missingComp} item\n` +
-   `• Stok fisik belum diisi: ${missingPhys} item\n\n` +
-   `Item yang belum diisi akan otomatis dianggap 0. Apakah Anda menyetujui untuk menyelesaikan audit sekarang?`;
-  if(!confirm(msg)) return;
+  if(!confirm(`PERINGATAN SELESAIKAN AUDIT:\n• Stok komputer belum diisi: ${missingComp} item\n• Stok fisik belum diisi: ${missingPhys} item\n\nItem yang belum diisi akan otomatis dianggap 0. Selesaikan audit sekarang?`)) return;
  }
-
  if(!whOnly){
   const invalidOpened = categoryItems("KONVERSI").find(x => {
-   const calc = calcConvNet(x);
-   const gross = Number(x.fisikKotorTerbuka)||0;
-   const tara = (Number(x.berat)||0) * calc.openCount;
+   const calc = calcConvNet(x); const gross = Number(x.fisikKotorTerbuka)||0; const tara = (Number(x.berat)||0) * calc.openCount;
    return calc.openCount > 0 && gross < tara;
   });
-  if(invalidOpened){
-   alert(`Berat kotor terbuka untuk PLU ${invalidOpened.plu} (${invalidOpened.nama}) lebih kecil dari total berat kemasan (tara). Periksa kembali angkanya.`);
-   return;
-  }
+  if(invalidOpened){ alert(`Berat kotor terbuka untuk PLU ${invalidOpened.plu} (${invalidOpened.nama}) lebih kecil dari berat kemasan (tara).`); return; }
  }
-
  audit.items.forEach(x => {
-  if(x.komputer===null || x.komputer===undefined || !Number.isFinite(Number(x.komputer))){
-   x.komputer = 0;
-  }
+  if(x.komputer===null || x.komputer===undefined || !Number.isFinite(Number(x.komputer))) x.komputer = 0;
   if(whOnly){
-   if(x.kategori==="RAW"){
-    const gRaw = Number(x.gudangRaw)||0;
-    x.gudangRaw = gRaw;
-    x.boothRaw = 0;
-    x.fisikKotor = gRaw;
-    x.fisikBersih = gRaw;
-    x.modeFisik = gRaw>0 ? "GUDANG (SEGEL)" : "KOSONG";
-   } else {
-    x.qtySegel = 0; x.isiSegel = 0; x.jumlahTerbuka = 0; x.fisikKotorTerbuka = 0;
-    x.fisikKotor = 0; x.fisikBersih = 0;
-    x.modeFisik = "TIDAK DIAUDIT (GUDANG)";
-   }
+   if(x.kategori==="RAW"){ const gRaw = Number(x.gudangRaw)||0; x.gudangRaw = gRaw; x.boothRaw = 0; x.fisikKotor = gRaw; x.fisikBersih = gRaw; x.modeFisik = gRaw>0 ? "GUDANG (SEGEL)" : "KOSONG"; }
+   else { x.qtySegel = 0; x.isiSegel = 0; x.jumlahTerbuka = 0; x.fisikKotorTerbuka = 0; x.fisikKotor = 0; x.fisikBersih = 0; x.modeFisik = "TIDAK DIAUDIT (GUDANG)"; }
   } else if(btOnly){
-   if(x.kategori==="RAW"){
-    const bRaw = Number(x.boothRaw)||0;
-    x.gudangRaw = 0;
-    x.boothRaw = bRaw;
-    x.fisikKotor = bRaw;
-    x.fisikBersih = bRaw;
-    x.modeFisik = bRaw>0 ? "BOOTH" : "KOSONG";
-   } else {
-    applyConvBoothCalculation(x);
-   }
+   if(x.kategori==="RAW"){ const bRaw = Number(x.boothRaw)||0; x.gudangRaw = 0; x.boothRaw = bRaw; x.fisikKotor = bRaw; x.fisikBersih = bRaw; x.modeFisik = bRaw>0 ? "BOOTH" : "KOSONG"; }
+   else applyConvBoothCalculation(x);
   } else {
-   if(x.kategori==="RAW"){
-    const gRaw = Number(x.gudangRaw)||0;
-    const bRaw = Number(x.boothRaw)||0;
-    x.gudangRaw = gRaw;
-    x.boothRaw = bRaw;
-    const tot = gRaw + bRaw;
-    x.fisikKotor = tot;
-    x.fisikBersih = tot;
-    x.modeFisik = `Gudang: ${fmt(gRaw)} + Booth: ${fmt(bRaw)}`;
-   } else {
-    applyConvBoothCalculation(x);
-   }
+   if(x.kategori==="RAW"){ const gRaw = Number(x.gudangRaw)||0; const bRaw = Number(x.boothRaw)||0; x.gudangRaw = gRaw; x.boothRaw = bRaw; const tot = gRaw + bRaw; x.fisikKotor = tot; x.fisikBersih = tot; x.modeFisik = `Gudang: ${fmt(gRaw)} + Booth: ${fmt(bRaw)}`; }
+   else applyConvBoothCalculation(x);
   }
   x.fisikBersihAsli = x.fisikBersih;
   x.selisihAsli = x.fisikBersihAsli - Number(x.komputer);
@@ -1377,311 +1114,121 @@ function finishAudit(forceEarly = false){
   x.selisih = x.selisihAsli;
   x.hasilStatus = x.hasilStatusAsli;
  });
-
- audit.balanced = false;
- audit.compareLogs = [];
- audit.manualCompares = [];
- selectedCompareKeys.clear();
- audit.status="completed";
- audit.selesaiPada=new Date().toISOString();
- audit.saved=false;
- saveAudit();
- renderAudit();
+ audit.balanced = false; audit.compareLogs = []; audit.manualCompares = []; selectedCompareKeys.clear();
+ audit.status="completed"; audit.selesaiPada=new Date().toISOString(); audit.saved=false;
+ saveAudit(); renderAudit();
 }
-
 function applyConvBoothCalculation(x){
  const calc = calcConvNet(x);
- x.qtySegel = Number(x.qtySegel)||0;
- x.isiSegel = calc.sealed;
- x.jumlahTerbuka = calc.openCount;
- x.fisikKotorTerbuka = Number(x.fisikKotorTerbuka)||0;
- x.fisikBersih = calc.total;
- x.fisikKotor = calc.sealed + x.fisikKotorTerbuka;
-
+ x.qtySegel = Number(x.qtySegel)||0; x.isiSegel = calc.sealed; x.jumlahTerbuka = calc.openCount; x.fisikKotorTerbuka = Number(x.fisikKotorTerbuka)||0;
+ x.fisikBersih = calc.total; x.fisikKotor = calc.sealed + x.fisikKotorTerbuka;
  if(x.qtySegel>0 && calc.openCount>0) x.modeFisik = "BOOTH CAMPURAN";
  else if(x.qtySegel>0) x.modeFisik = "BOOTH SEGEL";
  else if(calc.openCount>0) x.modeFisik = "BOOTH TERBUKA";
  else x.modeFisik = "KOSONG";
 }
-
 function resetAuditToOriginal(report){
  report.items.forEach(x => {
-  if(x.fisikBersihAsli !== null && x.fisikBersihAsli !== undefined){
-   x.fisikBersih = Number(x.fisikBersihAsli);
-  }
+  if(x.fisikBersihAsli !== null && x.fisikBersihAsli !== undefined) x.fisikBersih = Number(x.fisikBersihAsli);
   x.penyeimbangRAW = 0;
   x.selisih = Number(x.fisikBersih) - Number(x.komputer||0);
   x.hasilStatus = x.selisih>0 ? "PLUS" : x.selisih<0 ? "MINUS" : "SESUAI";
  });
- report.balanced = false;
- report.compareLogs = [];
+ report.balanced = false; report.compareLogs = [];
 }
-
 function getAllCompareCandidates(report){
  const items = report.items || [];
  const rawByPlu = new Map(items.filter(x=>x.kategori==="RAW").map(x=>[x.plu, x]));
- const candidates = [];
- const usedPairIds = new Set();
-
+ const candidates = []; const usedPairIds = new Set();
  items.filter(x=>x.kategori==="KONVERSI").forEach(conv => {
-  const links = parseRawLinks(conv.rawLink);
-  links.forEach(rawPlu => {
-   const raw = rawByPlu.get(rawPlu);
-   if(!raw) return;
-   const key = `LINK_${raw.id}_${conv.id}`;
-   if(usedPairIds.has(key)) return;
-   usedPairIds.add(key);
-
-   const ratio = Number(conv.isiBersih);
-   const validRatio = Number.isFinite(ratio) && ratio > 0;
-
-   if(raw.selisih > 0 && conv.selisih < 0){
-    candidates.push({key,source:"AUTO",direction:"RAW_TO_CONV",raw,conv,ratio,validRatio});
-   } else if(conv.selisih > 0 && raw.selisih < 0){
-    candidates.push({key,source:"AUTO",direction:"CONV_TO_RAW",raw,conv,ratio,validRatio});
-   }
+  parseRawLinks(conv.rawLink).forEach(rawPlu => {
+   const raw = rawByPlu.get(rawPlu); if(!raw) return;
+   const key = `LINK_${raw.id}_${conv.id}`; if(usedPairIds.has(key)) return; usedPairIds.add(key);
+   const ratio = Number(conv.isiBersih); const validRatio = Number.isFinite(ratio) && ratio > 0;
+   if(raw.selisih > 0 && conv.selisih < 0) candidates.push({key,source:"AUTO",direction:"RAW_TO_CONV",raw,conv,ratio,validRatio});
+   else if(conv.selisih > 0 && raw.selisih < 0) candidates.push({key,source:"AUTO",direction:"CONV_TO_RAW",raw,conv,ratio,validRatio});
   });
  });
-
  (report.manualCompares || []).forEach((mc, idx) => {
-  const plusItem = items.find(x=>x.id===mc.plusId);
-  const minusItem = items.find(x=>x.id===mc.minusId);
+  const plusItem = items.find(x=>x.id===mc.plusId); const minusItem = items.find(x=>x.id===mc.minusId);
   if(!plusItem || !minusItem) return;
-  const key = `MANUAL_${idx}_${plusItem.id}_${minusItem.id}`;
-  const ratio = Number(mc.ratio) || 1;
-  candidates.push({
-   key,
-   source:"MANUAL",
-   direction:plusItem.kategori==="RAW"?"RAW_TO_CONV":"CONV_TO_RAW",
-   raw:plusItem.kategori==="RAW"?plusItem:minusItem,
-   conv:plusItem.kategori==="KONVERSI"?plusItem:minusItem,
-   plusItem,
-   minusItem,
-   ratio,
-   validRatio:Number.isFinite(ratio) && ratio > 0
-  });
+  const key = `MANUAL_${idx}_${plusItem.id}_${minusItem.id}`; const ratio = Number(mc.ratio) || 1;
+  candidates.push({key,source:"MANUAL",direction:plusItem.kategori==="RAW"?"RAW_TO_CONV":"CONV_TO_RAW",raw:plusItem.kategori==="RAW"?plusItem:minusItem,conv:plusItem.kategori==="KONVERSI"?plusItem:minusItem,plusItem,minusItem,ratio,validRatio:Number.isFinite(ratio) && ratio > 0});
  });
-
  const simSelisih = new Map(items.map(x => [x.id, Number(x.selisih)||0]));
-
  return candidates.map(c => {
   if(c.source === "MANUAL"){
-   const pSel = simSelisih.get(c.plusItem.id) || 0;
-   const mSel = simSelisih.get(c.minusItem.id) || 0;
+   const pSel = simSelisih.get(c.plusItem.id) || 0; const mSel = simSelisih.get(c.minusItem.id) || 0;
    let plusShift = 0, minusShift = 0;
-   if(c.validRatio && pSel > 0 && mSel < 0){
-    const maxFromPlus = pSel * c.ratio;
-    const neededByMinus = Math.abs(mSel);
-    minusShift = Math.min(maxFromPlus, neededByMinus);
-    plusShift = minusShift / c.ratio;
-    simSelisih.set(c.plusItem.id, pSel - plusShift);
-    simSelisih.set(c.minusItem.id, mSel + minusShift);
-   }
+   if(c.validRatio && pSel > 0 && mSel < 0){ minusShift = Math.min(pSel * c.ratio, Math.abs(mSel)); plusShift = minusShift / c.ratio; simSelisih.set(c.plusItem.id, pSel - plusShift); simSelisih.set(c.minusItem.id, mSel + minusShift); }
    return { ...c, rawShift: plusShift, convShift: minusShift, plusShift, minusShift };
   }
-
-  const rSel = simSelisih.get(c.raw.id) || 0;
-  const cSel = simSelisih.get(c.conv.id) || 0;
+  const rSel = simSelisih.get(c.raw.id) || 0; const cSel = simSelisih.get(c.conv.id) || 0;
   let rawShift = 0, convShift = 0;
-
   if(c.validRatio){
-   if(c.direction === "RAW_TO_CONV" && rSel > 0 && cSel < 0){
-    const convDeficitInRaw = Math.abs(cSel) / c.ratio;
-    rawShift = Math.min(rSel, convDeficitInRaw);
-    convShift = rawShift * c.ratio;
-    simSelisih.set(c.raw.id, rSel - rawShift);
-    simSelisih.set(c.conv.id, cSel + convShift);
-   } else if(c.direction === "CONV_TO_RAW" && cSel > 0 && rSel < 0){
-    const convSurplusInRaw = cSel / c.ratio;
-    rawShift = Math.min(Math.abs(rSel), convSurplusInRaw);
-    convShift = rawShift * c.ratio;
-    simSelisih.set(c.raw.id, rSel + rawShift);
-    simSelisih.set(c.conv.id, cSel - convShift);
-   }
+   if(c.direction === "RAW_TO_CONV" && rSel > 0 && cSel < 0){ rawShift = Math.min(rSel, Math.abs(cSel) / c.ratio); convShift = rawShift * c.ratio; simSelisih.set(c.raw.id, rSel - rawShift); simSelisih.set(c.conv.id, cSel + convShift); }
+   else if(c.direction === "CONV_TO_RAW" && cSel > 0 && rSel < 0){ rawShift = Math.min(Math.abs(rSel), cSel / c.ratio); convShift = rawShift * c.ratio; simSelisih.set(c.raw.id, rSel + rawShift); simSelisih.set(c.conv.id, cSel - convShift); }
   }
-
   return { ...c, rawShift, convShift };
  });
 }
-
-function toggleCompareKey(key, checked){
- if(checked) selectedCompareKeys.add(key);
- else selectedCompareKeys.delete(key);
-}
-
-function toggleAllCompareKeys(checked){
- if(!audit) return;
- const list = getAllCompareCandidates(audit);
- selectedCompareKeys.clear();
- if(checked) list.forEach(c => selectedCompareKeys.add(c.key));
- renderCurrentResult();
-}
-
+function toggleCompareKey(key, checked){ if(checked) selectedCompareKeys.add(key); else selectedCompareKeys.delete(key); }
+function toggleAllCompareKeys(checked){ if(!audit) return; const list = getAllCompareCandidates(audit); selectedCompareKeys.clear(); if(checked) list.forEach(c => selectedCompareKeys.add(c.key)); renderCurrentResult(); }
 function addManualCompare(){
  if(!audit) return;
- const plusId = Number($("mcPlusSelect")?.value);
- const minusId = Number($("mcMinusSelect")?.value);
- const ratio = Number($("mcRatioInput")?.value);
+ const plusId = Number($("mcPlusSelect")?.value); const minusId = Number($("mcMinusSelect")?.value); const ratio = Number($("mcRatioInput")?.value);
  if(!plusId || !minusId){alert("Pilih item PLUS dan item MINUS terlebih dahulu.");return}
  if(plusId === minusId){alert("Item PLUS dan MINUS tidak boleh sama.");return}
- if(!Number.isFinite(ratio) || ratio <= 0){alert("Masukkan rasio konversi yang valid (contoh: 750 jika 1 RAW = 750 ML/Gram).");return}
- audit.manualCompares = audit.manualCompares || [];
- audit.manualCompares.push({plusId, minusId, ratio});
- saveAudit();
- renderCurrentResult();
+ if(!Number.isFinite(ratio) || ratio <= 0){alert("Masukkan rasio konversi yang valid.");return}
+ audit.manualCompares = audit.manualCompares || []; audit.manualCompares.push({plusId, minusId, ratio});
+ saveAudit(); renderCurrentResult();
 }
-
-function removeManualCompare(idx){
- if(!audit || !audit.manualCompares) return;
- audit.manualCompares.splice(idx, 1);
- saveAudit();
- renderCurrentResult();
-}
+function removeManualCompare(idx){ if(!audit || !audit.manualCompares) return; audit.manualCompares.splice(idx, 1); saveAudit(); renderCurrentResult(); }
 
 function applyCompareBalance(applyAll = true){
  if(!audit || audit.status!=="completed") return;
  resetAuditToOriginal(audit);
-
  const allCandidates = getAllCompareCandidates(audit);
- const targets = applyAll
-  ? allCandidates
-  : allCandidates.filter(c => selectedCompareKeys.has(c.key));
-
- let adjustedCount = 0;
- const missingRatio = [];
- const logs = [];
-
+ const targets = applyAll ? allCandidates : allCandidates.filter(c => selectedCompareKeys.has(c.key));
+ let adjustedCount = 0; const missingRatio = []; const logs = [];
  targets.forEach(c => {
-  if(!c.validRatio){
-   missingRatio.push(c.conv ? c.conv.nama : c.minusItem.nama);
-   return;
-  }
-
+  if(!c.validRatio){ missingRatio.push(c.conv ? c.conv.nama : c.minusItem.nama); return; }
   if(c.source === "MANUAL"){
-   const pItem = audit.items.find(x=>x.id===c.plusItem.id);
-   const mItem = audit.items.find(x=>x.id===c.minusItem.id);
-   if(!pItem || !mItem) return;
-   const livePlus = Number(pItem.selisih)||0;
-   const liveMinus = Number(mItem.selisih)||0;
-   if(livePlus <= 0 || liveMinus >= 0) return;
-
-   const minusShift = Math.min(livePlus * c.ratio, Math.abs(liveMinus));
-   const plusShift = minusShift / c.ratio;
-   if(plusShift <= 0) return;
-
-   pItem.fisikBersih = Number(pItem.fisikBersih) - plusShift;
-   pItem.penyeimbangRAW = Number(pItem.penyeimbangRAW||0) - plusShift;
-   pItem.selisih = Number(pItem.fisikBersih) - Number(pItem.komputer||0);
-   pItem.hasilStatus = pItem.selisih>0 ? "PLUS" : pItem.selisih<0 ? "MINUS" : "SESUAI";
-
-   mItem.fisikBersih = Number(mItem.fisikBersih) + minusShift;
-   mItem.penyeimbangRAW = Number(mItem.penyeimbangRAW||0) + minusShift;
-   mItem.selisih = Number(mItem.fisikBersih) - Number(mItem.komputer||0);
-   mItem.hasilStatus = mItem.selisih>0 ? "PLUS" : mItem.selisih<0 ? "MINUS" : "SESUAI";
+   const pItem = audit.items.find(x=>x.id===c.plusItem.id); const mItem = audit.items.find(x=>x.id===c.minusItem.id); if(!pItem || !mItem) return;
+   const livePlus = Number(pItem.selisih)||0; const liveMinus = Number(mItem.selisih)||0; if(livePlus <= 0 || liveMinus >= 0) return;
+   const minusShift = Math.min(livePlus * c.ratio, Math.abs(liveMinus)); const plusShift = minusShift / c.ratio; if(plusShift <= 0) return;
+   pItem.fisikBersih = Number(pItem.fisikBersih) - plusShift; pItem.penyeimbangRAW = Number(pItem.penyeimbangRAW||0) - plusShift; pItem.selisih = Number(pItem.fisikBersih) - Number(pItem.komputer||0); pItem.hasilStatus = pItem.selisih>0 ? "PLUS" : pItem.selisih<0 ? "MINUS" : "SESUAI";
+   mItem.fisikBersih = Number(mItem.fisikBersih) + minusShift; mItem.penyeimbangRAW = Number(mItem.penyeimbangRAW||0) + minusShift; mItem.selisih = Number(mItem.fisikBersih) - Number(mItem.komputer||0); mItem.hasilStatus = mItem.selisih>0 ? "PLUS" : mItem.selisih<0 ? "MINUS" : "SESUAI";
    adjustedCount++;
-   logs.push({
-    tipe: "MANUAL",
-    fromNama: `${pItem.nama} (${pItem.kategori})`,
-    toNama: `${mItem.nama} (${mItem.kategori})`,
-    fromDelta: -plusShift,
-    fromSatuan: pItem.satuan,
-    toDelta: minusShift,
-    toSatuan: mItem.satuan,
-    rasio: c.ratio,
-    selisihAkhirFrom: pItem.selisih,
-    selisihAkhirTo: mItem.selisih
-   });
+   logs.push({ tipe:"MANUAL", fromNama:`${pItem.nama} (${pItem.kategori})`, toNama:`${mItem.nama} (${mItem.kategori})`, fromDelta:-plusShift, fromSatuan:pItem.satuan, toDelta:minusShift, toSatuan:mItem.satuan, rasio:c.ratio, selisihAkhirFrom:pItem.selisih, selisihAkhirTo:mItem.selisih });
    return;
   }
-
-  const raw = audit.items.find(x=>x.id===c.raw.id);
-  const conv = audit.items.find(x=>x.id===c.conv.id);
-  if(!raw || !conv) return;
-
-  const liveRawSel = Number(raw.selisih)||0;
-  const liveConvSel = Number(conv.selisih)||0;
-
+  const raw = audit.items.find(x=>x.id===c.raw.id); const conv = audit.items.find(x=>x.id===c.conv.id); if(!raw || !conv) return;
+  const liveRawSel = Number(raw.selisih)||0; const liveConvSel = Number(conv.selisih)||0;
   if(c.direction === "RAW_TO_CONV" && liveRawSel > 0 && liveConvSel < 0){
-   const rawShift = Math.min(liveRawSel, Math.abs(liveConvSel) / c.ratio);
-   const convShift = rawShift * c.ratio;
-   if(rawShift <= 0) return;
-
-   raw.fisikBersih = Number(raw.fisikBersih) - rawShift;
-   raw.penyeimbangRAW = Number(raw.penyeimbangRAW||0) - rawShift;
-   raw.selisih = Number(raw.fisikBersih) - Number(raw.komputer||0);
-   raw.hasilStatus = raw.selisih>0 ? "PLUS" : raw.selisih<0 ? "MINUS" : "SESUAI";
-
-   conv.fisikBersih = Number(conv.fisikBersih) + convShift;
-   conv.penyeimbangRAW = Number(conv.penyeimbangRAW||0) + convShift;
-   conv.selisih = Number(conv.fisikBersih) - Number(conv.komputer||0);
-   conv.hasilStatus = conv.selisih>0 ? "PLUS" : conv.selisih<0 ? "MINUS" : "SESUAI";
+   const rawShift = Math.min(liveRawSel, Math.abs(liveConvSel) / c.ratio); const convShift = rawShift * c.ratio; if(rawShift <= 0) return;
+   raw.fisikBersih = Number(raw.fisikBersih) - rawShift; raw.penyeimbangRAW = Number(raw.penyeimbangRAW||0) - rawShift; raw.selisih = Number(raw.fisikBersih) - Number(raw.komputer||0); raw.hasilStatus = raw.selisih>0 ? "PLUS" : raw.selisih<0 ? "MINUS" : "SESUAI";
+   conv.fisikBersih = Number(conv.fisikBersih) + convShift; conv.penyeimbangRAW = Number(conv.penyeimbangRAW||0) + convShift; conv.selisih = Number(conv.fisikBersih) - Number(conv.komputer||0); conv.hasilStatus = conv.selisih>0 ? "PLUS" : conv.selisih<0 ? "MINUS" : "SESUAI";
    adjustedCount++;
-   logs.push({
-    tipe: "RAW → KONVERSI",
-    fromNama: `${raw.nama} (RAW · PLU ${raw.plu})`,
-    toNama: `${conv.nama} (KONVERSI · PLU ${conv.plu})`,
-    fromDelta: -rawShift,
-    fromSatuan: raw.satuan,
-    toDelta: convShift,
-    toSatuan: conv.satuan,
-    rasio: c.ratio,
-    selisihAkhirFrom: raw.selisih,
-    selisihAkhirTo: conv.selisih
-   });
+   logs.push({ tipe:"RAW → KONVERSI", fromNama:`${raw.nama} (RAW · PLU ${raw.plu})`, toNama:`${conv.nama} (KONVERSI · PLU ${conv.plu})`, fromDelta:-rawShift, fromSatuan:raw.satuan, toDelta:convShift, toSatuan:conv.satuan, rasio:c.ratio, selisihAkhirFrom:raw.selisih, selisihAkhirTo:conv.selisih });
   } else if(c.direction === "CONV_TO_RAW" && liveConvSel > 0 && liveRawSel < 0){
-   const rawShift = Math.min(Math.abs(liveRawSel), liveConvSel / c.ratio);
-   const convShift = rawShift * c.ratio;
-   if(rawShift <= 0) return;
-
-   raw.fisikBersih = Number(raw.fisikBersih) + rawShift;
-   raw.penyeimbangRAW = Number(raw.penyeimbangRAW||0) + rawShift;
-   raw.selisih = Number(raw.fisikBersih) - Number(raw.komputer||0);
-   raw.hasilStatus = raw.selisih>0 ? "PLUS" : raw.selisih<0 ? "MINUS" : "SESUAI";
-
-   conv.fisikBersih = Number(conv.fisikBersih) - convShift;
-   conv.penyeimbangRAW = Number(conv.penyeimbangRAW||0) - convShift;
-   conv.selisih = Number(conv.fisikBersih) - Number(conv.komputer||0);
-   conv.hasilStatus = conv.selisih>0 ? "PLUS" : conv.selisih<0 ? "MINUS" : "SESUAI";
+   const rawShift = Math.min(Math.abs(liveRawSel), liveConvSel / c.ratio); const convShift = rawShift * c.ratio; if(rawShift <= 0) return;
+   raw.fisikBersih = Number(raw.fisikBersih) + rawShift; raw.penyeimbangRAW = Number(raw.penyeimbangRAW||0) + rawShift; raw.selisih = Number(raw.fisikBersih) - Number(raw.komputer||0); raw.hasilStatus = raw.selisih>0 ? "PLUS" : raw.selisih<0 ? "MINUS" : "SESUAI";
+   conv.fisikBersih = Number(conv.fisikBersih) - convShift; conv.penyeimbangRAW = Number(conv.penyeimbangRAW||0) - convShift; conv.selisih = Number(conv.fisikBersih) - Number(conv.komputer||0); conv.hasilStatus = conv.selisih>0 ? "PLUS" : conv.selisih<0 ? "MINUS" : "SESUAI";
    adjustedCount++;
-   logs.push({
-    tipe: "KONVERSI → RAW",
-    fromNama: `${conv.nama} (KONVERSI · PLU ${conv.plu})`,
-    toNama: `${raw.nama} (RAW · PLU ${raw.plu})`,
-    fromDelta: -convShift,
-    fromSatuan: conv.satuan,
-    toDelta: rawShift,
-    toSatuan: raw.satuan,
-    rasio: c.ratio,
-    selisihAkhirFrom: conv.selisih,
-    selisihAkhirTo: raw.selisih
-   });
+   logs.push({ tipe:"KONVERSI → RAW", fromNama:`${conv.nama} (KONVERSI · PLU ${conv.plu})`, toNama:`${raw.nama} (RAW · PLU ${raw.plu})`, fromDelta:-convShift, fromSatuan:conv.satuan, toDelta:rawShift, toSatuan:raw.satuan, rasio:c.ratio, selisihAkhirFrom:conv.selisih, selisihAkhirTo:raw.selisih });
   }
  });
-
  if(adjustedCount===0){
   let msg = "Tidak ada item kendala yang dapat dikompair.";
-  if(missingRatio.length){
-   msg += " Isi dulu 'Isi Bersih per Kemasan Segel' di Master PLU untuk: " + [...new Set(missingRatio)].join(", ");
-  }
-  alert(msg);
-  return;
+  if(missingRatio.length) msg += " Isi dulu 'Isi Bersih per Kemasan Segel' di Master PLU untuk: " + [...new Set(missingRatio)].join(", ");
+  alert(msg); return;
  }
-
- audit.balanced = true;
- audit.compareLogs = logs;
- audit.saved = false;
- saveAudit();
- renderCurrentResult();
- alert(`Berhasil mengompair ${adjustedCount} pasangan item. Hasil audit dan selisih langsung diperbarui!`);
+ audit.balanced = true; audit.compareLogs = logs; audit.saved = false;
+ saveAudit(); renderCurrentResult();
+ alert(`Berhasil mengompair ${adjustedCount} pasangan item.`);
 }
-
-function undoCompareBalance(){
- if(!audit || !audit.balanced) return;
- resetAuditToOriginal(audit);
- audit.saved = false;
- saveAudit();
- renderCurrentResult();
-}
+function undoCompareBalance(){ if(!audit || !audit.balanced) return; resetAuditToOriginal(audit); audit.saved = false; saveAudit(); renderCurrentResult(); }
 
 function comparePanelHTML(report){
  if(!report || report.lokasi === "GUDANG") return "";
@@ -1689,276 +1236,91 @@ function comparePanelHTML(report){
  const troubledItems = items.filter(x => Number(x.selisih) !== 0);
  const plusItems = items.filter(x => Number(x.selisih) > 0);
  const minusItems = items.filter(x => Number(x.selisih) < 0);
-
  if(!troubledItems.length && !report.balanced) return "";
-
  const candidates = getAllCompareCandidates(report);
- if(selectedCompareKeys.size === 0 && candidates.length > 0){
-  candidates.forEach(c => selectedCompareKeys.add(c.key));
- }
-
+ if(selectedCompareKeys.size === 0 && candidates.length > 0) candidates.forEach(c => selectedCompareKeys.add(c.key));
  const rows = candidates.map((c, idx) => {
   const checked = selectedCompareKeys.has(c.key) ? "checked" : "";
   if(c.source === "MANUAL"){
    const mIdx = (report.manualCompares||[]).findIndex(m => m.plusId===c.plusItem.id && m.minusId===c.minusItem.id);
-   return `
-    <div class="compare-item">
-     <input type="checkbox" ${checked} onchange="toggleCompareKey('${esc(c.key)}', this.checked)">
-     <div class="compare-item-body">
-      <div><b>#${idx+1} [MANUAL] ${esc(c.plusItem.nama)}</b> (PLUS +${fmt(c.plusItem.selisih)} ${esc(c.plusItem.satuan)}) ↔ <b>${esc(c.minusItem.nama)}</b> (MINUS ${fmt(c.minusItem.selisih)} ${esc(c.minusItem.satuan)}) <button type="button" class="zero-btn" style="margin-left:6px" onclick="removeManualCompare(${mIdx})">Hapus</button></div>
-      <div style="margin-top:4px">Rencana Kompair: kurangi <b>-${fmt(c.plusShift)} ${esc(c.plusItem.satuan)}</b> dari item PLUS untuk menambah <b>+${fmt(c.minusShift)} ${esc(c.minusItem.satuan)}</b> ke item MINUS (rasio 1 : ${fmt(c.ratio)}).</div>
-     </div>
-    </div>`;
+   return `<div class="compare-item"><input type="checkbox" ${checked} onchange="toggleCompareKey('${esc(c.key)}', this.checked)"><div class="compare-item-body"><div><b>#${idx+1} [MANUAL] ${esc(c.plusItem.nama)}</b> (PLUS +${fmt(c.plusItem.selisih)} ${esc(c.plusItem.satuan)}) ↔ <b>${esc(c.minusItem.nama)}</b> (MINUS ${fmt(c.minusItem.selisih)} ${esc(c.minusItem.satuan)}) <button type="button" class="zero-btn" style="margin-left:6px" onclick="removeManualCompare(${mIdx})">Hapus</button></div><div style="margin-top:4px">Rencana Kompair: kurangi <b>-${fmt(c.plusShift)} ${esc(c.plusItem.satuan)}</b> dari item PLUS untuk menambah <b>+${fmt(c.minusShift)} ${esc(c.minusItem.satuan)}</b> ke item MINUS (rasio 1 : ${fmt(c.ratio)}).</div></div></div>`;
   }
-
   const isRawPlus = c.direction === "RAW_TO_CONV";
-  const badge = isRawPlus
-   ? `<span class="tag raw">RAW PLUS</span> ↔ <span class="tag konversi">KONVERSI MINUS</span>`
-   : `<span class="tag konversi">KONVERSI PLUS</span> ↔ <span class="tag raw">RAW MINUS</span>`;
-
+  const badge = isRawPlus ? `<span class="tag raw">RAW PLUS</span> ↔ <span class="tag konversi">KONVERSI MINUS</span>` : `<span class="tag konversi">KONVERSI PLUS</span> ↔ <span class="tag raw">RAW MINUS</span>`;
   const compareLine = isRawPlus
    ? `Komputer RAW: <b>${fmt(c.raw.komputer)} ${esc(c.raw.satuan)}</b> | Fisik RAW: <b>${fmt(c.raw.fisikBersih)} ${esc(c.raw.satuan)}</b> (Selisih +${fmt(c.raw.selisih)}) — Komputer KONVERSI: <b>${fmt(c.conv.komputer)} ${esc(c.conv.satuan)}</b> | Fisik KONVERSI: <b>${fmt(c.conv.fisikBersih)} ${esc(c.conv.satuan)}</b> (Selisih ${fmt(c.conv.selisih)})`
    : `Komputer KONVERSI: <b>${fmt(c.conv.komputer)} ${esc(c.conv.satuan)}</b> | Fisik KONVERSI: <b>${fmt(c.conv.fisikBersih)} ${esc(c.conv.satuan)}</b> (Selisih ${fmt(c.conv.selisih)}) — Komputer RAW: <b>${fmt(c.raw.komputer)} ${esc(c.raw.satuan)}</b> | Fisik RAW: <b>${fmt(c.raw.fisikBersih)} ${esc(c.raw.satuan)}</b> (Selisih ${fmt(c.raw.selisih)})`;
-
-  const actionLine = !c.validRatio
-   ? `<span class="minus">⚠ Isi Bersih per Kemasan Segel belum diisi di Master PLU</span>`
-   : isRawPlus
-    ? `Rencana Kompair: tarik <b>-${fmt(c.rawShift)} ${esc(c.raw.satuan)}</b> fisik RAW menjadi <b>+${fmt(c.convShift)} ${esc(c.conv.satuan)}</b> KONVERSI (rasio ${fmt(c.ratio)} ${esc(c.conv.satuan)}/RAW).`
-    : `Rencana Kompair: tarik <b>-${fmt(c.convShift)} ${esc(c.conv.satuan)}</b> KONVERSI menjadi <b>+${fmt(c.rawShift)} ${esc(c.raw.satuan)}</b> RAW (rasio ${fmt(c.ratio)} ${esc(c.conv.satuan)}/RAW).`;
-
-  return `
-   <div class="compare-item">
-    <input type="checkbox" ${checked} onchange="toggleCompareKey('${esc(c.key)}', this.checked)">
-    <div class="compare-item-body">
-     <div><b>#${idx+1} ${esc(c.raw.nama)}</b> (PLU ${esc(c.raw.plu)}) &amp; <b>${esc(c.conv.nama)}</b> (PLU ${esc(c.conv.plu)}) &nbsp; ${badge}</div>
-     <div style="margin-top:4px">${compareLine}</div>
-     <div style="margin-top:4px">${actionLine}</div>
-    </div>
-   </div>`;
+  const actionLine = !c.validRatio ? `<span class="minus">⚠ Isi Bersih per Kemasan Segel belum diisi di Master PLU</span>`
+   : isRawPlus ? `Rencana Kompair: tarik <b>-${fmt(c.rawShift)} ${esc(c.raw.satuan)}</b> fisik RAW menjadi <b>+${fmt(c.convShift)} ${esc(c.conv.satuan)}</b> KONVERSI (rasio ${fmt(c.ratio)} ${esc(c.conv.satuan)}/RAW).`
+   : `Rencana Kompair: tarik <b>-${fmt(c.convShift)} ${esc(c.conv.satuan)}</b> KONVERSI menjadi <b>+${fmt(c.rawShift)} ${esc(c.raw.satuan)}</b> RAW (rasio ${fmt(c.ratio)} ${esc(c.conv.satuan)}/RAW).`;
+  return `<div class="compare-item"><input type="checkbox" ${checked} onchange="toggleCompareKey('${esc(c.key)}', this.checked)"><div class="compare-item-body"><div><b>#${idx+1} ${esc(c.raw.nama)}</b> (PLU ${esc(c.raw.plu)}) &amp; <b>${esc(c.conv.nama)}</b> (PLU ${esc(c.conv.plu)}) &nbsp; ${badge}</div><div style="margin-top:4px">${compareLine}</div><div style="margin-top:4px">${actionLine}</div></div></div>`;
  }).join("");
-
- const unlinkedTroubled = troubledItems.filter(it =>
-  !candidates.some(c => (c.raw && c.raw.id===it.id) || (c.conv && c.conv.id===it.id) || (c.plusItem && c.plusItem.id===it.id) || (c.minusItem && c.minusItem.id===it.id))
- );
-
- const unlinkedBanner = unlinkedTroubled.length
-  ? `<div class="notice warn" style="margin-top:10px;margin-bottom:0">
-      <b>Terdapat ${unlinkedTroubled.length} item berkendala lainnya yang belum memiliki pasangan otomatis:</b><br>
-      ${unlinkedTroubled.map(x => `• <b>${esc(x.nama)}</b> (${esc(x.kategori)} · ${x.selisih>0?'PLUS +'+fmt(x.selisih):'MINUS '+fmt(x.selisih)} ${esc(x.satuan)})`).join("<br>")}
-      <div style="margin-top:4px">Gunakan form <b>Tambah Pasangan Kompair Manual</b> di bawah jika item tersebut tertukar dengan item PLUS/MINUS lainnya.</div>
-     </div>`
-  : "";
-
- const manualBuilderHTML = (plusItems.length && minusItems.length) ? `
-  <div class="manual-compare-box no-print">
-   <b style="font-size:12px;color:#7b5312">+ Tambah Pasangan Kompair Manual (Untuk Item Berkendala yang Belum Terhubung)</b>
-   <div class="manual-compare-grid">
-    <div class="field">
-     <label>Item PLUS (Kelebihan Fisik)</label>
-     <select id="mcPlusSelect">
-      ${plusItems.map(x=>`<option value="${x.id}">[${esc(x.kategori)}] ${esc(x.nama)} (+${fmt(x.selisih)} ${esc(x.satuan)})</option>`).join("")}
-     </select>
-    </div>
-    <div class="field">
-     <label>Item MINUS (Kekurangan Fisik)</label>
-     <select id="mcMinusSelect">
-      ${minusItems.map(x=>`<option value="${x.id}">[${esc(x.kategori)}] ${esc(x.nama)} (${fmt(x.selisih)} ${esc(x.satuan)})</option>`).join("")}
-     </select>
-    </div>
-    <div class="field">
-     <label>Rasio (1 PLUS = ... MINUS)</label>
-     <input id="mcRatioInput" type="number" inputmode="decimal" min="0.0001" step="any" value="1" placeholder="Contoh: 750">
-    </div>
-    <button type="button" class="btn warn-btn" onclick="addManualCompare()">+ Tambahkan</button>
-   </div>
-  </div>` : "";
-
- return `
-  <div class="compare-box">
-   <h4>⚖️ Kompair Seluruh Item Berkendala (Dua Arah RAW ↔ KONVERSI)</h4>
-   <div class="compare-summary-bar">
-    <span class="compare-pill">Total Item Berkendala: <b>${troubledItems.length} PLU</b> (${plusItems.length} PLUS · ${minusItems.length} MINUS)</span>
-    <span class="compare-pill">Siap Dikompair: <b>${candidates.length} Pasangan</b></span>
-   </div>
-   <div style="font-size:12px;line-height:1.5;color:#5c3f11">
-    Kompair akan langsung menyesuaikan stok bersih &amp; hasil selisih item (misal KONVERSI PLUS 750 ML dengan rasio 750 → menambah +1 RAW dan mengurangi 750 ML KONVERSI).
-   </div>
-   ${candidates.length ? `
-    <div class="no-print" style="margin-top:8px;font-size:11px">
-     <label style="cursor:pointer;font-weight:bold"><input type="checkbox" checked onchange="toggleAllCompareKeys(this.checked)" style="width:auto;vertical-align:middle"> Pilih / Batalkan Semua Pasangan Kompair (${candidates.length})</label>
-    </div>
-   ` : ''}
-   ${rows || '<div class="empty" style="padding:12px">Belum ada pasangan otomatis. Tambahkan pasangan manual di bawah jika ada item PLUS dan MINUS yang saling terkait.</div>'}
-   ${unlinkedBanner}
-   ${manualBuilderHTML}
-   <div class="actions no-print" style="margin-top:12px">
-    <button type="button" class="btn primary" onclick="applyCompareBalance(true)" ${candidates.length?'':'disabled'}>⚖️ Kompair Semua Item Berkendala (${candidates.length})</button>
-    <button type="button" class="btn blue" onclick="applyCompareBalance(false)" ${candidates.length?'':'disabled'}>✓ Terapkan Hanya yang Dicentang</button>
-    ${report.balanced ? `<button type="button" class="btn cancel" onclick="undoCompareBalance()">↩ Kembalikan Fisik Asli</button>` : ""}
-   </div>
-  </div>`;
+ const unlinkedTroubled = troubledItems.filter(it => !candidates.some(c => (c.raw && c.raw.id===it.id) || (c.conv && c.conv.id===it.id) || (c.plusItem && c.plusItem.id===it.id) || (c.minusItem && c.minusItem.id===it.id)));
+ const unlinkedBanner = unlinkedTroubled.length ? `<div class="notice warn" style="margin-top:10px;margin-bottom:0"><b>Terdapat ${unlinkedTroubled.length} item berkendala lainnya yang belum memiliki pasangan otomatis:</b><br>${unlinkedTroubled.map(x => `• <b>${esc(x.nama)}</b> (${esc(x.kategori)} · ${x.selisih>0?'PLUS +'+fmt(x.selisih):'MINUS '+fmt(x.selisih)} ${esc(x.satuan)})`).join("<br>")}</div>` : "";
+ const manualBuilderHTML = (plusItems.length && minusItems.length) ? `<div class="manual-compare-box no-print"><b style="font-size:12px;color:#7b5312">+ Tambah Pasangan Kompair Manual</b><div class="manual-compare-grid"><div class="field"><label>Item PLUS</label><select id="mcPlusSelect">${plusItems.map(x=>`<option value="${x.id}">[${esc(x.kategori)}] ${esc(x.nama)} (+${fmt(x.selisih)} ${esc(x.satuan)})</option>`).join("")}</select></div><div class="field"><label>Item MINUS</label><select id="mcMinusSelect">${minusItems.map(x=>`<option value="${x.id}">[${esc(x.kategori)}] ${esc(x.nama)} (${fmt(x.selisih)} ${esc(x.satuan)})</option>`).join("")}</select></div><div class="field"><label>Rasio (1 PLUS = ... MINUS)</label><input id="mcRatioInput" type="number" inputmode="decimal" min="0.0001" step="any" value="1"></div><button type="button" class="btn warn-btn" onclick="addManualCompare()">+ Tambahkan</button></div></div>` : "";
+ return `<div class="compare-box"><h4>⚖️ Kompair Seluruh Item Berkendala (Dua Arah RAW ↔ KONVERSI)</h4><div class="compare-summary-bar"><span class="compare-pill">Total Item Berkendala: <b>${troubledItems.length} PLU</b> (${plusItems.length} PLUS · ${minusItems.length} MINUS)</span><span class="compare-pill">Siap Dikompair: <b>${candidates.length} Pasangan</b></span></div>${candidates.length ? `<div class="no-print" style="margin-top:8px;font-size:11px"><label style="cursor:pointer;font-weight:bold"><input type="checkbox" checked onchange="toggleAllCompareKeys(this.checked)" style="width:auto;vertical-align:middle"> Pilih / Batalkan Semua Pasangan Kompair (${candidates.length})</label></div>` : ''}${rows || '<div class="empty" style="padding:12px">Belum ada pasangan otomatis.</div>'}${unlinkedBanner}${manualBuilderHTML}<div class="actions no-print" style="margin-top:12px"><button type="button" class="btn primary" onclick="applyCompareBalance(true)" ${candidates.length?'':'disabled'}>⚖️ Kompair Semua Item Berkendala (${candidates.length})</button><button type="button" class="btn blue" onclick="applyCompareBalance(false)" ${candidates.length?'':'disabled'}>✓ Terapkan Hanya yang Dicentang</button>${report.balanced ? `<button type="button" class="btn cancel" onclick="undoCompareBalance()">↩ Kembalikan Fisik Asli</button>` : ""}</div></div>`;
 }
-
 function warehouseConclusionHTML(report){
  if(!report || report.lokasi === "KABINET") return "";
  const rawItems = (report.items || []).filter(x => x.kategori === "RAW");
- const presentItems = rawItems.filter(x => {
-  if(report.lokasi === "GUDANG") return (Number(x.fisikBersih)||0) > 0;
-  return (Number(x.gudangRaw)||0) > 0;
- });
-
+ const presentItems = rawItems.filter(x => report.lokasi === "GUDANG" ? (Number(x.fisikBersih)||0) > 0 : (Number(x.gudangRaw)||0) > 0);
  const listRows = presentItems.map((x, i) => {
   const qty = report.lokasi === "GUDANG" ? (Number(x.fisikBersih)||0) : (Number(x.gudangRaw)||0);
-  return `
-   <div class="wh-item-row">
-    <div><b>${i+1}. ${esc(x.nama)}</b> <span class="muted">(PLU ${esc(x.plu)})</span> <span class="tag raw">RAW</span></div>
-    <div><b>${fmt(qty)} ${esc(x.satuan)} (Segel Gudang)</b></div>
-   </div>`;
+  return `<div class="wh-item-row"><div><b>${i+1}. ${esc(x.nama)}</b> <span class="muted">(PLU ${esc(x.plu)})</span> <span class="tag raw">RAW</span></div><div><b>${fmt(qty)} ${esc(x.satuan)} (Segel Gudang)</b></div></div>`;
  }).join("");
-
- return `
-  <div class="warehouse-box">
-   <h4>📦 Kesimpulan Stok Gudang (Khusus RAW — Semua Segel)</h4>
-   <div class="wh-summary-grid">
-    <div class="mini-stat"><span>TOTAL ITEM RAW ADA DI GUDANG</span><strong>${presentItems.length} Item</strong></div>
-    <div class="mini-stat"><span>STATUS KONVERSI GUDANG</span><strong class="same">Tidak Ada (0)</strong></div>
-   </div>
-   <div class="result-list">
-    ${listRows || '<div class="empty">Tidak ada stok fisik RAW di gudang (semua 0).</div>'}
-   </div>
-  </div>`;
+ return `<div class="warehouse-box"><h4>📦 Kesimpulan Stok Gudang (Khusus RAW — Semua Segel)</h4><div class="wh-summary-grid"><div class="mini-stat"><span>TOTAL ITEM RAW ADA DI GUDANG</span><strong>${presentItems.length} Item</strong></div><div class="mini-stat"><span>STATUS KONVERSI GUDANG</span><strong class="same">Tidak Ada (0)</strong></div></div><div class="result-list">${listRows || '<div class="empty">Tidak ada stok fisik RAW di gudang (semua 0).</div>'}</div></div>`;
 }
-
 function fullDetailSheetHTML(report){
  if(!report) return "";
  const items = report.items || [];
  const raws = items.filter(x => x.kategori === "RAW");
-
  const whRows = raws.filter(x => (Number(x.gudangRaw)||0) > 0 || report.lokasi==="GUDANG");
  const whTableRows = whRows.map((x,i) => {
   const q = report.lokasi==="GUDANG" ? (Number(x.fisikBersih)||0) : (Number(x.gudangRaw)||0);
   return `<tr><td>${i+1}</td><td>${esc(x.plu)}</td><td>${esc(x.nama)}</td><td>${fmt(q)} ${esc(x.satuan)}</td><td>Rak Gudang (RAW Segel)</td></tr>`;
  }).join("") || `<tr><td colspan="5" style="text-align:center">Tidak ada stok tercatat di Gudang</td></tr>`;
-
  const boothRows = items.filter(x => {
   if(x.kategori==="RAW") return (Number(x.boothRaw)||0) > 0 || report.lokasi==="KABINET";
   return (Number(x.fisikBersih)||0) > 0 || (Number(x.qtySegel)||0) > 0 || (Number(x.jumlahTerbuka)||0) > 0;
  });
  const boothTableRows = boothRows.map((x,i) => {
   const isRaw = x.kategori==="RAW";
-  const stokText = isRaw
-   ? `${fmt(x.boothRaw||0)} ${esc(x.satuan)}`
-   : `Total Bersih: ${fmt(x.fisikBersih||0)} ${esc(x.satuan)} (Segel: ${fmt(x.isiSegel||0)} · Terbuka: ${fmt(x.jumlahTerbuka||0)} wadah)`;
-  const rakSaran = isRaw
-   ? "Rak/Kabinet RAW"
-   : "Rak/Kabinet KONVERSI (Pisahkan & Tata Rapi untuk Audit Berikutnya)";
+  const stokText = isRaw ? `${fmt(x.boothRaw||0)} ${esc(x.satuan)}` : `Total Bersih: ${fmt(x.fisikBersih||0)} ${esc(x.satuan)} (Segel: ${fmt(x.isiSegel||0)} · Terbuka: ${fmt(x.jumlahTerbuka||0)} wadah)`;
+  const rakSaran = isRaw ? "Rak/Kabinet RAW" : "Rak/Kabinet KONVERSI (Pisahkan & Tata Rapi untuk Audit Berikutnya)";
   return `<tr><td>${i+1}</td><td>${esc(x.plu)}</td><td>${esc(x.nama)}</td><td><span class="tag ${isRaw?'raw':'konversi'}">${esc(x.kategori)}</span></td><td>${stokText}</td><td>${rakSaran}</td></tr>`;
  }).join("") || `<tr><td colspan="6" style="text-align:center">Tidak ada stok tercatat di Booth / Kabinet</td></tr>`;
-
  const logs = Array.isArray(report.compareLogs) ? report.compareLogs : [];
- const logTableRows = logs.length
-  ? logs.map((lg,i) => `<tr>
-      <td>${i+1}</td>
-      <td><b>${esc(lg.tipe)}</b></td>
-      <td>${esc(lg.fromNama)} (${lg.fromDelta>=0?'+':''}${fmt(lg.fromDelta)} ${esc(lg.fromSatuan)})</td>
-      <td>${esc(lg.toNama)} (${lg.toDelta>=0?'+':''}${fmt(lg.toDelta)} ${esc(lg.toSatuan)})</td>
-      <td>${fmt(lg.rasio)}</td>
-      <td>Selisih akhir: ${lg.selisihAkhirFrom>=0?'+':''}${fmt(lg.selisihAkhirFrom)} / ${lg.selisihAkhirTo>=0?'+':''}${fmt(lg.selisihAkhirTo)}</td>
-     </tr>`).join("")
-  : `<tr><td colspan="6" style="text-align:center">Belum ada item yang dikompair pada laporan ini</td></tr>`;
-
- return `
-  <div class="pdf-detail-sheet">
-   <h4>📋 Rincian Lengkap untuk Laporan &amp; PDF (Gudang, Kabinet/Booth, Kompair &amp; Penataan Rak)</h4>
-   <div class="notice" style="margin-bottom:10px">
-    <b>Catatan Penataan Audit Berikutnya:</b> Barang yang sudah dikonversi (kategori <b>KONVERSI</b>) disarankan dipisahkan di rak/kabinet khusus konversi agar tidak tercampur dengan stok segel/RAW dan mempermudah pengecekan berikutnya.
-   </div>
-
-   <b>1. Rincian Stok di Gudang</b>
-   <table class="pdf-table">
-    <thead><tr><th>No</th><th>PLU</th><th>Nama Barang</th><th>Stok Gudang</th><th>Lokasi Penempatan</th></tr></thead>
-    <tbody>${whTableRows}</tbody>
-   </table>
-
-   <b>2. Rincian Stok di Kabinet / Booth &amp; Rekomendasi Rak</b>
-   <table class="pdf-table">
-    <thead><tr><th>No</th><th>PLU</th><th>Nama Barang</th><th>Kategori</th><th>Rincian Stok Booth</th><th>Penataan Rak / Kabinet</th></tr></thead>
-    <tbody>${boothTableRows}</tbody>
-   </table>
-
-   <b>3. Rincian Item yang Dikompair</b>
-   <table class="pdf-table">
-    <thead><tr><th>No</th><th>Arah</th><th>Item Sumber</th><th>Item Tujuan</th><th>Rasio</th><th>Hasil Akhir</th></tr></thead>
-    <tbody>${logTableRows}</tbody>
-   </table>
-  </div>`;
+ const logTableRows = logs.length ? logs.map((lg,i) => `<tr><td>${i+1}</td><td><b>${esc(lg.tipe)}</b></td><td>${esc(lg.fromNama)} (${lg.fromDelta>=0?'+':''}${fmt(lg.fromDelta)} ${esc(lg.fromSatuan)})</td><td>${esc(lg.toNama)} (${lg.toDelta>=0?'+':''}${fmt(lg.toDelta)} ${esc(lg.toSatuan)})</td><td>${fmt(lg.rasio)}</td><td>Selisih akhir: ${lg.selisihAkhirFrom>=0?'+':''}${fmt(lg.selisihAkhirFrom)} / ${lg.selisihAkhirTo>=0?'+':''}${fmt(lg.selisihAkhirTo)}</td></tr>`).join("") : `<tr><td colspan="6" style="text-align:center">Belum ada item yang dikompair pada laporan ini</td></tr>`;
+ return `<div class="pdf-detail-sheet"><h4>📋 Rincian Lengkap untuk Laporan &amp; PDF (Gudang, Kabinet/Booth, Kompair &amp; Penataan Rak)</h4><div class="notice" style="margin-bottom:10px"><b>Catatan Penataan Audit Berikutnya:</b> Barang yang sudah dikonversi (kategori <b>KONVERSI</b>) disarankan dipisahkan di rak/kabinet khusus konversi agar tidak tercampur dengan stok segel/RAW dan mempermudah pengecekan berikutnya.</div><b>1. Rincian Stok di Gudang</b><table class="pdf-table"><thead><tr><th>No</th><th>PLU</th><th>Nama Barang</th><th>Stok Gudang</th><th>Lokasi Penempatan</th></tr></thead><tbody>${whTableRows}</tbody></table><b>2. Rincian Stok di Kabinet / Booth &amp; Rekomendasi Rak</b><table class="pdf-table"><thead><tr><th>No</th><th>PLU</th><th>Nama Barang</th><th>Kategori</th><th>Rincian Stok Booth</th><th>Penataan Rak / Kabinet</th></tr></thead><tbody>${boothTableRows}</tbody></table><b>3. Rincian Item yang Dikompair</b><table class="pdf-table"><thead><tr><th>No</th><th>Arah</th><th>Item Sumber</th><th>Item Tujuan</th><th>Rasio</th><th>Hasil Akhir</th></tr></thead><tbody>${logTableRows}</tbody></table></div>`;
 }
-
-function sortedItems(items,order){
- const a=[...items];
- if(order==="minus")a.sort((x,y)=>x.selisih-y.selisih);
- else if(order==="plus")a.sort((x,y)=>y.selisih-x.selisih);
- else if(order==="plu")a.sort((x,y)=>x.plu.localeCompare(y.plu,undefined,{numeric:true}));
- else if(order==="name")a.sort((x,y)=>x.nama.localeCompare(y.nama));
- return a;
-}
-function summaryHTML(items){
- const plus=items.filter(x=>x.selisih>0).length,minus=items.filter(x=>x.selisih<0).length,same=items.filter(x=>x.selisih===0).length;
- return `<div class="mini-stat"><span>PLUS</span><strong class="plus">${plus}</strong></div><div class="mini-stat"><span>MINUS</span><strong class="minus">${minus}</strong></div><div class="mini-stat"><span>SESUAI</span><strong class="same">${same}</strong></div>`;
-}
-
+function sortedItems(items,order){ const a=[...items]; if(order==="minus")a.sort((x,y)=>x.selisih-y.selisih); else if(order==="plus")a.sort((x,y)=>y.selisih-x.selisih); else if(order==="plu")a.sort((x,y)=>x.plu.localeCompare(y.plu,undefined,{numeric:true})); else if(order==="name")a.sort((x,y)=>x.nama.localeCompare(y.nama)); return a; }
+function summaryHTML(items){ const plus=items.filter(x=>x.selisih>0).length,minus=items.filter(x=>x.selisih<0).length,same=items.filter(x=>x.selisih===0).length; return `<div class="mini-stat"><span>PLUS</span><strong class="plus">${plus}</strong></div><div class="mini-stat"><span>MINUS</span><strong class="minus">${minus}</strong></div><div class="mini-stat"><span>SESUAI</span><strong class="same">${same}</strong></div>`; }
 function linkedFlags(items){
- const rawByPlu=new Map(items.filter(x=>x.kategori==="RAW").map(x=>[x.plu,x]));
- const flags=[];
+ const rawByPlu=new Map(items.filter(x=>x.kategori==="RAW").map(x=>[x.plu,x])); const flags=[];
  items.filter(x=>x.kategori==="KONVERSI"&&x.rawLink).forEach(conv=>{
-  parseRawLinks(conv.rawLink).forEach(lk => {
-   const raw=rawByPlu.get(lk);
-   if(!raw)return;
-   if(raw.selisih>0 && conv.selisih<0){
-    flags.push({type:"RAW_PLUS_CONV_MINUS",raw,conv});
-   } else if(conv.selisih>0 && raw.selisih<0){
-    flags.push({type:"CONV_PLUS_RAW_MINUS",raw,conv});
-   }
+  parseRawLinks(conv.rawLink).forEach(lk => { const raw=rawByPlu.get(lk); if(!raw)return;
+   if(raw.selisih>0 && conv.selisih<0) flags.push({type:"RAW_PLUS_CONV_MINUS",raw,conv});
+   else if(conv.selisih>0 && raw.selisih<0) flags.push({type:"CONV_PLUS_RAW_MINUS",raw,conv});
   });
  });
  return flags;
 }
-
 function resultCard(x,flags){
  const cls=x.selisih>0?"plus":x.selisih<0?"minus":"same";
  const convMinusFlags = flags.filter(f=>f.type==="RAW_PLUS_CONV_MINUS" && f.conv.id===x.id);
  const rawForConvMinusFlags = flags.filter(f=>f.type==="RAW_PLUS_CONV_MINUS" && f.raw.id===x.id);
  const convPlusFlags = flags.filter(f=>f.type==="CONV_PLUS_RAW_MINUS" && f.conv.id===x.id);
  const rawForConvPlusFlags = flags.filter(f=>f.type==="CONV_PLUS_RAW_MINUS" && f.raw.id===x.id);
-
  let flag="";
- if(convMinusFlags.length){
-  const names = convMinusFlags.map(f=>`${esc(f.raw.nama)} (+${fmt(f.raw.selisih)})`).join(", ");
-  flag=`<div class="flag">⚠ KOMPAIR RAW PLUS ↔ KONVERSI MINUS: stok fisik RAW <b>${names}</b> PLUS, sedangkan KONVERSI ini MINUS (${fmt(x.selisih)} ${esc(x.satuan)}).</div>`;
- } else if(rawForConvMinusFlags.length){
-  const names = rawForConvMinusFlags.map(f=>`${esc(f.conv.nama)} (${fmt(f.conv.selisih)})`).join(", ");
-  flag=`<div class="flag">⚠ KOMPAIR RAW PLUS ↔ KONVERSI MINUS: RAW ini PLUS (+${fmt(x.selisih)} ${esc(x.satuan)}), sementara KONVERSI <b>${names}</b> MINUS.</div>`;
- } else if(convPlusFlags.length){
-  const names = convPlusFlags.map(f=>`${esc(f.raw.nama)} (${fmt(f.raw.selisih)})`).join(", ");
-  flag=`<div class="flag rev">🚨 KONVERSI PLUS &amp; RAW MINUS: KONVERSI ini PLUS (+${fmt(x.selisih)} ${esc(x.satuan)}), tetapi RAW terkait <b>${names}</b> MINUS.</div>`;
- } else if(rawForConvPlusFlags.length){
-  const names = rawForConvPlusFlags.map(f=>`${esc(f.conv.nama)} (+${fmt(f.conv.selisih)})`).join(", ");
-  flag=`<div class="flag rev">🚨 RAW MINUS &amp; KONVERSI PLUS: RAW ini MINUS (${fmt(x.selisih)} ${esc(x.satuan)}), sedangkan KONVERSI terkait <b>${names}</b> PLUS.</div>`;
- }
-
+ if(convMinusFlags.length) flag=`<div class="flag">⚠ KOMPAIR RAW PLUS ↔ KONVERSI MINUS: stok fisik RAW <b>${convMinusFlags.map(f=>`${esc(f.raw.nama)} (+${fmt(f.raw.selisih)})`).join(", ")}</b> PLUS, KONVERSI MINUS (${fmt(x.selisih)} ${esc(x.satuan)}).</div>`;
+ else if(rawForConvMinusFlags.length) flag=`<div class="flag">⚠ KOMPAIR RAW PLUS ↔ KONVERSI MINUS: RAW PLUS (+${fmt(x.selisih)} ${esc(x.satuan)}), KONVERSI <b>${rawForConvMinusFlags.map(f=>`${esc(f.conv.nama)} (${fmt(f.conv.selisih)})`).join(", ")}</b> MINUS.</div>`;
+ else if(convPlusFlags.length) flag=`<div class="flag rev">🚨 KONVERSI PLUS &amp; RAW MINUS: KONVERSI PLUS (+${fmt(x.selisih)} ${esc(x.satuan)}), RAW <b>${convPlusFlags.map(f=>`${esc(f.raw.nama)} (${fmt(f.raw.selisih)})`).join(", ")}</b> MINUS.</div>`;
+ else if(rawForConvPlusFlags.length) flag=`<div class="flag rev">🚨 RAW MINUS &amp; KONVERSI PLUS: RAW MINUS (${fmt(x.selisih)} ${esc(x.satuan)}), KONVERSI <b>${rawForConvPlusFlags.map(f=>`${esc(f.conv.nama)} (+${fmt(f.conv.selisih)})`).join(", ")}</b> PLUS.</div>`;
  const balVal = Number(x.penyeimbangRAW)||0;
- const balNote = balVal !== 0
-  ? `<div class="bal-note">⚖️ Hasil Kompair: ${balVal>0?`+${fmt(balVal)}`:fmt(balVal)} ${esc(x.satuan)} (Fisik awal: ${fmt(x.fisikBersihAsli)} ${esc(x.satuan)} · Selisih awal: ${x.selisihAsli>0?`+${fmt(x.selisihAsli)}`:fmt(x.selisihAsli)})</div>`
-  : "";
-
+ const balNote = balVal !== 0 ? `<div class="bal-note">⚖️ Hasil Kompair: ${balVal>0?`+${fmt(balVal)}`:fmt(balVal)} ${esc(x.satuan)} (Fisik awal: ${fmt(x.fisikBersihAsli)} ${esc(x.satuan)} · Selisih awal: ${x.selisihAsli>0?`+${fmt(x.selisihAsli)}`:fmt(x.selisihAsli)})</div>` : "";
  const openCount = Number(x.jumlahTerbuka)||0;
  const openedNet = openCount>0 ? Math.max(0,(Number(x.fisikKotorTerbuka||0)-((Number(x.berat)||0)*openCount))) : 0;
- return `<div><div class="result-card">
- <div class="name">${esc(x.nama)} ${balVal!==0?'<span class="tag bal-tag">DIKOMPAIR</span>':''}<div class="sub">PLU ${esc(x.plu)} · ${esc(x.kategori)}</div></div>
- <div class="metric"><span>Komputer</span><strong>${fmt(x.komputer)} ${esc(x.satuan)}</strong></div>
- <div class="metric"><span>Fisik bersih</span><strong>${fmt(x.fisikBersih)} ${esc(x.satuan)}</strong><div class="sub">${x.kategori==="KONVERSI"?`${esc(x.modeFisik||"-")} · Segel: ${fmt(x.isiSegel||0)} · Terbuka: ${fmt(openedNet)}`:`${esc(x.modeFisik||fmt(x.fisikKotor))}`}</div></div>
- <div class="metric"><span>Selisih</span><strong class="${cls}">${x.selisih>0?"+":""}${fmt(x.selisih)} ${esc(x.satuan)}<br>${x.hasilStatus}</strong></div>
- </div>${flag}${balNote}</div>`;
+ return `<div><div class="result-card"><div class="name">${esc(x.nama)} ${balVal!==0?'<span class="tag bal-tag">DIKOMPAIR</span>':''}<div class="sub">PLU ${esc(x.plu)} · ${esc(x.kategori)}</div></div><div class="metric"><span>Komputer</span><strong>${fmt(x.komputer)} ${esc(x.satuan)}</strong></div><div class="metric"><span>Fisik bersih</span><strong>${fmt(x.fisikBersih)} ${esc(x.satuan)}</strong><div class="sub">${x.kategori==="KONVERSI"?`${esc(x.modeFisik||"-")} · Segel: ${fmt(x.isiSegel||0)} · Terbuka: ${fmt(openedNet)}`:`${esc(x.modeFisik||fmt(x.fisikKotor))}`}</div></div><div class="metric"><span>Selisih</span><strong class="${cls}">${x.selisih>0?"+":""}${fmt(x.selisih)} ${esc(x.satuan)}<br>${x.hasilStatus}</strong></div></div>${flag}${balNote}</div>`;
 }
 function renderResultsInto(items,rawId,convId,rawSumId,convSumId,infoId,metaId,order){
  const whOnly = currentReport && currentReport.lokasi === "GUDANG";
@@ -2000,7 +1362,7 @@ function saveAuditResult(){
  const copy=JSON.parse(JSON.stringify(audit));
  copy.saved=true;copy.historyId=Date.now();
  auditHistory.unshift(copy);audit.saved=true;
- saveHistory();saveAudit();renderCurrentResult();alert("Hasil audit berhasil disimpan di Riwayat Audit.");
+ saveAudit();saveHistory();renderCurrentResult();alert("Hasil audit berhasil disimpan dan dikirim ke Google Sheets.");
 }
 function renderHistory(){
  const list=$("historyList");
@@ -2021,15 +1383,12 @@ function openHistory(i){
  renderHistoryDetail();
  $("historyDetail").scrollIntoView({behavior:"smooth"});
 }
-function openHistoryAndPrint(i){
- openHistory(i);
- setTimeout(()=>exportPDF(true), 120);
-}
+function openHistoryAndPrint(i){ openHistory(i); setTimeout(()=>exportPDF(true), 120); }
 function closeHistoryDetail(){historyViewing=null;$("historyDetail").classList.add("hidden")}
 function deleteHistory(i){
- if(!confirm("Hapus riwayat audit ini dari database bersama? Tindakan ini akan terlihat oleh auditor lain."))return;
- const removed=auditHistory[i];auditHistory.splice(i,1);saveHistory();
- if(SHEETS_API&&removed?.historyId){fetch(SHEETS_API,{method:"POST",mode:"no-cors",headers:{"Content-Type":"text/plain;charset=utf-8"},body:JSON.stringify({action:"deleteHistory",historyId:String(removed.historyId)})}).catch(()=>{});}
+ if(!confirm("Hapus riwayat audit ini dari database bersama? Tindakan ini akan terlihat oleh semua perangkat."))return;
+ auditHistory.splice(i,1);
+ saveHistory();
  renderHistory();closeHistoryDetail();
 }
 function renderHistoryDetail(){
@@ -2048,68 +1407,27 @@ function renderHistoryDetail(){
 function exportPDF(fromHistory=false){
  let report = fromHistory ? historyViewing : audit;
  if(!report){alert("Tidak ada data audit untuk diekspor ke PDF.");return}
-
  if(!fromHistory && report.status !== "completed"){
   if(!confirm("Audit masih berjalan. Selesaikan audit sekarang agar hasil akhir & kompair masuk ke PDF?")) return;
-  finishAudit(true);
-  report = audit;
-  if(!report || report.status !== "completed") return;
+  finishAudit(true); report = audit; if(!report || report.status !== "completed") return;
  }
-
- currentReport=report;
- const oldAudit=audit;
- audit=report;
- $("pageHistory").classList.add("hidden");
- $("pageAudit").classList.remove("hidden");
+ currentReport=report; const oldAudit=audit; audit=report;
+ $("pageHistory").classList.add("hidden"); $("pageAudit").classList.remove("hidden");
  $("auditStart").classList.add("hidden");$("auditWorkspace").classList.add("hidden");$("auditResult").classList.remove("hidden");
  renderCurrentResult();
  window.print();
  window.onafterprint=()=>{
-  audit=oldAudit;
-  currentReport=fromHistory?historyViewing:audit;
-  if(fromHistory){
-   $("pageAudit").classList.add("hidden");
-   $("pageHistory").classList.remove("hidden");
-   $("historyDetail").classList.remove("hidden");
-  } else {
-   renderAudit();
-  }
+  audit=oldAudit; currentReport=fromHistory?historyViewing:audit;
+  if(fromHistory){ $("pageAudit").classList.add("hidden"); $("pageHistory").classList.remove("hidden"); $("historyDetail").classList.remove("hidden"); }
+  else renderAudit();
  };
 }
 function exportAllHistory(){
  if(!auditHistory.length){alert("Belum ada riwayat audit.");return}
  const rows=[["Tanggal","Mode Audit","Nama Auditor","Waktu Mulai","Waktu Selesai","Durasi","PLU","Nama Barang","Kategori","Satuan","Stok Komputer","Kondisi Fisik","Fisik Gudang (RAW)","Fisik Booth (RAW)","Fisik Kotor","Berat Kemasan per Wadah","Isi Bersih Segel per Wadah","Jumlah Segel","Isi Bersih Segel Total","Jumlah Terbuka","Berat Kotor Terbuka","Fisik Awal","Penyeimbang Kompair","Fisik Bersih","Selisih","Status"]];
  auditHistory.forEach(h=>{
-  const whOnly = h.lokasi === "GUDANG";
-  const list = whOnly ? h.items.filter(x=>x.kategori==="RAW") : h.items;
-  list.forEach(x=>rows.push([
-   h.tanggal,
-   locationLabel(h.lokasi||"KEDUANYA"),
-   h.auditor,
-   dateTimeText(h.mulaiPada),
-   dateTimeText(h.selesaiPada),
-   durationText(h.mulaiPada,h.selesaiPada),
-   x.plu,
-   x.nama,
-   x.kategori,
-   x.satuan,
-   x.komputer,
-   x.modeFisik||"",
-   x.kategori==="RAW"?(x.gudangRaw??""):"",
-   x.kategori==="RAW"?(x.boothRaw??""):"",
-   x.fisikKotor,
-   x.berat??0,
-   x.isiBersih??0,
-   x.qtySegel??0,
-   x.isiSegel??0,
-   x.jumlahTerbuka??0,
-   x.fisikKotorTerbuka??0,
-   x.fisikBersihAsli ?? x.fisikBersih,
-   x.penyeimbangRAW ?? 0,
-   x.fisikBersih,
-   x.selisih,
-   x.hasilStatus
-  ]));
+  const whOnly = h.lokasi === "GUDANG"; const list = whOnly ? h.items.filter(x=>x.kategori==="RAW") : h.items;
+  list.forEach(x=>rows.push([h.tanggal,locationLabel(h.lokasi||"KEDUANYA"),h.auditor,dateTimeText(h.mulaiPada),dateTimeText(h.selesaiPada),durationText(h.mulaiPada,h.selesaiPada),x.plu,x.nama,x.kategori,x.satuan,x.komputer,x.modeFisik||"",x.kategori==="RAW"?(x.gudangRaw??""):"",x.kategori==="RAW"?(x.boothRaw??""):"",x.fisikKotor,x.berat??0,x.isiBersih??0,x.qtySegel??0,x.isiSegel??0,x.jumlahTerbuka??0,x.fisikKotorTerbuka??0,x.fisikBersihAsli ?? x.fisikBersih,x.penyeimbangRAW ?? 0,x.fisikBersih,x.selisih,x.hasilStatus]));
  });
  downloadCSV(rows,"Riwayat-Audit-Poin-Coffee.csv");
 }
@@ -2119,16 +1437,141 @@ function downloadCSV(rows,name){
  const url=URL.createObjectURL(blob),a=document.createElement("a");a.href=url;a.download=name;a.click();URL.revokeObjectURL(url);
 }
 
-// ================= GOOGLE SHEETS CLOUD DATABASE =================
-function setSyncStatus(message,kind=''){const el=$("syncStatus");if(el){el.textContent=message;el.className='sync-status '+kind}}
-function jsonp(url){return new Promise((resolve,reject)=>{const cb='poinCb'+Date.now()+Math.floor(Math.random()*10000);const script=document.createElement('script');const timer=setTimeout(()=>{cleanup();reject(new Error('Waktu koneksi habis. Periksa deployment Apps Script.'))},20000);function cleanup(){clearTimeout(timer);delete window[cb];script.remove()}window[cb]=data=>{cleanup();resolve(data)};script.onerror=()=>{cleanup();reject(new Error('Tidak dapat membaca Google Sheets.'))};script.src=url+(url.includes('?')?'&':'?')+'action=read&callback='+cb+'&_='+Date.now();document.body.appendChild(script)})}
-async function syncFromCloud(firstConnect=false){if(!SHEETS_API){setSyncStatus('URL database belum diatur.');return}try{setSyncStatus('Mengambil data terbaru dari Google Sheets...');const data=await jsonp(SHEETS_API);if(!data||!data.ok)throw new Error(data?.error||'Respons database tidak valid.');const remoteMaster=Array.isArray(data.master)?data.master:[];const remoteHistory=Array.isArray(data.history)?data.history:[];if(firstConnect&&remoteMaster.length===0&&remoteHistory.length===0&&(masterPLU.length||auditHistory.length)){await pushCloudData();setSyncStatus('Data lokal awal sedang dikirim ke Google Sheets. Muat ulang setelah beberapa detik.','ok');return}masterPLU=remoteMaster;auditHistory=remoteHistory;localStorage.setItem('masterPLU',JSON.stringify(masterPLU));localStorage.setItem('poinAuditHistory',JSON.stringify(auditHistory));renderMaster();renderHistory();setSyncStatus('Terhubung real-time — data Master PLU & Riwayat Audit sinkron dengan Google Sheets.','ok');}catch(e){setSyncStatus('Gagal sinkron: '+e.message,'bad')}}
-function queueCloudSync(){if(!SHEETS_API)return;if(cloudTimer)clearTimeout(cloudTimer);cloudTimer=setTimeout(pushCloudData,600)}
-async function pushCloudData(){if(!SHEETS_API||cloudBusy)return;cloudBusy=true;setSyncStatus('Menyimpan perubahan ke Google Sheets...','');try{const payload={action:'saveBundle',master:masterPLU,history:auditHistory};await fetch(SHEETS_API,{method:'POST',mode:'no-cors',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify(payload)});setSyncStatus('Tersinkron ke Google Sheets ('+new Date().toLocaleTimeString('id-ID',{hour:'2-digit',minute:'2-digit',second:'2-digit'})+').','ok')}catch(e){setSyncStatus('Gagal mengirim perubahan ke cloud: '+e.message,'bad')}finally{cloudBusy=false}}
-setInterval(()=>{if(SHEETS_API&&document.visibilityState==='visible'&&!cloudBusy)syncFromCloud()},15000);
+// ================= REAL-TIME GOOGLE SHEETS SYNC + HEADER SPINNER =================
+function setBusyIndicator(active, labelText, kind="ok"){
+ const badge = $("headerLiveBadge");
+ const lbl = $("headerSyncLabel");
+ if(badge){
+  badge.classList.toggle("syncing", Boolean(active));
+  badge.classList.toggle("error", kind === "bad");
+ }
+ if(lbl && labelText) lbl.textContent = labelText;
+}
+
+function setSyncStatus(message, kind=""){
+ const el = $("syncStatus");
+ if(el){ el.textContent = message; el.className = "sync-status " + kind; }
+}
+
+function jsonpRead(url){
+ return new Promise((resolve, reject) => {
+  const cb = "poinCb" + Date.now() + "_" + Math.floor(Math.random()*100000);
+  const script = document.createElement("script");
+  const timer = setTimeout(() => { cleanup(); reject(new Error("Waktu koneksi habis.")); }, 20000);
+  function cleanup(){ clearTimeout(timer); delete window[cb]; script.remove(); }
+  window[cb] = data => { cleanup(); resolve(data); };
+  script.onerror = () => { cleanup(); reject(new Error("Gagal memuat data dari Google Sheets.")); };
+  script.src = url + (url.includes("?") ? "&" : "?") + "action=read&callback=" + cb + "&_=" + Date.now();
+  document.body.appendChild(script);
+ });
+}
+
+function enqueueSyncAction(actionName){
+ pendingQueue.push({
+  id: Date.now() + "_" + Math.random().toString(36).slice(2,7),
+  action: actionName || "saveBundle",
+  createdAt: new Date().toISOString()
+ });
+ savePendingQueue();
+ setBusyIndicator(true, "Mengirim...", "ok");
+ setSyncStatus("Perubahan sedang dikirim ke Google Sheets...", "");
+ if(pushDebounceTimer) clearTimeout(pushDebounceTimer);
+ pushDebounceTimer = setTimeout(() => { flushPendingQueue(); }, 250);
+}
+
+async function flushPendingQueue(){
+ if(!SHEETS_API || isPushing || !pendingQueue.length) return;
+ isPushing = true;
+ setBusyIndicator(true, "Mengirim...", "ok");
+ try {
+  while(pendingQueue.length > 0){
+   const payload = {
+    action: "saveBundle",
+    master: masterPLU,
+    history: auditHistory
+   };
+   await fetch(SHEETS_API, {
+    method: "POST",
+    mode: "no-cors",
+    headers: { "Content-Type": "text/plain;charset=utf-8" },
+    body: JSON.stringify(payload)
+   });
+   pendingQueue.shift();
+   savePendingQueue();
+  }
+  const jam = new Date().toLocaleTimeString("id-ID", { hour:"2-digit", minute:"2-digit", second:"2-digit" });
+  setSyncStatus("Tersinkron real-time ke Google Sheets (" + jam + ").", "ok");
+  setBusyIndicator(false, "Live · " + jam, "ok");
+ } catch (e) {
+  setSyncStatus("Menunggu koneksi untuk mengirim perubahan: " + e.message, "bad");
+  setBusyIndicator(false, "Antre Kirim", "bad");
+ } finally {
+  isPushing = false;
+ }
+}
+
+async function pullFromCloud(silent = true){
+ if(!SHEETS_API || isPulling || isPushing || pendingQueue.length > 0) return;
+ isPulling = true;
+ if(!silent) setBusyIndicator(true, "Menarik data...", "ok");
+ try {
+  const data = await jsonpRead(SHEETS_API);
+  if(!data || !data.ok) throw new Error(data?.error || "Respons database tidak valid.");
+  const remoteMaster = Array.isArray(data.master) ? data.master : [];
+  const remoteHistory = Array.isArray(data.history) ? data.history : [];
+  const sig = JSON.stringify({ m: remoteMaster, h: remoteHistory });
+
+  const changed = sig !== lastCloudSignature;
+  lastCloudSignature = sig;
+
+  if(changed){
+   masterPLU = remoteMaster;
+   auditHistory = remoteHistory;
+   localStorage.setItem("masterPLU", JSON.stringify(masterPLU));
+   localStorage.setItem("poinAuditHistory", JSON.stringify(auditHistory));
+
+   if(!$("pageMaster").classList.contains("hidden")) renderMaster();
+   if(!$("pageHistory").classList.contains("hidden")){
+    renderHistory();
+    if(historyViewing && historyViewing.historyId){
+     const updatedDoc = auditHistory.find(x => String(x.historyId) === String(historyViewing.historyId));
+     if(updatedDoc){ historyViewing = JSON.parse(JSON.stringify(updatedDoc)); renderHistoryDetail(); }
+    }
+   }
+  }
+
+  const jam = new Date().toLocaleTimeString("id-ID", { hour:"2-digit", minute:"2-digit", second:"2-digit" });
+  setSyncStatus("Terhubung real-time — data sinkron dengan Google Sheets (" + jam + ").", "ok");
+  setBusyIndicator(false, "Live · " + jam, "ok");
+ } catch (e) {
+  setSyncStatus("Gagal menarik data Google Sheets: " + e.message, "bad");
+  setBusyIndicator(false, "Gangguan Sync", "bad");
+ } finally {
+  isPulling = false;
+ }
+}
+
+document.addEventListener("visibilitychange", () => {
+ if(document.visibilityState === "visible"){
+  if(pendingQueue.length > 0) flushPendingQueue();
+  else pullFromCloud(false);
+ }
+});
+window.addEventListener("focus", () => {
+ if(pendingQueue.length > 0) flushPendingQueue();
+ else pullFromCloud(true);
+});
+
+setInterval(() => {
+ if(document.visibilityState !== "visible") return;
+ if(pendingQueue.length > 0) flushPendingQueue();
+ else pullFromCloud(true);
+}, 5000);
 
 renderMaster();
-if(audit)renderAudit();
+if(pendingQueue.length > 0) flushPendingQueue();
+else pullFromCloud(false);
+if(audit) renderAudit();
 else document.body.classList.remove("audit-active");
 </script>
 </body>
