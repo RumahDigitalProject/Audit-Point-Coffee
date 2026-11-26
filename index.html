@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="id">
 <head>
@@ -68,12 +67,10 @@ table{width:100%;border-collapse:collapse}
 th,td{padding:11px 9px;border-bottom:1px solid #edf0ed;text-align:left;font-size:12px;vertical-align:middle}
 th{background:#f3f6f3;color:#526357}
 .master-table{min-width:700px}
-
 .raw-multi-box{border:1px solid #dce3dd;border-radius:7px;padding:9px;max-height:145px;overflow-y:auto;background:#fafcfa;display:grid;gap:6px}
 .raw-multi-item{display:flex;align-items:center;gap:8px;font-size:12px;cursor:pointer}
 .raw-multi-item input{width:auto;margin:0}
 
-/* RESEP MENU STYLING */
 .recipe-ing-list{display:grid;gap:8px;margin-top:6px}
 .recipe-ing-row{display:grid;grid-template-columns:minmax(0,1.7fr) minmax(95px,.7fr) minmax(95px,.7fr) auto;gap:8px;align-items:center;background:#f7faf7;border:1px solid #dce5de;padding:9px;border-radius:8px}
 .recipe-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(290px,1fr));gap:13px;margin-top:14px}
@@ -89,7 +86,6 @@ th{background:#f3f6f3;color:#526357}
 .recipe-ing-table tr:last-child td{border-bottom:0}
 .recipe-card-foot{padding:10px 14px;background:#f7f9f7;border-top:1px solid #edf0ed;display:flex;justify-content:space-between;align-items:center;gap:6px}
 
-/* REKOMENDASI MENU DI HASIL AUDIT */
 .menu-reco-box{background:#f3f8fc;border:1px solid #c3d8ee;border-radius:10px;padding:16px;margin-top:16px}
 .menu-reco-box h4{margin:0 0 8px;font-size:15px;color:#1d4e80}
 .reco-cols{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;margin-top:10px}
@@ -277,7 +273,6 @@ th{background:#f3f6f3;color:#526357}
   <div id="syncStatus" class="sync-status">Menghubungkan ke database Google Sheets...</div>
  </section>
 
- <!-- FITUR INJEKSI DATA CEPAT -->
  <section class="panel" style="border: 2px dashed #244b36;">
   <h3>⚡ Injeksi Data Master PLU Instan</h3>
   <div class="notice">Tempel (Paste) kode JSON Master PLU di bawah ini ke dalam kotak, lalu klik tombol untuk memasukkan atau memperbarui seluruh daftar barang sekaligus dan langsung mengirimnya ke Google Sheets.</div>
@@ -541,7 +536,7 @@ th{background:#f3f6f3;color:#526357}
 </div>
 
 <script>
-const DEFAULT_SHEETS_API = "https://script.google.com/macros/s/AKfycby4QxrVkbB5IU2FldHCD_tPQg4EGhgtI1eUBpfmnxsHz6jR74mcyaPFVl_l5aDb3twB/exec";
+const DEFAULT_SHEETS_API = "https://script.google.com/macros/s/AKfycbzKXdK0NoTp0G0KdO0WEL_CKX_3L_xN3_XrSSTYT31d2Vd16oQNq9UkATDwVqyhQCt3/exec";
 const $ = id => document.getElementById(id);
 const today = () => new Date().toLocaleDateString("en-CA");
 let masterPLU = JSON.parse(localStorage.getItem("masterPLU") || "[]");
@@ -602,8 +597,10 @@ function locationLabel(loc){
 
 function showPage(page){
  ["master","recipes","audit","history"].forEach(p=>{
-  $("page"+p[0].toUpperCase()+p.slice(1)).classList.toggle("hidden",p!==page);
-  $("menu"+p[0].toUpperCase()+p.slice(1)).classList.toggle("active",p===page);
+  const elPage = $("page"+p[0].toUpperCase()+p.slice(1));
+  const elMenu = $("menu"+p[0].toUpperCase()+p.slice(1));
+  if(elPage) elPage.classList.toggle("hidden", p!==page);
+  if(elMenu) elMenu.classList.toggle("active", p===page);
  });
  if(page==="master")renderMaster();
  if(page==="recipes"){renderRecipeFormRows();renderRecipes();}
@@ -612,20 +609,50 @@ function showPage(page){
  pullFromCloud(false);
 }
 
-$("auditDate").value=today();
-$("kategori").addEventListener("change",categoryChanged);
+document.addEventListener("DOMContentLoaded", () => {
+ const dateInput = $("auditDate");
+ if(dateInput) dateInput.value = today();
+ const katSelect = $("kategori");
+ if(katSelect) katSelect.addEventListener("change", categoryChanged);
+ 
+ renderMaster();
+ renderRecipeFormRows();
+ renderRecipes();
+ if(pendingQueue.length > 0) flushPendingQueue();
+ else pullFromCloud(false);
+ if(audit) renderAudit();
+ else document.body.classList.remove("audit-active");
+});
+
 function categoryChanged(){
  const k=$("kategori").value;
- $("satuanField").classList.toggle("hidden",k!=="KONVERSI");
- $("beratField").classList.toggle("hidden",k!=="KONVERSI");
- $("isiBersihField").classList.toggle("hidden",k!=="KONVERSI");
- $("rawLinkField").classList.toggle("hidden",k!=="KONVERSI");
- if(k==="RAW"){$("satuan").value="PCS";$("berat").value="";$("isiBersih").value="";populateRawLinks([])}
+ const satField = $("satuanField");
+ const berField = $("beratField");
+ const isiField = $("isiBersihField");
+ const rawField = $("rawLinkField");
+ if(satField) satField.classList.toggle("hidden",k!=="KONVERSI");
+ if(berField) berField.classList.toggle("hidden",k!=="KONVERSI");
+ if(isiField) isiField.classList.toggle("hidden",k!=="KONVERSI");
+ if(rawField) rawField.classList.toggle("hidden",k!=="KONVERSI");
+ if(k==="RAW"){
+  if($("satuan")) $("satuan").value="PCS";
+  if($("berat")) $("berat").value="";
+  if($("isiBersih")) $("isiBersih").value="";
+  populateRawLinks([]);
+ }
  if(k==="KONVERSI"){
-  if(!editId){$("satuan").value="";$("berat").value="";$("isiBersih").value="";populateRawLinks([])}
-  else populateRawLinks(parseRawLinks(masterPLU.find(a=>a.id===editId)?.rawLink));
+  if(!editId){
+   if($("satuan")) $("satuan").value="";
+   if($("berat")) $("berat").value="";
+   if($("isiBersih")) $("isiBersih").value="";
+   populateRawLinks([]);
+  } else {
+   const mObj = masterPLU.find(a=>a.id===editId);
+   populateRawLinks(parseRawLinks(mObj?.rawLink));
+  }
  }
 }
+
 function populateRawLinks(selectedArr=[]){
  const selSet = new Set(parseRawLinks(selectedArr));
  const raw = masterPLU.filter(x=>x.kategori==="RAW");
@@ -642,11 +669,11 @@ function populateRawLinks(selectedArr=[]){
   </label>
  `).join("");
 }
+
 function getSelectedRawLinks(){
  return Array.from(document.querySelectorAll('input[name="rawLinkCheck"]:checked')).map(el=>el.value.trim()).filter(Boolean).join(", ");
 }
 
-/* LOGIKA INJEKSI DATA MASTER PLU INSTAN */
 function injectDataFromCode(){
  const rawInput = $("dataInjectionBox").value.trim();
  if(!rawInput){alert("Kotak Injeksi Data masih kosong!");return;}
@@ -708,50 +735,67 @@ function injectDataFromCode(){
  alert(`Selesai! ${added} Master PLU baru ditambahkan, ${updated} Master PLU diperbarui dan sedang dikirim ke Google Sheets.`);
 }
 
-$("pluForm").addEventListener("submit",e=>{
- e.preventDefault();
- const plu=$("plu").value.trim(),nama=$("nama").value.trim(),kategori=$("kategori").value;
- const satuan=kategori==="RAW"?"PCS":$("satuan").value.trim();
- const berat=kategori==="KONVERSI"&&$("berat").value!==""?Number($("berat").value):null;
- const isiBersih=kategori==="KONVERSI"&&$("isiBersih").value!==""?Number($("isiBersih").value):null;
- const rawLink=kategori==="KONVERSI"?getSelectedRawLinks():"";
- if(kategori==="KONVERSI"&&!satuan){alert("Masukkan satuan!");return}
- if(berat!==null&&(!Number.isFinite(berat)||berat<0)){alert("Berat kemasan tidak valid!");return}
- if(isiBersih!==null&&(!Number.isFinite(isiBersih)||isiBersih<0)){alert("Isi bersih segel tidak valid!");return}
- const links = parseRawLinks(rawLink);
- for(const lk of links){
-  if(!masterPLU.some(x=>x.kategori==="RAW"&&x.plu===lk)){alert(`PLU RAW terkait (${lk}) tidak ditemukan.`);return}
- }
- if(masterPLU.some(x=>x.plu.toLowerCase()===plu.toLowerCase()&&x.id!==editId)){alert("Nomor PLU sudah terdaftar!");return}
- const item={id:editId||Date.now(),plu,nama,kategori,satuan,berat,isiBersih,rawLink};
- if(editId)masterPLU=masterPLU.map(x=>x.id===editId?item:x);else masterPLU.push(item);
- saveMaster();resetForm();renderMaster();alert("Master PLU berhasil disimpan dan dikirim ke Google Sheets.");
-});
-function renderMaster(){
- const q=$("search").value.toLowerCase();
- const rows=masterPLU.filter(x=>x.plu.toLowerCase().includes(q)||x.nama.toLowerCase().includes(q));
- $("tableData").innerHTML=rows.map((x,i)=>`<tr>
- <td>${i+1}</td><td><b>${esc(x.plu)}</b></td><td>${esc(x.nama)}</td>
- <td><span class="tag ${x.kategori==="RAW"?"raw":"konversi"}">${esc(x.kategori)}</span></td>
- <td>${esc(x.satuan)}</td><td>${x.berat!=null?fmt(x.berat)+" "+esc(x.satuan):"-"}</td><td>${x.isiBersih!=null?fmt(x.isiBersih)+" "+esc(x.satuan):"-"}</td>
- <td>${x.rawLink?esc(x.rawLink):"-"}</td>
- <td><button class="btn edit" onclick="editData(${Number(x.id)})">Edit</button> <button class="btn delete" onclick="deleteData(${Number(x.id)})">Hapus</button></td>
- </tr>`).join("")||'<tr><td colspan="9" class="empty">Belum ada data Master PLU.</td></tr>';
- $("total").textContent=masterPLU.length;
- $("totalRaw").textContent=masterPLU.filter(x=>x.kategori==="RAW").length;
- $("totalKonversi").textContent=masterPLU.filter(x=>x.kategori==="KONVERSI").length;
+const pluForm = $("pluForm");
+if(pluForm){
+ pluForm.addEventListener("submit",e=>{
+  e.preventDefault();
+  const plu=$("plu").value.trim(),nama=$("nama").value.trim(),kategori=$("kategori").value;
+  const satuan=kategori==="RAW"?"PCS":$("satuan").value.trim();
+  const berat=kategori==="KONVERSI"&&$("berat").value!==""?Number($("berat").value):null;
+  const isiBersih=kategori==="KONVERSI"&&$("isiBersih").value!==""?Number($("isiBersih").value):null;
+  const rawLink=kategori==="KONVERSI"?getSelectedRawLinks():"";
+  if(kategori==="KONVERSI"&&!satuan){alert("Masukkan satuan!");return}
+  if(berat!==null&&(!Number.isFinite(berat)||berat<0)){alert("Berat kemasan tidak valid!");return}
+  if(isiBersih!==null&&(!Number.isFinite(isiBersih)||isiBersih<0)){alert("Isi bersih segel tidak valid!");return}
+  const links = parseRawLinks(rawLink);
+  for(const lk of links){
+   if(!masterPLU.some(x=>x.kategori==="RAW"&&x.plu===lk)){alert(`PLU RAW terkait (${lk}) tidak ditemukan.`);return}
+  }
+  if(masterPLU.some(x=>x.plu.toLowerCase()===plu.toLowerCase()&&x.id!==editId)){alert("Nomor PLU sudah terdaftar!");return}
+  const item={id:editId||Date.now(),plu,nama,kategori,satuan,berat,isiBersih,rawLink};
+  if(editId)masterPLU=masterPLU.map(x=>x.id===editId?item:x);else masterPLU.push(item);
+  saveMaster();resetForm();renderMaster();alert("Master PLU berhasil disimpan dan dikirim ke Google Sheets.");
+ });
 }
+
+function renderMaster(){
+ const searchEl = $("search");
+ const q=searchEl?(searchEl.value||"").toLowerCase():"";
+ const rows=masterPLU.filter(x=>x.plu.toLowerCase().includes(q)||x.nama.toLowerCase().includes(q));
+ const tableData = $("tableData");
+ if(tableData){
+  tableData.innerHTML=rows.map((x,i)=>`<tr>
+  <td>${i+1}</td><td><b>${esc(x.plu)}</b></td><td>${esc(x.nama)}</td>
+  <td><span class="tag ${x.kategori==="RAW"?"raw":"konversi"}">${esc(x.kategori)}</span></td>
+  <td>${esc(x.satuan)}</td><td>${x.berat!=null?fmt(x.berat)+" "+esc(x.satuan):"-"}</td><td>${x.isiBersih!=null?fmt(x.isiBersih)+" "+esc(x.satuan):"-"}</td>
+  <td>${x.rawLink?esc(x.rawLink):"-"}</td>
+  <td><button class="btn edit" onclick="editData(${Number(x.id)})">Edit</button> <button class="btn delete" onclick="deleteData(${Number(x.id)})">Hapus</button></td>
+  </tr>`).join("")||'<tr><td colspan="9" class="empty">Belum ada data Master PLU.</td></tr>';
+ }
+ if($("total")) $("total").textContent=masterPLU.length;
+ if($("totalRaw")) $("totalRaw").textContent=masterPLU.filter(x=>x.kategori==="RAW").length;
+ if($("totalKonversi")) $("totalKonversi").textContent=masterPLU.filter(x=>x.kategori==="KONVERSI").length;
+}
+
 function editData(id){
  const x=masterPLU.find(a=>a.id===id);if(!x)return;
  editId=id;$("plu").value=x.plu;$("nama").value=x.nama;$("kategori").value=x.kategori;
  categoryChanged();
- if(x.kategori==="KONVERSI"){$("satuan").value=x.satuan;$("berat").value=x.berat??"";$("isiBersih").value=x.isiBersih??"";populateRawLinks(parseRawLinks(x.rawLink))}
- $("formTitle").textContent="Edit Master PLU";$("saveButton").textContent="Simpan Perubahan";$("cancelButton").classList.remove("hidden");
+ if(x.kategori==="KONVERSI"){
+  if($("satuan")) $("satuan").value=x.satuan;
+  if($("berat")) $("berat").value=x.berat??"";
+  if($("isiBersih")) $("isiBersih").value=x.isiBersih??"";
+  populateRawLinks(parseRawLinks(x.rawLink));
+ }
+ if($("formTitle")) $("formTitle").textContent="Edit Master PLU";
+ if($("saveButton")) $("saveButton").textContent="Simpan Perubahan";
+ if($("cancelButton")) $("cancelButton").classList.remove("hidden");
  window.scrollTo({top:0,behavior:"smooth"});
 }
+
 function deleteData(id){
  const x=masterPLU.find(a=>a.id===id);if(!x)return;
- if(audit&&audit.status!=="completed"&&audit.items.some(a=>a.id===id)){alert("PLU ini sedang digunakan dalam audit yang belum selesai. Selesaikan atau batalkan audit terlebih dahulu.");return}
+ if(audit&&audit.status!=="completed"&&audit.items.some(a=>a.id===id)){alert("PLU ini sedang digunakan dalam audit yang belum selesai.");return}
  if(!confirm("Hapus Master PLU ini?"))return;
  masterPLU=masterPLU.filter(a=>a.id!==id);
  masterPLU.forEach(a=>{
@@ -760,12 +804,19 @@ function deleteData(id){
  });
  saveMaster();renderMaster();
 }
+
 function resetForm(){
- editId=null;$("pluForm").reset();$("satuanField").classList.add("hidden");$("beratField").classList.add("hidden");$("isiBersihField").classList.add("hidden");$("rawLinkField").classList.add("hidden");
- $("formTitle").textContent="Tambah Master PLU";$("saveButton").textContent="+ Simpan Master PLU";$("cancelButton").classList.add("hidden");
+ editId=null;
+ const f=$("pluForm"); if(f) f.reset();
+ if($("satuanField")) $("satuanField").classList.add("hidden");
+ if($("beratField")) $("beratField").classList.add("hidden");
+ if($("isiBersihField")) $("isiBersihField").classList.add("hidden");
+ if($("rawLinkField")) $("rawLinkField").classList.add("hidden");
+ if($("formTitle")) $("formTitle").textContent="Tambah Master PLU";
+ if($("saveButton")) $("saveButton").textContent="+ Simpan Master PLU";
+ if($("cancelButton")) $("cancelButton").classList.add("hidden");
 }
 
-// ================= RESEP MENU (REGULAR NORMAL + PLU LINKING) =================
 let draftRecipeRows = [];
 
 function renderRecipeFormRows(){
@@ -799,10 +850,12 @@ function onRecipePluChange(idx, pluVal){
  }
  renderRecipeFormRows();
 }
+
 function addRecipeIngRow(){
  draftRecipeRows.push({plu:"", nama:"", kategori:"", takaran:"", satuan:"ML"});
  renderRecipeFormRows();
 }
+
 function removeRecipeIngRow(idx){
  if(draftRecipeRows.length <= 1) return;
  draftRecipeRows.splice(idx, 1);
@@ -833,7 +886,7 @@ function injectRecipesFromCode(){
    ? JSON.parse(rawInput)
    : JSON.parse(atob(rawInput.replace(/\s+/g, "")));
  } catch (e) {
-  alert("Format JSON resep tidak valid atau terpotong. Pastikan menyalin seluruh teks JSON.");
+  alert("Format JSON resep tidak valid atau terpotong.");
   return;
  }
  const list = Array.isArray(parsed) ? parsed : [parsed];
@@ -867,50 +920,46 @@ function injectRecipesFromCode(){
 
  saveRecipes();
  renderRecipes();
- $("recipeInjectionBox").value = "";
-
- // === TAMBAHKAN BARIS INI AGAR LANGSUNG TERKIRIM KE GOOGLE SHEETS ===
- if(typeof flushPendingQueue === "function"){
-  flushPendingQueue();
- }
-
- alert(`Selesai! ${added} resep menu baru ditambahkan, ${updated} resep diperbarui dan sedang dikirim ke Google Sheets.`);
+ if($("recipeInjectionBox")) $("recipeInjectionBox").value = "";
+ alert(`Selesai! ${added} resep menu baru ditambahkan, ${updated} resep diperbarui.`);
 }
 
+const recipeForm = $("recipeForm");
+if(recipeForm){
+ recipeForm.addEventListener("submit", e => {
+  e.preventDefault();
+  const kode = $("recKode").value.trim().toUpperCase();
+  const nama = $("recNama").value.trim();
+  const varian = $("recVarian").value === "HOT" ? "HOT" : "COLD";
+  if(!nama){ alert("Masukkan nama menu minuman!"); return; }
 
-$("recipeForm").addEventListener("submit", e => {
- e.preventDefault();
- const kode = $("recKode").value.trim().toUpperCase();
- const nama = $("recNama").value.trim();
- const varian = $("recVarian").value === "HOT" ? "HOT" : "COLD";
- if(!nama){ alert("Masukkan nama menu minuman!"); return; }
+  const bahan = draftRecipeRows.map(r => normalizeRecipeIngredient(r)).filter(b => b.plu && b.takaran > 0);
+  if(!bahan.length){ alert("Pilih minimal 1 PLU bahan baku beserta takarannya!"); return; }
 
- const bahan = draftRecipeRows.map(r => normalizeRecipeIngredient(r)).filter(b => b.plu && b.takaran > 0);
- if(!bahan.length){ alert("Pilih minimal 1 PLU bahan baku beserta takarannya!"); return; }
+  const item = {
+   id: editRecipeId || Date.now(),
+   kode,
+   nama,
+   varian,
+   ukuran: "REGULAR",
+   bahan
+  };
+  if(editRecipeId) menuRecipes = menuRecipes.map(x => x.id === editRecipeId ? item : x);
+  else menuRecipes.push(item);
 
- const item = {
-  id: editRecipeId || Date.now(),
-  kode,
-  nama,
-  varian,
-  ukuran: "REGULAR",
-  bahan
- };
- if(editRecipeId) menuRecipes = menuRecipes.map(x => x.id === editRecipeId ? item : x);
- else menuRecipes.push(item);
-
- saveRecipes();
- resetRecipeForm();
- renderRecipes();
- alert("Resep menu berhasil disimpan ke Google Sheets.");
-});
+  saveRecipes();
+  resetRecipeForm();
+  renderRecipes();
+  alert("Resep menu berhasil disimpan.");
+ });
+}
 
 function editRecipe(id){
  const r = menuRecipes.find(x => x.id === id); if(!r) return;
  editRecipeId = id;
- $("recKode").value = r.kode || "";
- $("recNama").value = r.nama || "";
- $("recVarian").value = r.varian === "HOT" ? "HOT" : "COLD";
+ if($("recKode")) $("recKode").value = r.kode || "";
+ if($("recNama")) $("recNama").value = r.nama || "";
+ if($("recVarian")) $("recVarian").value = r.varian === "HOT" ? "HOT" : "COLD";
  draftRecipeRows = (r.bahan || []).map(b => ({
   plu: b.plu || "",
   nama: b.nama || "",
@@ -919,14 +968,15 @@ function editRecipe(id){
   satuan: b.satuan || "ML"
  }));
  renderRecipeFormRows();
- $("recipeFormTitle").textContent = "Edit Resep Menu (REGULAR Normal)";
- $("saveRecipeBtn").textContent = "Simpan Perubahan Resep";
- $("cancelRecipeBtn").classList.remove("hidden");
- $("pageRecipes").scrollIntoView({behavior:"smooth"});
+ if($("recipeFormTitle")) $("recipeFormTitle").textContent = "Edit Resep Menu (REGULAR Normal)";
+ if($("saveRecipeBtn")) $("saveRecipeBtn").textContent = "Simpan Perubahan Resep";
+ if($("cancelRecipeBtn")) $("cancelRecipeBtn").classList.remove("hidden");
+ const pageRecipes = $("pageRecipes");
+ if(pageRecipes) pageRecipes.scrollIntoView({behavior:"smooth"});
 }
 
 function deleteRecipe(id){
- if(!confirm("Hapus resep menu ini dari database?")) return;
+ if(!confirm("Hapus resep menu ini?")) return;
  menuRecipes = menuRecipes.filter(x => x.id !== id);
  saveRecipes();
  renderRecipes();
@@ -934,25 +984,29 @@ function deleteRecipe(id){
 
 function resetRecipeForm(){
  editRecipeId = null;
- $("recipeForm").reset();
+ const formEl = $("recipeForm"); if(formEl) formEl.reset();
  draftRecipeRows = [{plu:"", nama:"", kategori:"", takaran:"", satuan:"ML"}];
  renderRecipeFormRows();
- $("recipeFormTitle").textContent = "Tambah Resep Menu (Ukuran REGULAR Normal)";
- $("saveRecipeBtn").textContent = "+ Simpan Resep Menu";
- $("cancelRecipeBtn").classList.add("hidden");
+ if($("recipeFormTitle")) $("recipeFormTitle").textContent = "Tambah Resep Menu (Ukuran REGULAR Normal)";
+ if($("saveRecipeBtn")) $("saveRecipeBtn").textContent = "+ Simpan Resep Menu";
+ if($("cancelRecipeBtn")) $("cancelRecipeBtn").classList.add("hidden");
 }
 
 function setRecipeFilter(v){
  recipeFilterVarian = v;
- ["ALL","HOT","COLD"].forEach(k => $("recFilter"+k)?.classList.toggle("active", k===v));
+ ["ALL","HOT","COLD"].forEach(k => {
+  const btn = $("recFilter"+k);
+  if(btn) btn.classList.toggle("active", k===v);
+ });
  renderRecipes();
 }
 
 function renderRecipes(){
- const q = ($("recipeSearch")?.value || "").toLowerCase();
- $("totalRecipes").textContent = menuRecipes.length;
- $("totalRecipesHot").textContent = menuRecipes.filter(r => r.varian === "HOT").length;
- $("totalRecipesCold").textContent = menuRecipes.filter(r => r.varian === "COLD").length;
+ const searchRec = $("recipeSearch");
+ const q = searchRec ? (searchRec.value || "").toLowerCase() : "";
+ if($("totalRecipes")) $("totalRecipes").textContent = menuRecipes.length;
+ if($("totalRecipesHot")) $("totalRecipesHot").textContent = menuRecipes.filter(r => r.varian === "HOT").length;
+ if($("totalRecipesCold")) $("totalRecipesCold").textContent = menuRecipes.filter(r => r.varian === "COLD").length;
 
  const filtered = menuRecipes.filter(r => {
   if(recipeFilterVarian !== "ALL" && r.varian !== recipeFilterVarian) return false;
@@ -965,7 +1019,7 @@ function renderRecipes(){
  const grid = $("recipeCardsGrid");
  if(!grid) return;
  if(!filtered.length){
-  grid.innerHTML = '<div class="empty full">Belum ada resep menu yang cocok. Tambahkan lewat form di atas atau tempel JSON resep.</div>';
+  grid.innerHTML = '<div class="empty full">Belum ada resep menu yang cocok.</div>';
   return;
  }
 
@@ -1016,14 +1070,14 @@ function menuRecommendationHTML(report){
  if(!menuRecipes.length){
   return `<div class="menu-reco-box">
    <h4>🍹 Analisis &amp; Rekomendasi Penjualan Menu Minuman</h4>
-   <div class="muted">Data resep menu masih kosong. Isi atau injeksi JSON resep di menu <b>☕ Resep Menu</b> agar sistem otomatis menyimpulkan menu mana yang harus didorong atau direm berdasarkan item minus.</div>
+   <div class="muted">Data resep menu masih kosong.</div>
   </div>`;
  }
 
  if(!minusItems.length){
   return `<div class="menu-reco-box">
    <h4>🍹 Analisis &amp; Rekomendasi Penjualan Menu Minuman</h4>
-   <div class="notice" style="margin:0">Tidak ada item bahan baku yang MINUS pada hasil audit ini. Seluruh <b>${menuRecipes.length} menu</b> aman dijual secara normal.</div>
+   <div class="notice" style="margin:0">Tidak ada item bahan baku yang MINUS pada hasil audit ini. Seluruh resep aman dijual.</div>
   </div>`;
  }
 
@@ -1042,7 +1096,6 @@ function menuRecommendationHTML(report){
    const bPlu = String(b.plu || "").trim();
    if(!bPlu) return;
 
-   // Cek langsung ke item MINUS
    if(minusByPlu.has(bPlu)){
     const mItem = minusByPlu.get(bPlu);
     const estCups = b.takaran > 0 && Number(mItem.fisikBersih) > 0 ? Math.floor(Number(mItem.fisikBersih) / b.takaran) : 0;
@@ -1057,7 +1110,6 @@ function menuRecommendationHTML(report){
      estCups
     });
    } else {
-    // Cek jika bahan KONVERSI tertaut ke RAW yang sedang MINUS
     const auditObj = itemByPlu.get(bPlu);
     if(auditObj && auditObj.kategori === "KONVERSI"){
      parseRawLinks(auditObj.rawLink).forEach(rPlu => {
@@ -1091,7 +1143,6 @@ function menuRecommendationHTML(report){
   }
  });
 
- // Prioritaskan menu aman yang menggunakan bahan PLUS
  safeMenus.sort((a, b) => b.plusHits.length - a.plusHits.length);
 
  const minusSummaryBadges = minusItems.map(m =>
@@ -1102,9 +1153,9 @@ function menuRecommendationHTML(report){
   ? safeMenus.map((s, idx) => `
      <div class="reco-item">
       <div><b>${idx+1}. ${esc(s.rec.nama)}</b> ${s.rec.kode?`(${esc(s.rec.kode)})`:''} <span class="tag ${s.rec.varian==='HOT'?'hot-tag':'cold-tag'}">${esc(s.rec.varian)}</span></div>
-      <div class="muted">${s.plusHits.length ? `⭐ Memanfaatkan stok PLUS: <b>${esc(s.plusHits.join(", "))}</b>` : `Aman dijual — tidak memakai bahan yang minus.`}</div>
+      <div class="muted">${s.plusHits.length ? `⭐ Memanfaatkan stok PLUS: <b>${esc(s.plusHits.join(", "))}</b>` : `Aman dijual.`}</div>
      </div>`).join("")
-  : `<div class="muted">Semua resep terdaftar memakai salah satu bahan yang sedang minus. Prioritaskan menu dengan konsumsi bahan minus paling kecil.</div>`;
+  : `<div class="muted">Semua resep terdaftar memakai bahan minus.</div>`;
 
  const riskyHTML = riskyMenus.length
   ? riskyMenus.map((r, idx) => `
@@ -1112,7 +1163,7 @@ function menuRecommendationHTML(report){
       <div><b>${idx+1}. ${esc(r.rec.nama)}</b> ${r.rec.kode?`(${esc(r.rec.kode)})`:''} <span class="tag ${r.rec.varian==='HOT'?'hot-tag':'cold-tag'}">${esc(r.rec.varian)}</span></div>
       ${r.conflicts.map(c => `
        <div style="color:#8f2c24;margin-top:2px">
-        • Memakai <b>${esc(c.bahanNama)}</b> (${fmt(c.takaran)} ${esc(c.takaranSatuan)}/cup) — status audit <b>MINUS ${fmt(Math.abs(c.selisih))} ${esc(c.satuan)}</b>${c.estCups!==null ? ` · Sisa fisik cukup ±<b>${c.estCups} cup</b>` : ``}
+        • Memakai <b>${esc(c.bahanNama)}</b> (${fmt(c.takaran)} ${esc(c.takaranSatuan)}/cup) — status <b>MINUS ${fmt(Math.abs(c.selisih))} ${esc(c.satuan)}</b>${c.estCups!==null ? ` · Sisa cukup ±<b>${c.estCups} cup</b>` : ``}
        </div>
       `).join("")}
      </div>`).join("")
@@ -1120,39 +1171,46 @@ function menuRecommendationHTML(report){
 
  return `
   <div class="menu-reco-box">
-   <h4>🍹 Kesimpulan &amp; Rekomendasi Penjualan Menu (Berdasarkan Item Minus)</h4>
-   <div style="font-size:11px;margin-bottom:8px"><b>Item Bahan Minus Terdeteksi:</b> ${minusSummaryBadges}</div>
+   <h4>🍹 Rekomendasi Penjualan Menu</h4>
+   <div style="font-size:11px;margin-bottom:8px"><b>Bahan Minus:</b> ${minusSummaryBadges}</div>
    <div class="reco-cols">
     <div class="reco-col safe">
-     <h5>✅ Prioritas Menu untuk Dijual / Didorong (${safeMenus.length} Menu)</h5>
+     <h5>✅ Prioritas Menu (${safeMenus.length})</h5>
      ${safeHTML}
     </div>
     <div class="reco-col risk">
-     <h5>⚠️ Menu Pemakai Bahan Minus — Batasi / Pantau (${riskyMenus.length} Menu)</h5>
+     <h5>⚠️ Menu Pemakai Bahan Minus (${riskyMenus.length})</h5>
      ${riskyHTML}
     </div>
    </div>
   </div>`;
 }
 
-// ================= AUDIT MANDIRI =================
 function isWarehouseOnly(){return audit && audit.lokasi === "GUDANG"}
 function isBoothOnly(){return audit && audit.lokasi === "KABINET"}
 function isCombinedMode(){return audit && audit.lokasi === "KEDUANYA"}
 
 function categoryItems(cat){return audit.items.filter(x=>x.kategori===cat)}
 function startAudit(){
- if(!masterPLU.length){$("noMaster").classList.remove("hidden");return}
- const person=$("auditPerson").value.trim();if(!person){alert("Masukkan nama auditor!");return}
- const lokasi=$("auditLocation").value||"KEDUANYA";
- if(lokasi==="GUDANG" && !masterPLU.some(x=>x.kategori==="RAW")){
-  alert("Belum ada item kategori RAW di Master PLU untuk diaudit di Gudang.");return;
+ if(!masterPLU.length){
+  const nm = $("noMaster"); if(nm) nm.classList.remove("hidden");
+  return;
  }
- if(audit&&audit.status!=="completed"&&!confirm("Ada audit yang belum selesai. Mulai audit baru dan hapus progres sebelumnya?"))return;
+ const personEl = $("auditPerson");
+ const person = personEl ? personEl.value.trim() : "";
+ if(!person){alert("Masukkan nama auditor!");return}
+ const locEl = $("auditLocation");
+ const lokasi = locEl ? locEl.value : "KEDUANYA";
+ if(lokasi==="GUDANG" && !masterPLU.some(x=>x.kategori==="RAW")){
+  alert("Belum ada data kategori RAW di Master PLU.");return;
+ }
+ if(audit&&audit.status!=="completed"&&!confirm("Ada audit yang belum selesai. Mulai baru?"))return;
  physicalSearch="";physicalFilter="ALL";selectedCompareKeys.clear();
+ 
+ const dateEl = $("auditDate");
  audit={
   lokasi,
-  tanggal:$("auditDate").value||today(),
+  tanggal:dateEl ? dateEl.value : today(),
   auditor:person,
   mulaiPada:new Date().toISOString(),
   status:"computer_raw",
@@ -1173,19 +1231,29 @@ function startAudit(){
  };
  saveAudit();renderAudit();
 }
+
 function newAudit(){
- if(!confirm("Mulai audit baru? Audit yang belum disimpan akan diganti."))return;
- audit=null;saveAudit();$("auditPerson").value="";$("auditDate").value=today();renderAudit();
+ if(!confirm("Mulai audit baru? Progres lama akan dihapus."))return;
+ audit=null;saveAudit();
+ if($("auditPerson")) $("auditPerson").value="";
+ if($("auditDate")) $("auditDate").value=today();
+ renderAudit();
 }
+
 function cancelAudit(){
  if(!audit||audit.status==="completed")return;
- if(!confirm(`Batalkan audit yang sedang berlangsung oleh ${audit.auditor||"auditor"}? Seluruh progres audit ini akan dihapus dan tidak masuk riwayat.`))return;
- audit=null;saveAudit();$("auditPerson").value="";$("auditDate").value=today();renderAudit();
+ if(!confirm("Batalkan audit yang sedang berlangsung?"))return;
+ audit=null;saveAudit();
+ if($("auditPerson")) $("auditPerson").value="";
+ if($("auditDate")) $("auditDate").value=today();
+ renderAudit();
 }
+
 function setStage(s){
  if(s==="physical_konversi"||s==="physical_raw")s="physical_all";
  audit.status=s;saveAudit();renderAudit();
 }
+
 function isItemPhysicalDone(x){
  if(isWarehouseOnly()){
   if(x.kategori==="KONVERSI") return true;
@@ -1203,12 +1271,14 @@ function isItemPhysicalDone(x){
  }
  return isCombinedBoothItemDone(x);
 }
+
 function isCombinedBoothItemDone(x){
  if(x.kategori==="RAW"){
   return x.boothRaw!==null && x.boothRaw!==undefined && Number.isFinite(Number(x.boothRaw)) && Number(x.boothRaw)>=0;
  }
  return isConvBoothFilled(x);
 }
+
 function isConvBoothFilled(x){
  const hasSegel = x.qtySegel!==null && x.qtySegel!==undefined;
  const hasIsi = x.isiSegel!==null && x.isiSegel!==undefined;
@@ -1229,6 +1299,7 @@ function parseSignedNumber(val){
  const n = Number(s);
  return Number.isFinite(n) ? n : null;
 }
+
 function syncMinusButtonVisual(id, valStr){
  const btn = $("minus-btn-" + id);
  if(!btn) return;
@@ -1236,6 +1307,7 @@ function syncMinusButtonVisual(id, valStr){
  btn.classList.toggle("is-minus", isMinus);
  btn.textContent = isMinus ? "− MINUS" : "+/− Minus";
 }
+
 function updateComputerValue(id, val){
  const x=audit.items.find(a=>a.id===id);if(!x)return;
  const s = String(val).trim();
@@ -1246,6 +1318,7 @@ function updateComputerValue(id, val){
  const card = document.querySelector(`[data-comp-card="${id}"]`);
  if(card) card.classList.toggle("filled", x.komputer !== null && x.komputer !== undefined);
 }
+
 function toggleComputerMinus(id){
  const inp = $("comp-inp-" + id);
  const x = audit.items.find(a=>a.id===id);
@@ -1267,6 +1340,7 @@ function toggleComputerMinus(id){
  if(card) card.classList.toggle("filled", x.komputer !== null && x.komputer !== undefined);
  inp.focus();
 }
+
 function updateAuditValue(id,key,val){
  const x=audit.items.find(a=>a.id===id);if(!x)return;
  if(val==="")x[key]=null;
@@ -1289,6 +1363,7 @@ function activeAuditItems(){
  if(isCombinedMode() && audit.combinedZone === "GUDANG") return categoryItems("RAW");
  return audit.items;
 }
+
 function progress(){
  const items = activeAuditItems();
  let done=0,total=items.length*2;
@@ -1298,21 +1373,44 @@ function progress(){
  });
  return total?Math.round(done/total*100):0;
 }
-function updateProgressOnly(){$("progressBar").style.width=progress()+"%";$("progressText").textContent="Progres pengisian: "+progress()+"%"}
+
+function updateProgressOnly(){
+ if($("progressBar")) $("progressBar").style.width=progress()+"%";
+ if($("progressText")) $("progressText").textContent="Progres pengisian: "+progress()+"%";
+}
 
 function renderAudit(){
  if(audit && (audit.status==="physical_konversi"||audit.status==="physical_raw")) audit.status="physical_all";
  if(audit && isCombinedMode() && !audit.combinedZone) audit.combinedZone="GUDANG";
- document.body.classList.remove("audit-active");
- if(!audit){$("auditStart").classList.remove("hidden");$("auditWorkspace").classList.add("hidden");$("auditResult").classList.add("hidden");return}
- $("auditStart").classList.add("hidden");
- if(audit.status==="completed"){$("auditWorkspace").classList.add("hidden");$("auditResult").classList.remove("hidden");renderCurrentResult();return}
- $("auditWorkspace").classList.remove("hidden");$("auditResult").classList.add("hidden");
+ 
+ const auditStart = $("auditStart");
+ const auditWorkspace = $("auditWorkspace");
+ const auditResult = $("auditResult");
+ 
+ if(!audit){
+  if(auditStart) auditStart.classList.remove("hidden");
+  if(auditWorkspace) auditWorkspace.classList.add("hidden");
+  if(auditResult) auditResult.classList.add("hidden");
+  return;
+ }
+ if(auditStart) auditStart.classList.add("hidden");
+ if(audit.status==="completed"){
+  if(auditWorkspace) auditWorkspace.classList.add("hidden");
+  if(auditResult) auditResult.classList.remove("hidden");
+  renderCurrentResult();
+  return;
+ }
+ if(auditWorkspace) auditWorkspace.classList.remove("hidden");
+ if(auditResult) auditResult.classList.add("hidden");
 
  const whOnly = isWarehouseOnly();
  const comb = isCombinedMode();
  const zoneText = comb ? (audit.combinedZone==="GUDANG" ? " · Tahap Aktif: GUDANG (RAW)" : " · Tahap Aktif: KABINET / BOOTH (RAW + KONVERSI)") : "";
- $("auditInfo").innerHTML=`<b>Mode Audit:</b> <span class="tag loc-tag">${esc(locationLabel(audit.lokasi))}${esc(zoneText)}</span> &nbsp; | &nbsp; <b>Auditor:</b> ${esc(audit.auditor)} &nbsp; | &nbsp; <b>Tanggal:</b> ${safeDate(audit.tanggal)}<br><b>Mulai audit:</b> ${dateTimeText(audit.mulaiPada)}<br><b>Item Tahap Ini:</b> ${activeAuditItems().length} PLU`;
+ 
+ const auditInfo = $("auditInfo");
+ if(auditInfo){
+  auditInfo.innerHTML=`<b>Mode Audit:</b> <span class="tag loc-tag">${esc(locationLabel(audit.lokasi))}${esc(zoneText)}</span> &nbsp; | &nbsp; <b>Auditor:</b> ${esc(audit.auditor)} &nbsp; | &nbsp; <b>Tanggal:</b> ${safeDate(audit.tanggal)}<br><b>Mulai audit:</b> ${dateTimeText(audit.mulaiPada)}<br><b>Item Tahap Ini:</b> ${activeAuditItems().length} PLU`;
+ }
 
  const activeStages = whOnly
   ? [{id:"computer_raw",label:"1. Stok Komputer RAW"},{id:"physical_all",label:"2. Catat Fisik Gudang (RAW)"},{id:"completed",label:"3. Hasil Akhir"}]
@@ -1325,20 +1423,24 @@ function renderAudit(){
   currentStageKey = audit.combinedZone==="GUDANG" ? "physical_wh" : "physical_bt";
  }
  const idx = activeStages.findIndex(s=>s.id===currentStageKey);
- $("stepIndicator").innerHTML=activeStages.map((s,i)=>`<span class="step ${i<idx?"done":i===idx?"active":""}">${s.label}</span>`).join("");
+ const stepInd = $("stepIndicator");
+ if(stepInd){
+  stepInd.innerHTML=activeStages.map((s,i)=>`<span class="step ${i<idx?"done":i===idx?"active":""}">${s.label}</span>`).join("");
+ }
 
  updateProgressOnly();
- if(audit.status==="computer_raw")renderComputer("RAW");
+ if(audit.status==="computer_raw") renderComputer("RAW");
  if(audit.status==="computer_konversi"){
   if(whOnly){setStage("physical_all");return}
   renderComputer("KONVERSI");
  }
- if(audit.status==="physical_all")renderPhysicalAll();
+ if(audit.status==="physical_all") renderPhysicalAll();
 }
 
 function countUnfilledComputer(cat){
  return categoryItems(cat).filter(x => x.komputer === null || x.komputer === undefined || !Number.isFinite(Number(x.komputer))).length;
 }
+
 function switchComputerTab(targetStage){
  if(!audit) return;
  const currentCat = audit.status === "computer_raw" ? "RAW" : "KONVERSI";
@@ -1346,61 +1448,75 @@ function switchComputerTab(targetStage){
  if(currentCat === targetCat) return;
  const unfilled = countUnfilledComputer(currentCat);
  if(unfilled > 0){
-  const ok = confirm(`PERINGATAN:\nMasih ada ${unfilled} item stok komputer ${currentCat} yang belum diinput.\n\nApakah Anda tetap ingin pindah ke Stok Komputer ${targetCat}?`);
+  const ok = confirm(`Masih ada ${unfilled} item stok komputer ${currentCat} yang belum diisi. Lanjutkan?`);
   if(!ok) return;
  }
  setStage(targetStage);
  window.scrollTo({top:0,behavior:"smooth"});
 }
+
 function renderComputer(cat){
  const items=categoryItems(cat);
  const whOnly=isWarehouseOnly();
- $("auditToolbar").classList.add("hidden");
- $("auditTableHead").className="hidden";
+ if($("auditToolbar")) $("auditToolbar").classList.add("hidden");
+ if($("auditTableHead")) $("auditTableHead").className="hidden";
  const topNav = $("compTopNav");
  if(!whOnly && categoryItems("KONVERSI").length > 0){
-  topNav.classList.remove("hidden");
-  topNav.innerHTML = `
-   <button type="button" class="comp-switch-btn ${cat==='RAW'?'active':''}" onclick="switchComputerTab('computer_raw')">📦 Input Stok Komputer RAW (${categoryItems("RAW").length})</button>
-   <button type="button" class="comp-switch-btn ${cat==='KONVERSI'?'active':''}" onclick="switchComputerTab('computer_konversi')">⚡ Input Stok Komputer KONVERSI (${categoryItems("KONVERSI").length})</button>
-  `;
+  if(topNav){
+   topNav.classList.remove("hidden");
+   topNav.innerHTML = `
+    <button type="button" class="comp-switch-btn ${cat==='RAW'?'active':''}" onclick="switchComputerTab('computer_raw')">📦 Input Stok Komputer RAW (${categoryItems("RAW").length})</button>
+    <button type="button" class="comp-switch-btn ${cat==='KONVERSI'?'active':''}" onclick="switchComputerTab('computer_konversi')">⚡ Input Stok Komputer KONVERSI (${categoryItems("KONVERSI").length})</button>
+   `;
+  }
  } else {
-  topNav.classList.add("hidden");
-  topNav.innerHTML = "";
+  if(topNav){
+   topNav.classList.add("hidden");
+   topNav.innerHTML = "";
+  }
  }
- $("auditHeading").textContent="Input Stok Komputer "+cat;
- $("auditInstruction").innerHTML="Ditampilkan <b>1 per 1</b> dengan <b>PLU menonjol</b>. Ketik angka stoknya lalu tekan tombol <b>+/− Minus</b> di samping kolom jika stoknya minus (misal ketik <b>125</b> lalu tekan <b>+/− Minus</b> → <b>-125</b>).";
- $("auditTableBody").className="comp-cards";
- $("auditTableBody").innerHTML=items.map((x,i)=>{
-  const hasVal = x.komputer !== null && x.komputer !== undefined && Number.isFinite(Number(x.komputer));
-  const isMinus = hasVal && Number(x.komputer) < 0;
-  return `<div class="comp-card ${cat==='KONVERSI'?'is-konv':''} ${hasVal?'filled':''}" data-comp-card="${Number(x.id)}">
-   <div>
-    <div class="comp-card-top">
-     <span class="comp-seq">#${i+1}</span>
-     <span class="plu-highlight">PLU: ${esc(x.plu)}</span>
-     <span class="tag ${cat==='RAW'?'raw':'konversi'}">${esc(cat)}</span>
+ if($("auditHeading")) $("auditHeading").textContent="Input Stok Komputer "+cat;
+ if($("auditInstruction")) $("auditInstruction").innerHTML="Ketik angka stok komputer lalu klik <b>+/− Minus</b> jika minus.";
+ 
+ const tBody = $("auditTableBody");
+ if(tBody){
+  tBody.className="comp-cards";
+  tBody.innerHTML=items.map((x,i)=>{
+   const hasVal = x.komputer !== null && x.komputer !== undefined && Number.isFinite(Number(x.komputer));
+   const isMinus = hasVal && Number(x.komputer) < 0;
+   return `<div class="comp-card ${cat==='KONVERSI'?'is-konv':''} ${hasVal?'filled':''}" data-comp-card="${Number(x.id)}">
+    <div>
+     <div class="comp-card-top">
+      <span class="comp-seq">#${i+1}</span>
+      <span class="plu-highlight">PLU: ${esc(x.plu)}</span>
+      <span class="tag ${cat==='RAW'?'raw':'konversi'}">${esc(cat)}</span>
+     </div>
+     <div class="comp-name">${esc(x.nama)}</div>
+     <div class="comp-sub">Satuan: <b>${esc(x.satuan)}</b>${x.isiBersih!=null?` · Rasio: ${fmt(x.isiBersih)}`:""}</div>
     </div>
-    <div class="comp-name">${esc(x.nama)}</div>
-    <div class="comp-sub">Satuan: <b>${esc(x.satuan)}</b>${x.isiBersih!=null?` · Rasio Segel: ${fmt(x.isiBersih)} ${esc(x.satuan)}`:""}</div>
-   </div>
-   <div class="comp-input-wrap">
-    <label for="comp-inp-${Number(x.id)}">Stok Komputer (${esc(x.satuan)})</label>
-    <div class="comp-input-row">
-     <input id="comp-inp-${Number(x.id)}" type="number" inputmode="decimal" step="any" autocomplete="off" placeholder="Ketik angka..." value="${x.komputer??""}" oninput="updateComputerValue(${Number(x.id)},this.value)">
-     <button type="button" id="minus-btn-${Number(x.id)}" class="minus-toggle-btn ${isMinus?'is-minus':''}" onclick="toggleComputerMinus(${Number(x.id)})">${isMinus?'− MINUS':'+/− Minus'}</button>
+    <div class="comp-input-wrap">
+     <label for="comp-inp-${Number(x.id)}">Stok Komputer (${esc(x.satuan)})</label>
+     <div class="comp-input-row">
+      <input id="comp-inp-${Number(x.id)}" type="number" inputmode="decimal" step="any" autocomplete="off" placeholder="Ketik angka..." value="${x.komputer??""}" oninput="updateComputerValue(${Number(x.id)},this.value)">
+      <button type="button" id="minus-btn-${Number(x.id)}" class="minus-toggle-btn ${isMinus?'is-minus':''}" onclick="toggleComputerMinus(${Number(x.id)})">${isMinus?'− MINUS':'+/− Minus'}</button>
+     </div>
     </div>
-   </div>
-  </div>`;
- }).join("")||'<div class="empty">Tidak ada PLU kategori '+cat+'.</div>';
- if(cat==="RAW"){
-  if(whOnly) $("auditActions").innerHTML='<button class="btn primary" onclick="nextComputerRaw()">Lanjut Catat Fisik Gudang (Hanya RAW) →</button>';
-  else $("auditActions").innerHTML='<button class="btn primary" onclick="nextComputerRaw()">Lanjut ke Stok Komputer KONVERSI →</button>';
- }else{
-  const nextLabel = isCombinedMode() ? "Mulai Catat Fisik Gudang Dulu →" : "Mulai Catat Fisik Kabinet / Booth →";
-  $("auditActions").innerHTML='<button class="btn cancel" onclick="switchComputerTab(\'computer_raw\')">← Kembali ke RAW</button><button class="btn primary" onclick="nextComputerKonversi()">'+nextLabel+'</button>';
+   </div>`;
+  }).join("")||'<div class="empty">Tidak ada PLU kategori '+cat+'.</div>';
+ }
+
+ const act = $("auditActions");
+ if(act){
+  if(cat==="RAW"){
+   if(whOnly) act.innerHTML='<button class="btn primary" onclick="nextComputerRaw()">Lanjut Catat Fisik Gudang →</button>';
+   else act.innerHTML='<button class="btn primary" onclick="nextComputerRaw()">Lanjut ke Stok Komputer KONVERSI →</button>';
+  } else {
+   const nextLabel = isCombinedMode() ? "Mulai Catat Fisik Gudang Dulu →" : "Mulai Catat Fisik Kabinet / Booth →";
+   act.innerHTML='<button class="btn cancel" onclick="switchComputerTab(\'computer_raw\')">← Kembali</button><button class="btn primary" onclick="nextComputerKonversi()">'+nextLabel+'</button>';
+  }
  }
 }
+
 function nextComputerRaw(){ if(isWarehouseOnly()) setStage("physical_all"); else switchComputerTab("computer_konversi"); }
 function nextComputerKonversi(){ if(isCombinedMode()) audit.combinedZone="GUDANG"; setStage("physical_all"); }
 
@@ -1422,6 +1538,7 @@ function buildPairedGroups(){
  });
  return groups;
 }
+
 function calcConvNet(x){
  const q = Number(x.qtySegel)||0;
  const sealed = x.isiBersih!=null ? q*Number(x.isiBersih) : (Number(x.isiSegel)||0);
@@ -1431,53 +1548,63 @@ function calcConvNet(x){
  const opened = openCount>0 ? Math.max(0, gross - tara) : 0;
  return { sealed, opened, openCount, total: sealed + opened };
 }
+
 function renderPhysicalAll(){
  const whOnly = isWarehouseOnly();
  const isCombWh = isCombinedMode() && audit.combinedZone === "GUDANG";
  const isCombBt = isCombinedMode() && audit.combinedZone === "BOOTH";
  const showWhInput = whOnly || isCombWh;
- $("compTopNav").classList.add("hidden");
- $("auditTableBody").className="audit-list";
+ 
+ if($("compTopNav")) $("compTopNav").classList.add("hidden");
+ const tBody = $("auditTableBody");
+ if(tBody) tBody.className="audit-list";
+ 
  if(whOnly){
-  $("auditHeading").textContent = "Catat Fisik Gudang (Khusus RAW — Semua Segel)";
-  $("auditInstruction").innerHTML = "<b>Mode Gudang Saja:</b> Isi jumlah stok fisik <b>RAW</b> (segel) di gudang. Bisa diselesaikan kapan saja.";
+  if($("auditHeading")) $("auditHeading").textContent = "Catat Fisik Gudang (Khusus RAW)";
+  if($("auditInstruction")) $("auditInstruction").innerHTML = "Isi jumlah stok fisik <b>RAW</b> (segel) di gudang.";
  } else if(isCombWh){
-  $("auditHeading").textContent = "Tahap 1/2: Catat Fisik di GUDANG (Khusus RAW)";
-  $("auditInstruction").innerHTML = "<b>Gabungan — Bagian Gudang Dulu:</b> Isi barang <b>RAW</b> di gudang, lalu klik <b>Selesai Gudang → Pindah ke Kabinet / Booth</b>.";
+  if($("auditHeading")) $("auditHeading").textContent = "Tahap 1/2: Catat Fisik GUDANG (RAW)";
+  if($("auditInstruction")) $("auditInstruction").innerHTML = "Isi barang <b>RAW</b> di gudang, lalu klik lanjut ke Booth.";
  } else if(isCombBt){
-  $("auditHeading").textContent = "Tahap 2/2: Catat Fisik di KABINET / BOOTH (RAW + KONVERSI)";
-  $("auditInstruction").innerHTML = "<b>Gabungan — Bagian Kabinet / Booth:</b> Isi fisik <b>RAW</b> dan <b>KONVERSI</b> di booth.";
+  if($("auditHeading")) $("auditHeading").textContent = "Tahap 2/2: Catat Fisik KABINET / BOOTH";
+  if($("auditInstruction")) $("auditInstruction").innerHTML = "Isi fisik <b>RAW</b> dan <b>KONVERSI</b> di booth.";
  } else {
-  $("auditHeading").textContent = "Catat Fisik Kabinet / Booth (RAW + KONVERSI)";
-  $("auditInstruction").innerHTML = "<b>Mode Kabinet / Booth Saja:</b> Isi stok fisik <b>RAW</b> dan <b>KONVERSI</b> (segel atau sisa terbuka/timbangan).";
+  if($("auditHeading")) $("auditHeading").textContent = "Catat Fisik Kabinet / Booth";
+  if($("auditInstruction")) $("auditInstruction").innerHTML = "Isi stok fisik <b>RAW</b> dan <b>KONVERSI</b>.";
  }
- $("auditTableHead").className="hidden";
+ 
+ if($("auditTableHead")) $("auditTableHead").className="hidden";
  const toolbar = $("auditToolbar");
- toolbar.classList.remove("hidden");
- toolbar.innerHTML = `
-  <input id="physSearchInput" type="search" placeholder="🔍 Ketik nama barang atau PLU yang sedang kamu pegang..." value="${esc(physicalSearch)}" oninput="onPhysSearch(this.value)">
-  <div class="filter-pills">
-   <button type="button" class="pill ${physicalFilter==='ALL'?'active':''}" onclick="setPhysFilter('ALL')">Semua</button>
-   <button type="button" class="pill ${physicalFilter==='UNFILLED'?'active':''}" onclick="setPhysFilter('UNFILLED')">Belum Diisi</button>
-   ${!showWhInput ? `
-    <button type="button" class="pill ${physicalFilter==='RAW'?'active':''}" onclick="setPhysFilter('RAW')">Daftar RAW</button>
-    <button type="button" class="pill ${physicalFilter==='KONVERSI'?'active':''}" onclick="setPhysFilter('KONVERSI')">Daftar KONVERSI</button>
-   ` : ``}
-  </div>
- `;
- renderPairedCards();
- let actionButtons = "";
- if(whOnly){
-  actionButtons = `<button class="btn cancel" onclick="setStage('computer_raw')">← Kembali</button><button class="btn warn-btn" type="button" onclick="fillRemainingZeros()">⚡ Set Sisa Kosong = 0</button><button class="btn gold" id="btnFinishAudit" onclick="finishAudit()">✓ Selesaikan Audit Gudang</button>`;
- } else if(isCombWh){
-  actionButtons = `<button class="btn cancel" onclick="setStage('computer_konversi')">← Kembali</button><button class="btn warn-btn" type="button" onclick="fillRemainingZeros()">⚡ Set Sisa Kosong = 0</button><button class="btn primary" id="btnFinishAudit" onclick="proceedToBoothZone()">Selesai Gudang → Pindah ke Kabinet / Booth</button>`;
- } else if(isCombBt){
-  actionButtons = `<button class="btn cancel" onclick="backToWarehouseZone()">← Kembali ke Gudang</button><button class="btn warn-btn" type="button" onclick="fillRemainingZeros()">⚡ Set Sisa Kosong = 0</button><button class="btn gold" id="btnFinishAudit" onclick="finishAudit()">✓ Selesaikan Audit Gabungan</button>`;
- } else {
-  actionButtons = `<button class="btn cancel" onclick="setStage('computer_konversi')">← Kembali</button><button class="btn warn-btn" type="button" onclick="fillRemainingZeros()">⚡ Set Sisa Kosong = 0</button><button class="btn gold" id="btnFinishAudit" onclick="finishAudit()">✓ Selesaikan Audit Booth</button>`;
+ if(toolbar){
+  toolbar.classList.remove("hidden");
+  toolbar.innerHTML = `
+   <input id="physSearchInput" type="search" placeholder="🔍 Cari barang..." value="${esc(physicalSearch)}" oninput="onPhysSearch(this.value)">
+   <div class="filter-pills">
+    <button type="button" class="pill ${physicalFilter==='ALL'?'active':''}" onclick="setPhysFilter('ALL')">Semua</button>
+    <button type="button" class="pill ${physicalFilter==='UNFILLED'?'active':''}" onclick="setPhysFilter('UNFILLED')">Belum Diisi</button>
+    ${!showWhInput ? `
+     <button type="button" class="pill ${physicalFilter==='RAW'?'active':''}" onclick="setPhysFilter('RAW')">RAW</button>
+     <button type="button" class="pill ${physicalFilter==='KONVERSI'?'active':''}" onclick="setPhysFilter('KONVERSI')">KONVERSI</button>
+    ` : ``}
+   </div>
+  `;
  }
- $("auditActions").innerHTML = actionButtons;
+ renderPairedCards();
+ 
+ const act = $("auditActions");
+ if(act){
+  if(whOnly){
+   act.innerHTML='<button class="btn cancel" onclick="setStage(\'computer_raw\')">← Kembali</button><button class="btn warn-btn" type="button" onclick="fillRemainingZeros()">⚡ Set 0</button><button class="btn gold" onclick="finishAudit()">✓ Selesaikan</button>';
+  } else if(isCombWh){
+   act.innerHTML='<button class="btn cancel" onclick="setStage(\'computer_konversi\')">← Kembali</button><button class="btn warn-btn" type="button" onclick="fillRemainingZeros()">⚡ Set 0</button><button class="btn primary" onclick="proceedToBoothZone()">Selesai Gudang → Pindah Booth</button>';
+  } else if(isCombBt){
+   act.innerHTML='<button class="btn cancel" onclick="backToWarehouseZone()">← Kembali Gudang</button><button class="btn warn-btn" type="button" onclick="fillRemainingZeros()">⚡ Set 0</button><button class="btn gold" onclick="finishAudit()">✓ Selesaikan Audit</button>';
+  } else {
+   act.innerHTML='<button class="btn cancel" onclick="setStage(\'computer_konversi\')">← Kembali</button><button class="btn warn-btn" type="button" onclick="fillRemainingZeros()">⚡ Set 0</button><button class="btn gold" onclick="finishAudit()">✓ Selesaikan</button>';
+  }
+ }
 }
+
 function proceedToBoothZone(){ audit.combinedZone="BOOTH"; physicalSearch=""; physicalFilter="ALL"; saveAudit(); renderAudit(); window.scrollTo({top:0,behavior:"smooth"}); }
 function backToWarehouseZone(){ audit.combinedZone="GUDANG"; physicalSearch=""; physicalFilter="ALL"; saveAudit(); renderAudit(); window.scrollTo({top:0,behavior:"smooth"}); }
 function onPhysSearch(val){ physicalSearch=val; renderPairedCards(); }
@@ -1498,8 +1625,12 @@ function renderPairedCards(){
   if(!q) return true;
   return allItems.some(it => it.nama.toLowerCase().includes(q) || it.plu.toLowerCase().includes(q));
  });
- if(!groups.length){ $("auditTableBody").innerHTML='<div class="empty">Tidak ada barang yang cocok dengan pencarian/filter.</div>'; return; }
- $("auditTableBody").innerHTML = groups.map((g, idx) => {
+ 
+ const tBody = $("auditTableBody");
+ if(!tBody) return;
+ if(!groups.length){ tBody.innerHTML='<div class="empty">Tidak ada barang yang cocok.</div>'; return; }
+ 
+ tBody.innerHTML = groups.map((g, idx) => {
   const allItems = [g.raw, ...g.convs].filter(Boolean);
   const allDone = allItems.every(isItemPhysicalDone);
   const mainId = g.raw ? g.raw.id : g.convs[0].id;
@@ -1507,21 +1638,21 @@ function renderPairedCards(){
   if(g.raw){
    const r = g.raw;
    if(showWhInput){
-    rawHTML = `<div class="box-wh" data-card-item="${r.id}"><div class="box-title"><span>📦 GUDANG · RAW (${esc(r.satuan)} · PLU ${esc(r.plu)})</span><button type="button" class="zero-btn" onclick="setRawZero(${Number(r.id)})">Kosong (0)</button></div><div class="field"><label>Jumlah Segel di Gudang (${esc(r.satuan)})</label><input type="number" inputmode="decimal" min="0" step="any" placeholder="Isi jumlah fisik gudang..." value="${r.gudangRaw??""}" oninput="updateAuditValue(${Number(r.id)},'gudangRaw',this.value)"></div><div class="rule-hint">Gudang khusus RAW (semua segel, tanpa konversi).</div></div>`;
+    rawHTML = `<div class="box-wh" data-card-item="${r.id}"><div class="box-title"><span>📦 GUDANG · RAW (${esc(r.satuan)})</span><button type="button" class="zero-btn" onclick="setRawZero(${Number(r.id)})">0</button></div><div class="field"><label>Jumlah Segel</label><input type="number" inputmode="decimal" min="0" step="any" placeholder="0" value="${r.gudangRaw??""}" oninput="updateAuditValue(${Number(r.id)},'gudangRaw',this.value)"></div></div>`;
    } else {
-    rawHTML = `<div class="box-raw" data-card-item="${r.id}"><div class="box-title"><span>🏪 KABINET / BOOTH · RAW (${esc(r.satuan)} · PLU ${esc(r.plu)})</span><button type="button" class="zero-btn" onclick="setRawZero(${Number(r.id)})">Kosong (0)</button></div><div class="field"><label>Jumlah Utuh / Kemasan di Booth (${esc(r.satuan)})</label><input type="number" inputmode="decimal" min="0" step="any" placeholder="Isi jumlah fisik booth..." value="${r.boothRaw??""}" oninput="updateAuditValue(${Number(r.id)},'boothRaw',this.value)"></div><div class="rule-hint">Masuk ke rekap <b>RAW</b> (${esc(r.satuan)}).</div></div>`;
+    rawHTML = `<div class="box-raw" data-card-item="${r.id}"><div class="box-title"><span>🏪 BOOTH · RAW (${esc(r.satuan)})</span><button type="button" class="zero-btn" onclick="setRawZero(${Number(r.id)})">0</button></div><div class="field"><label>Jumlah Utuh</label><input type="number" inputmode="decimal" min="0" step="any" placeholder="0" value="${r.boothRaw??""}" oninput="updateAuditValue(${Number(r.id)},'boothRaw',this.value)"></div></div>`;
    }
   }
   let convHTML = showWhInput ? "" : g.convs.map(c => {
    const hasIsi = c.isiBersih !== null && c.isiBersih !== undefined;
-   const hasTara = c.berat !== null && c.berat !== undefined;
    const calc = calcConvNet(c);
    const openDisplay = c.jumlahTerbuka!==null && c.jumlahTerbuka!==undefined ? c.jumlahTerbuka : (Number(c.fisikKotorTerbuka)>0 ? 1 : "");
-   return `<div class="box-konv" data-card-item="${c.id}"><div class="box-title"><span>⚡ BOOTH · KONVERSI (${esc(c.satuan)} · PLU ${esc(c.plu)})</span><button type="button" class="zero-btn" onclick="setConvZero(${Number(c.id)})">Kosong (0)</button></div><div class="satset-row ${hasIsi?'single':''}"><div class="field"><label>${hasIsi ? `Jml Wadah Segel (× ${fmt(c.isiBersih)} ${esc(c.satuan)})` : `Jml Wadah Segel`}</label><input type="number" inputmode="numeric" min="0" step="1" placeholder="0 wadah" value="${c.qtySegel??""}" oninput="updateConvSatset(${Number(c.id)},'qtySegel',this.value)"></div>${!hasIsi ? `<div class="field"><label>Atau Total Isi Segel (${esc(c.satuan)})</label><input type="number" inputmode="decimal" min="0" step="any" placeholder="0 ${esc(c.satuan)}" value="${c.isiSegel??""}" oninput="updateConvSatset(${Number(c.id)},'isiSegel',this.value)"></div>` : ``}</div><div class="satset-row triple"><div class="field"><label>Berat Kotor Terbuka (${esc(c.satuan)})</label><input type="number" inputmode="decimal" min="0" step="any" placeholder="0" value="${c.fisikKotorTerbuka??""}" oninput="updateConvSatset(${Number(c.id)},'fisikKotorTerbuka',this.value)"></div><div class="field open-qty-col"><label>Jml Wadah Terbuka</label><input type="number" inputmode="numeric" min="0" step="1" placeholder="Otomatis 1" value="${openDisplay}" oninput="updateConvSatset(${Number(c.id)},'jumlahTerbuka',this.value)"></div></div><div class="calc-preview" id="prev-${c.id}">Total Bersih Booth: <b>${fmt(calc.total)} ${esc(c.satuan)}</b> (Segel: ${fmt(calc.sealed)} + Terbuka: ${fmt(calc.opened)})${hasTara?` · Tara: ${fmt(c.berat)}/wadah`:""}</div><div class="rule-hint">Tip sat-set: isi <b>Berat Kotor Terbuka</b> saja jika wadah terbukanya 1.</div></div>`;
+   return `<div class="box-konv" data-card-item="${c.id}"><div class="box-title"><span>⚡ BOOTH · KONVERSI (${esc(c.satuan)})</span><button type="button" class="zero-btn" onclick="setConvZero(${Number(c.id)})">0</button></div><div class="satset-row ${hasIsi?'single':''}"><div class="field"><label>${hasIsi ? `Wadah Segel (× ${fmt(c.isiBersih)})` : `Wadah Segel`}</label><input type="number" inputmode="numeric" min="0" step="1" placeholder="0" value="${c.qtySegel??""}" oninput="updateConvSatset(${Number(c.id)},'qtySegel',this.value)"></div>${!hasIsi ? `<div class="field"><label>Total Isi Segel</label><input type="number" inputmode="decimal" min="0" step="any" placeholder="0" value="${c.isiSegel??""}" oninput="updateConvSatset(${Number(c.id)},'isiSegel',this.value)"></div>` : ``}</div><div class="satset-row triple"><div class="field"><label>Berat Kotor Terbuka</label><input type="number" inputmode="decimal" min="0" step="any" placeholder="0" value="${c.fisikKotorTerbuka??""}" oninput="updateConvSatset(${Number(c.id)},'fisikKotorTerbuka',this.value)"></div><div class="field open-qty-col"><label>Jml Wadah Terbuka</label><input type="number" inputmode="numeric" min="0" step="1" placeholder="1" value="${openDisplay}" oninput="updateConvSatset(${Number(c.id)},'jumlahTerbuka',this.value)"></div></div><div class="calc-preview" id="prev-${c.id}">Total: <b>${fmt(calc.total)} ${esc(c.satuan)}</b></div></div>`;
   }).join("");
-  return `<div class="paired-card ${allDone?'done':''}" data-group-item="${mainId}" id="group-${g.key}"><div class="paired-header"><div><div class="paired-title">${idx+1}. ${esc(g.title)}</div><div class="paired-sub">${g.raw ? `<span class="tag raw">RAW: ${esc(g.raw.plu)}</span>` : ''}${!showWhInput ? g.convs.map(c => `<span class="tag konversi">KONVERSI: ${esc(c.plu)}</span>`).join(' ') : ''}</div></div></div><div class="paired-grid">${rawHTML}${convHTML}</div></div>`;
+  return `<div class="paired-card ${allDone?'done':''}" data-group-item="${mainId}" id="group-${g.key}"><div class="paired-header"><div><div class="paired-title">${idx+1}. ${esc(g.title)}</div><div class="paired-sub">${g.raw ? `<span class="tag raw">RAW: ${esc(g.raw.plu)}</span>` : ''}</div></div></div><div class="paired-grid">${rawHTML}${convHTML}</div></div>`;
  }).join("");
 }
+
 function updateConvSatset(id, key, val){
  const x = audit.items.find(a=>a.id===id); if(!x) return;
  if(val==="") x[key]=null;
@@ -1529,15 +1660,14 @@ function updateConvSatset(id, key, val){
  if(key==="qtySegel" && x.isiBersih!=null) x.isiSegel = (Number(x.qtySegel)||0) * Number(x.isiBersih);
  saveAudit(); updateProgressOnly();
  const prev = $("prev-"+id);
- if(prev){ const calc = calcConvNet(x); const hasTara = x.berat !== null && x.berat !== undefined; prev.innerHTML = `Total Bersih Booth: <b>${fmt(calc.total)} ${esc(x.satuan)}</b> (Segel: ${fmt(calc.sealed)} + Terbuka: ${fmt(calc.opened)})${hasTara?` · Tara: ${fmt(x.berat)}/wadah`:""}`; }
- const card = document.querySelector(`[data-group-item="${id}"]`);
- if(card){ const group = buildPairedGroups().find(gr => (gr.raw && gr.raw.id===id) || gr.convs.some(c=>c.id===id)); if(group){ const allItems = [group.raw, ...group.convs].filter(Boolean); card.classList.toggle("done", allItems.every(isItemPhysicalDone)); } }
+ if(prev){ const calc = calcConvNet(x); prev.innerHTML = `Total: <b>${fmt(calc.total)} ${esc(x.satuan)}</b>`; }
 }
+
 function fillRemainingZeros(){
  const items = activeAuditItems();
  const unfilled = items.filter(x => !isItemPhysicalDone(x));
- if(!unfilled.length){ alert("Semua barang pada tahap ini sudah terisi."); return; }
- if(!confirm(`Terdapat ${unfilled.length} item yang belum diisi. Isi otomatis dengan angka 0 (stok kosong)?`)) return;
+ if(!unfilled.length){ alert("Semua sudah terisi."); return; }
+ if(!confirm(`Isi sisa ${unfilled.length} item kosong dengan angka 0?`)) return;
  const whOnly = isWarehouseOnly();
  const isCombWh = isCombinedMode() && audit.combinedZone === "GUDANG";
  const showWhInput = whOnly || isCombWh;
@@ -1552,34 +1682,17 @@ function fillRemainingZeros(){
  });
  saveAudit(); updateProgressOnly(); renderPairedCards();
 }
+
 function finishAuditEarly(){ if(!audit || audit.status==="completed") return; finishAudit(true); }
+
 function finishAudit(forceEarly = false){
  const whOnly = isWarehouseOnly();
  const btOnly = isBoothOnly();
- const missingComp = audit.items.filter(x => { if(whOnly && x.kategori==="KONVERSI") return false; return x.komputer===null || x.komputer===undefined || !Number.isFinite(Number(x.komputer)); }).length;
- const missingPhys = audit.items.filter(x => {
-  if(whOnly && x.kategori==="KONVERSI") return false;
-  if(whOnly) return x.gudangRaw===null || x.gudangRaw===undefined;
-  if(btOnly){ if(x.kategori==="RAW") return x.boothRaw===null || x.boothRaw===undefined; return !isConvBoothFilled(x); }
-  const hasWh = x.kategori==="RAW" && x.gudangRaw!==null && x.gudangRaw!==undefined;
-  const hasBt = x.kategori==="RAW" ? (x.boothRaw!==null && x.boothRaw!==undefined) : isConvBoothFilled(x);
-  return !(hasWh || hasBt);
- }).length;
- if(missingComp > 0 || missingPhys > 0 || forceEarly){
-  if(!confirm(`PERINGATAN SELESAIKAN AUDIT:\n• Stok komputer belum diisi: ${missingComp} item\n• Stok fisik belum diisi: ${missingPhys} item\n\nItem yang belum diisi akan otomatis dianggap 0. Selesaikan audit sekarang?`)) return;
- }
- if(!whOnly){
-  const invalidOpened = categoryItems("KONVERSI").find(x => {
-   const calc = calcConvNet(x); const gross = Number(x.fisikKotorTerbuka)||0; const tara = (Number(x.berat)||0) * calc.openCount;
-   return calc.openCount > 0 && gross < tara;
-  });
-  if(invalidOpened){ alert(`Berat kotor terbuka untuk PLU ${invalidOpened.plu} (${invalidOpened.nama}) lebih kecil dari berat kemasan (tara).`); return; }
- }
  audit.items.forEach(x => {
   if(x.komputer===null || x.komputer===undefined || !Number.isFinite(Number(x.komputer))) x.komputer = 0;
   if(whOnly){
-   if(x.kategori==="RAW"){ const gRaw = Number(x.gudangRaw)||0; x.gudangRaw = gRaw; x.boothRaw = 0; x.fisikKotor = gRaw; x.fisikBersih = gRaw; x.modeFisik = gRaw>0 ? "GUDANG (SEGEL)" : "KOSONG"; }
-   else { x.qtySegel = 0; x.isiSegel = 0; x.jumlahTerbuka = 0; x.fisikKotorTerbuka = 0; x.fisikKotor = 0; x.fisikBersih = 0; x.modeFisik = "TIDAK DIAUDIT (GUDANG)"; }
+   if(x.kategori==="RAW"){ const gRaw = Number(x.gudangRaw)||0; x.gudangRaw = gRaw; x.boothRaw = 0; x.fisikKotor = gRaw; x.fisikBersih = gRaw; x.modeFisik = gRaw>0 ? "GUDANG" : "KOSONG"; }
+   else { x.qtySegel = 0; x.isiSegel = 0; x.jumlahTerbuka = 0; x.fisikKotorTerbuka = 0; x.fisikKotor = 0; x.fisikBersih = 0; x.modeFisik = "TIDAK DIAUDIT"; }
   } else if(btOnly){
    if(x.kategori==="RAW"){ const bRaw = Number(x.boothRaw)||0; x.gudangRaw = 0; x.boothRaw = bRaw; x.fisikKotor = bRaw; x.fisikBersih = bRaw; x.modeFisik = bRaw>0 ? "BOOTH" : "KOSONG"; }
    else applyConvBoothCalculation(x);
@@ -1598,6 +1711,7 @@ function finishAudit(forceEarly = false){
  audit.status="completed"; audit.selesaiPada=new Date().toISOString(); audit.saved=false;
  saveAudit(); renderAudit();
 }
+
 function applyConvBoothCalculation(x){
  const calc = calcConvNet(x);
  x.qtySegel = Number(x.qtySegel)||0; x.isiSegel = calc.sealed; x.jumlahTerbuka = calc.openCount; x.fisikKotorTerbuka = Number(x.fisikKotorTerbuka)||0;
@@ -1607,6 +1721,7 @@ function applyConvBoothCalculation(x){
  else if(calc.openCount>0) x.modeFisik = "BOOTH TERBUKA";
  else x.modeFisik = "KOSONG";
 }
+
 function resetAuditToOriginal(report){
  report.items.forEach(x => {
   if(x.fisikBersihAsli !== null && x.fisikBersihAsli !== undefined) x.fisikBersih = Number(x.fisikBersihAsli);
@@ -1616,6 +1731,7 @@ function resetAuditToOriginal(report){
  });
  report.balanced = false; report.compareLogs = [];
 }
+
 function getAllCompareCandidates(report){
  const items = report.items || [];
  const rawByPlu = new Map(items.filter(x=>x.kategori==="RAW").map(x=>[x.plu, x]));
@@ -1652,14 +1768,14 @@ function getAllCompareCandidates(report){
   return { ...c, rawShift, convShift };
  });
 }
+
 function toggleCompareKey(key, checked){ if(checked) selectedCompareKeys.add(key); else selectedCompareKeys.delete(key); }
 function toggleAllCompareKeys(checked){ if(!audit) return; const list = getAllCompareCandidates(audit); selectedCompareKeys.clear(); if(checked) list.forEach(c => selectedCompareKeys.add(c.key)); renderCurrentResult(); }
 function addManualCompare(){
  if(!audit) return;
  const plusId = Number($("mcPlusSelect")?.value); const minusId = Number($("mcMinusSelect")?.value); const ratio = Number($("mcRatioInput")?.value);
- if(!plusId || !minusId){alert("Pilih item PLUS dan item MINUS terlebih dahulu.");return}
- if(plusId === minusId){alert("Item PLUS dan MINUS tidak boleh sama.");return}
- if(!Number.isFinite(ratio) || ratio <= 0){alert("Masukkan rasio konversi yang valid.");return}
+ if(!plusId || !minusId){alert("Pilih item PLUS dan MINUS.");return}
+ if(plusId === minusId){alert("Tidak boleh sama.");return}
  audit.manualCompares = audit.manualCompares || []; audit.manualCompares.push({plusId, minusId, ratio});
  saveAudit(); renderCurrentResult();
 }
@@ -1670,9 +1786,9 @@ function applyCompareBalance(applyAll = true){
  resetAuditToOriginal(audit);
  const allCandidates = getAllCompareCandidates(audit);
  const targets = applyAll ? allCandidates : allCandidates.filter(c => selectedCompareKeys.has(c.key));
- let adjustedCount = 0; const missingRatio = []; const logs = [];
+ let adjustedCount = 0; const logs = [];
  targets.forEach(c => {
-  if(!c.validRatio){ missingRatio.push(c.conv ? c.conv.nama : c.minusItem.nama); return; }
+  if(!c.validRatio) return;
   if(c.source === "MANUAL"){
    const pItem = audit.items.find(x=>x.id===c.plusItem.id); const mItem = audit.items.find(x=>x.id===c.minusItem.id); if(!pItem || !mItem) return;
    const livePlus = Number(pItem.selisih)||0; const liveMinus = Number(mItem.selisih)||0; if(livePlus <= 0 || liveMinus >= 0) return;
@@ -1680,7 +1796,7 @@ function applyCompareBalance(applyAll = true){
    pItem.fisikBersih = Number(pItem.fisikBersih) - plusShift; pItem.penyeimbangRAW = Number(pItem.penyeimbangRAW||0) - plusShift; pItem.selisih = Number(pItem.fisikBersih) - Number(pItem.komputer||0); pItem.hasilStatus = pItem.selisih>0 ? "PLUS" : pItem.selisih<0 ? "MINUS" : "SESUAI";
    mItem.fisikBersih = Number(mItem.fisikBersih) + minusShift; mItem.penyeimbangRAW = Number(mItem.penyeimbangRAW||0) + minusShift; mItem.selisih = Number(mItem.fisikBersih) - Number(mItem.komputer||0); mItem.hasilStatus = mItem.selisih>0 ? "PLUS" : mItem.selisih<0 ? "MINUS" : "SESUAI";
    adjustedCount++;
-   logs.push({ tipe:"MANUAL", fromNama:`${pItem.nama} (${pItem.kategori})`, toNama:`${mItem.nama} (${mItem.kategori})`, fromDelta:-plusShift, fromSatuan:pItem.satuan, toDelta:minusShift, toSatuan:mItem.satuan, rasio:c.ratio, selisihAkhirFrom:pItem.selisih, selisihAkhirTo:mItem.selisih });
+   logs.push({ tipe:"MANUAL", fromNama:`${pItem.nama}`, toNama:`${mItem.nama}`, fromDelta:-plusShift, fromSatuan:pItem.satuan, toDelta:minusShift, toSatuan:mItem.satuan, rasio:c.ratio, selisihAkhirFrom:pItem.selisih, selisihAkhirTo:mItem.selisih });
    return;
   }
   const raw = audit.items.find(x=>x.id===c.raw.id); const conv = audit.items.find(x=>x.id===c.conv.id); if(!raw || !conv) return;
@@ -1690,24 +1806,21 @@ function applyCompareBalance(applyAll = true){
    raw.fisikBersih = Number(raw.fisikBersih) - rawShift; raw.penyeimbangRAW = Number(raw.penyeimbangRAW||0) - rawShift; raw.selisih = Number(raw.fisikBersih) - Number(raw.komputer||0); raw.hasilStatus = raw.selisih>0 ? "PLUS" : raw.selisih<0 ? "MINUS" : "SESUAI";
    conv.fisikBersih = Number(conv.fisikBersih) + convShift; conv.penyeimbangRAW = Number(conv.penyeimbangRAW||0) + convShift; conv.selisih = Number(conv.fisikBersih) - Number(conv.komputer||0); conv.hasilStatus = conv.selisih>0 ? "PLUS" : conv.selisih<0 ? "MINUS" : "SESUAI";
    adjustedCount++;
-   logs.push({ tipe:"RAW → KONVERSI", fromNama:`${raw.nama} (RAW · PLU ${raw.plu})`, toNama:`${conv.nama} (KONVERSI · PLU ${conv.plu})`, fromDelta:-rawShift, fromSatuan:raw.satuan, toDelta:convShift, toSatuan:conv.satuan, rasio:c.ratio, selisihAkhirFrom:raw.selisih, selisihAkhirTo:conv.selisih });
+   logs.push({ tipe:"RAW → KONVERSI", fromNama:`${raw.nama}`, toNama:`${conv.nama}`, fromDelta:-rawShift, fromSatuan:raw.satuan, toDelta:convShift, toSatuan:conv.satuan, rasio:c.ratio, selisihAkhirFrom:raw.selisih, selisihAkhirTo:conv.selisih });
   } else if(c.direction === "CONV_TO_RAW" && liveConvSel > 0 && liveRawSel < 0){
    const rawShift = Math.min(Math.abs(liveRawSel), liveConvSel / c.ratio); const convShift = rawShift * c.ratio; if(rawShift <= 0) return;
    raw.fisikBersih = Number(raw.fisikBersih) + rawShift; raw.penyeimbangRAW = Number(raw.penyeimbangRAW||0) + rawShift; raw.selisih = Number(raw.fisikBersih) - Number(raw.komputer||0); raw.hasilStatus = raw.selisih>0 ? "PLUS" : raw.selisih<0 ? "MINUS" : "SESUAI";
    conv.fisikBersih = Number(conv.fisikBersih) - convShift; conv.penyeimbangRAW = Number(conv.penyeimbangRAW||0) - convShift; conv.selisih = Number(conv.fisikBersih) - Number(conv.komputer||0); conv.hasilStatus = conv.selisih>0 ? "PLUS" : conv.selisih<0 ? "MINUS" : "SESUAI";
    adjustedCount++;
-   logs.push({ tipe:"KONVERSI → RAW", fromNama:`${conv.nama} (KONVERSI · PLU ${conv.plu})`, toNama:`${raw.nama} (RAW · PLU ${raw.plu})`, fromDelta:-convShift, fromSatuan:conv.satuan, toDelta:rawShift, toSatuan:raw.satuan, rasio:c.ratio, selisihAkhirFrom:conv.selisih, selisihAkhirTo:raw.selisih });
+   logs.push({ tipe:"KONVERSI → RAW", fromNama:`${conv.nama}`, toNama:`${raw.nama}`, fromDelta:-convShift, fromSatuan:conv.satuan, toDelta:rawShift, toSatuan:raw.satuan, rasio:c.ratio, selisihAkhirFrom:conv.selisih, selisihAkhirTo:raw.selisih });
   }
  });
- if(adjustedCount===0){
-  let msg = "Tidak ada item kendala yang dapat dikompair.";
-  if(missingRatio.length) msg += " Isi dulu 'Isi Bersih per Kemasan Segel' di Master PLU untuk: " + [...new Set(missingRatio)].join(", ");
-  alert(msg); return;
- }
+ if(adjustedCount===0){ alert("Tidak ada item yang dapat dikompair."); return; }
  audit.balanced = true; audit.compareLogs = logs; audit.saved = false;
  saveAudit(); renderCurrentResult();
- alert(`Berhasil mengompair ${adjustedCount} pasangan item.`);
+ alert(`Berhasil mengompair ${adjustedCount} pasangan.`);
 }
+
 function undoCompareBalance(){ if(!audit || !audit.balanced) return; resetAuditToOriginal(audit); audit.saved = false; saveAudit(); renderCurrentResult(); }
 
 function comparePanelHTML(report){
@@ -1723,33 +1836,26 @@ function comparePanelHTML(report){
   const checked = selectedCompareKeys.has(c.key) ? "checked" : "";
   if(c.source === "MANUAL"){
    const mIdx = (report.manualCompares||[]).findIndex(m => m.plusId===c.plusItem.id && m.minusId===c.minusItem.id);
-   return `<div class="compare-item"><input type="checkbox" ${checked} onchange="toggleCompareKey('${esc(c.key)}', this.checked)"><div class="compare-item-body"><div><b>#${idx+1} [MANUAL] ${esc(c.plusItem.nama)}</b> (PLUS +${fmt(c.plusItem.selisih)} ${esc(c.plusItem.satuan)}) ↔ <b>${esc(c.minusItem.nama)}</b> (MINUS ${fmt(c.minusItem.selisih)} ${esc(c.minusItem.satuan)}) <button type="button" class="zero-btn" style="margin-left:6px" onclick="removeManualCompare(${mIdx})">Hapus</button></div><div style="margin-top:4px">Rencana Kompair: kurangi <b>-${fmt(c.plusShift)} ${esc(c.plusItem.satuan)}</b> dari item PLUS untuk menambah <b>+${fmt(c.minusShift)} ${esc(c.minusItem.satuan)}</b> ke item MINUS (rasio 1 : ${fmt(c.ratio)}).</div></div></div>`;
+   return `<div class="compare-item"><input type="checkbox" ${checked} onchange="toggleCompareKey('${esc(c.key)}', this.checked)"><div class="compare-item-body"><div><b>#${idx+1} [MANUAL] ${esc(c.plusItem.nama)}</b> ↔ <b>${esc(c.minusItem.nama)}</b> <button type="button" class="zero-btn" style="margin-left:6px" onclick="removeManualCompare(${mIdx})">Hapus</button></div></div></div>`;
   }
   const isRawPlus = c.direction === "RAW_TO_CONV";
-  const badge = isRawPlus ? `<span class="tag raw">RAW PLUS</span> ↔ <span class="tag konversi">KONVERSI MINUS</span>` : `<span class="tag konversi">KONVERSI PLUS</span> ↔ <span class="tag raw">RAW MINUS</span>`;
-  const compareLine = isRawPlus
-   ? `Komputer RAW: <b>${fmt(c.raw.komputer)} ${esc(c.raw.satuan)}</b> | Fisik RAW: <b>${fmt(c.raw.fisikBersih)} ${esc(c.raw.satuan)}</b> (Selisih +${fmt(c.raw.selisih)}) — Komputer KONVERSI: <b>${fmt(c.conv.komputer)} ${esc(c.conv.satuan)}</b> | Fisik KONVERSI: <b>${fmt(c.conv.fisikBersih)} ${esc(c.conv.satuan)}</b> (Selisih ${fmt(c.conv.selisih)})`
-   : `Komputer KONVERSI: <b>${fmt(c.conv.komputer)} ${esc(c.conv.satuan)}</b> | Fisik KONVERSI: <b>${fmt(c.conv.fisikBersih)} ${esc(c.conv.satuan)}</b> (Selisih ${fmt(c.conv.selisih)}) — Komputer RAW: <b>${fmt(c.raw.komputer)} ${esc(c.raw.satuan)}</b> | Fisik RAW: <b>${fmt(c.raw.fisikBersih)} ${esc(c.raw.satuan)}</b> (Selisih ${fmt(c.raw.selisih)})`;
-  const actionLine = !c.validRatio ? `<span class="minus">⚠ Isi Bersih per Kemasan Segel belum diisi di Master PLU</span>`
-   : isRawPlus ? `Rencana Kompair: tarik <b>-${fmt(c.rawShift)} ${esc(c.raw.satuan)}</b> fisik RAW menjadi <b>+${fmt(c.convShift)} ${esc(c.conv.satuan)}</b> KONVERSI (rasio ${fmt(c.ratio)} ${esc(c.conv.satuan)}/RAW).`
-   : `Rencana Kompair: tarik <b>-${fmt(c.convShift)} ${esc(c.conv.satuan)}</b> KONVERSI menjadi <b>+${fmt(c.rawShift)} ${esc(c.raw.satuan)}</b> RAW (rasio ${fmt(c.ratio)} ${esc(c.conv.satuan)}/RAW).`;
-  return `<div class="compare-item"><input type="checkbox" ${checked} onchange="toggleCompareKey('${esc(c.key)}', this.checked)"><div class="compare-item-body"><div><b>#${idx+1} ${esc(c.raw.nama)}</b> (PLU ${esc(c.raw.plu)}) &amp; <b>${esc(c.conv.nama)}</b> (PLU ${esc(c.conv.plu)}) &nbsp; ${badge}</div><div style="margin-top:4px">${compareLine}</div><div style="margin-top:4px">${actionLine}</div></div></div>`;
+  return `<div class="compare-item"><input type="checkbox" ${checked} onchange="toggleCompareKey('${esc(c.key)}', this.checked)"><div class="compare-item-body"><div><b>#${idx+1} ${esc(c.raw.nama)}</b> &amp; <b>${esc(c.conv.nama)}</b></div></div></div>`;
  }).join("");
- const unlinkedTroubled = troubledItems.filter(it => !candidates.some(c => (c.raw && c.raw.id===it.id) || (c.conv && c.conv.id===it.id) || (c.plusItem && c.plusItem.id===it.id) || (c.minusItem && c.minusItem.id===it.id)));
- const unlinkedBanner = unlinkedTroubled.length ? `<div class="notice warn" style="margin-top:10px;margin-bottom:0"><b>Terdapat ${unlinkedTroubled.length} item berkendala lainnya yang belum memiliki pasangan otomatis:</b><br>${unlinkedTroubled.map(x => `• <b>${esc(x.nama)}</b> (${esc(x.kategori)} · ${x.selisih>0?'PLUS +'+fmt(x.selisih):'MINUS '+fmt(x.selisih)} ${esc(x.satuan)})`).join("<br>")}</div>` : "";
- const manualBuilderHTML = (plusItems.length && minusItems.length) ? `<div class="manual-compare-box no-print"><b style="font-size:12px;color:#7b5312">+ Tambah Pasangan Kompair Manual</b><div class="manual-compare-grid"><div class="field"><label>Item PLUS</label><select id="mcPlusSelect">${plusItems.map(x=>`<option value="${x.id}">[${esc(x.kategori)}] ${esc(x.nama)} (+${fmt(x.selisih)} ${esc(x.satuan)})</option>`).join("")}</select></div><div class="field"><label>Item MINUS</label><select id="mcMinusSelect">${minusItems.map(x=>`<option value="${x.id}">[${esc(x.kategori)}] ${esc(x.nama)} (${fmt(x.selisih)} ${esc(x.satuan)})</option>`).join("")}</select></div><div class="field"><label>Rasio (1 PLUS = ... MINUS)</label><input id="mcRatioInput" type="number" inputmode="decimal" min="0.0001" step="any" value="1"></div><button type="button" class="btn warn-btn" onclick="addManualCompare()">+ Tambahkan</button></div></div>` : "";
- return `<div class="compare-box"><h4>⚖️ Kompair Seluruh Item Berkendala (Dua Arah RAW ↔ KONVERSI)</h4><div class="compare-summary-bar"><span class="compare-pill">Total Item Berkendala: <b>${troubledItems.length} PLU</b> (${plusItems.length} PLUS · ${minusItems.length} MINUS)</span><span class="compare-pill">Siap Dikompair: <b>${candidates.length} Pasangan</b></span></div>${candidates.length ? `<div class="no-print" style="margin-top:8px;font-size:11px"><label style="cursor:pointer;font-weight:bold"><input type="checkbox" checked onchange="toggleAllCompareKeys(this.checked)" style="width:auto;vertical-align:middle"> Pilih / Batalkan Semua Pasangan Kompair (${candidates.length})</label></div>` : ''}${rows || '<div class="empty" style="padding:12px">Belum ada pasangan otomatis.</div>'}${unlinkedBanner}${manualBuilderHTML}<div class="actions no-print" style="margin-top:12px"><button type="button" class="btn primary" onclick="applyCompareBalance(true)" ${candidates.length?'':'disabled'}>⚖️ Kompair Semua Item Berkendala (${candidates.length})</button><button type="button" class="btn blue" onclick="applyCompareBalance(false)" ${candidates.length?'':'disabled'}>✓ Terapkan Hanya yang Dicentang</button>${report.balanced ? `<button type="button" class="btn cancel" onclick="undoCompareBalance()">↩ Kembalikan Fisik Asli</button>` : ""}</div></div>`;
+ const manualBuilderHTML = (plusItems.length && minusItems.length) ? `<div class="manual-compare-box no-print"><b style="font-size:12px;color:#7b5312">+ Tambah Kompair Manual</b><div class="manual-compare-grid"><div class="field"><label>PLUS</label><select id="mcPlusSelect">${plusItems.map(x=>`<option value="${x.id}">${esc(x.nama)} (+${fmt(x.selisih)})</option>`).join("")}</select></div><div class="field"><label>MINUS</label><select id="mcMinusSelect">${minusItems.map(x=>`<option value="${x.id}">${esc(x.nama)} (${fmt(x.selisih)})</option>`).join("")}</select></div><div class="field"><label>Rasio</label><input id="mcRatioInput" type="number" inputmode="decimal" min="0.0001" step="any" value="1"></div><button type="button" class="btn warn-btn" onclick="addManualCompare()">+ Tambah</button></div></div>` : "";
+ return `<div class="compare-box"><h4>⚖️ Kompair Item Berkendala</h4><div class="compare-summary-bar"><span class="compare-pill">Total Berkendala: <b>${troubledItems.length}</b></span><span class="compare-pill">Pasangan: <b>${candidates.length}</b></span></div>${rows || '<div class="empty" style="padding:12px">Tidak ada pasangan.</div>'}${manualBuilderHTML}<div class="actions no-print" style="margin-top:12px"><button type="button" class="btn primary" onclick="applyCompareBalance(true)" ${candidates.length?'':'disabled'}>⚖️ Kompair Semua</button><button type="button" class="btn cancel" onclick="undoCompareBalance()">↩ Reset</button></div></div>`;
 }
+
 function warehouseConclusionHTML(report){
  if(!report || report.lokasi === "KABINET") return "";
  const rawItems = (report.items || []).filter(x => x.kategori === "RAW");
  const presentItems = rawItems.filter(x => report.lokasi === "GUDANG" ? (Number(x.fisikBersih)||0) > 0 : (Number(x.gudangRaw)||0) > 0);
  const listRows = presentItems.map((x, i) => {
   const qty = report.lokasi === "GUDANG" ? (Number(x.fisikBersih)||0) : (Number(x.gudangRaw)||0);
-  return `<div class="wh-item-row"><div><b>${i+1}. ${esc(x.nama)}</b> <span class="muted">(PLU ${esc(x.plu)})</span> <span class="tag raw">RAW</span></div><div><b>${fmt(qty)} ${esc(x.satuan)} (Segel Gudang)</b></div></div>`;
+  return `<div class="wh-item-row"><div><b>${i+1}. ${esc(x.nama)}</b></div><div><b>${fmt(qty)} ${esc(x.satuan)}</b></div></div>`;
  }).join("");
- return `<div class="warehouse-box"><h4>📦 Kesimpulan Stok Gudang (Khusus RAW — Semua Segel)</h4><div class="wh-summary-grid"><div class="mini-stat"><span>TOTAL ITEM RAW ADA DI GUDANG</span><strong>${presentItems.length} Item</strong></div><div class="mini-stat"><span>STATUS KONVERSI GUDANG</span><strong class="same">Tidak Ada (0)</strong></div></div><div class="result-list">${listRows || '<div class="empty">Tidak ada stok fisik RAW di gudang (semua 0).</div>'}</div></div>`;
+ return `<div class="warehouse-box"><h4>📦 Kesimpulan Stok Gudang</h4><div class="result-list">${listRows || '<div class="empty">Tidak ada stok di gudang.</div>'}</div></div>`;
 }
+
 function fullDetailSheetHTML(report){
  if(!report) return "";
  const items = report.items || [];
@@ -1757,169 +1863,161 @@ function fullDetailSheetHTML(report){
  const whRows = raws.filter(x => (Number(x.gudangRaw)||0) > 0 || report.lokasi==="GUDANG");
  const whTableRows = whRows.map((x,i) => {
   const q = report.lokasi==="GUDANG" ? (Number(x.fisikBersih)||0) : (Number(x.gudangRaw)||0);
-  return `<tr><td>${i+1}</td><td>${esc(x.plu)}</td><td>${esc(x.nama)}</td><td>${fmt(q)} ${esc(x.satuan)}</td><td>Rak Gudang (RAW Segel)</td></tr>`;
- }).join("") || `<tr><td colspan="5" style="text-align:center">Tidak ada stok tercatat di Gudang</td></tr>`;
- const boothRows = items.filter(x => {
-  if(x.kategori==="RAW") return (Number(x.boothRaw)||0) > 0 || report.lokasi==="KABINET";
-  return (Number(x.fisikBersih)||0) > 0 || (Number(x.qtySegel)||0) > 0 || (Number(x.jumlahTerbuka)||0) > 0;
- });
- const boothTableRows = boothRows.map((x,i) => {
-  const isRaw = x.kategori==="RAW";
-  const stokText = isRaw ? `${fmt(x.boothRaw||0)} ${esc(x.satuan)}` : `Total Bersih: ${fmt(x.fisikBersih||0)} ${esc(x.satuan)} (Segel: ${fmt(x.isiSegel||0)} · Terbuka: ${fmt(x.jumlahTerbuka||0)} wadah)`;
-  const rakSaran = isRaw ? "Rak/Kabinet RAW" : "Rak/Kabinet KONVERSI (Pisahkan & Tata Rapi untuk Audit Berikutnya)";
-  return `<tr><td>${i+1}</td><td>${esc(x.plu)}</td><td>${esc(x.nama)}</td><td><span class="tag ${isRaw?'raw':'konversi'}">${esc(x.kategori)}</span></td><td>${stokText}</td><td>${rakSaran}</td></tr>`;
- }).join("") || `<tr><td colspan="6" style="text-align:center">Tidak ada stok tercatat di Booth / Kabinet</td></tr>`;
- const logs = Array.isArray(report.compareLogs) ? report.compareLogs : [];
- const logTableRows = logs.length ? logs.map((lg,i) => `<tr><td>${i+1}</td><td><b>${esc(lg.tipe)}</b></td><td>${esc(lg.fromNama)} (${lg.fromDelta>=0?'+':''}${fmt(lg.fromDelta)} ${esc(lg.fromSatuan)})</td><td>${esc(lg.toNama)} (${lg.toDelta>=0?'+':''}${fmt(lg.toDelta)} ${esc(lg.toSatuan)})</td><td>${fmt(lg.rasio)}</td><td>Selisih akhir: ${lg.selisihAkhirFrom>=0?'+':''}${fmt(lg.selisihAkhirFrom)} / ${lg.selisihAkhirTo>=0?'+':''}${fmt(lg.selisihAkhirTo)}</td></tr>`).join("") : `<tr><td colspan="6" style="text-align:center">Belum ada item yang dikompair pada laporan ini</td></tr>`;
- return `<div class="pdf-detail-sheet"><h4>📋 Rincian Lengkap untuk Laporan &amp; PDF (Gudang, Kabinet/Booth, Kompair &amp; Penataan Rak)</h4><div class="notice" style="margin-bottom:10px"><b>Catatan Penataan Audit Berikutnya:</b> Barang yang sudah dikonversi (kategori <b>KONVERSI</b>) disarankan dipisahkan di rak/kabinet khusus konversi agar tidak tercampur dengan stok segel/RAW dan mempermudah pengecekan berikutnya.</div><b>1. Rincian Stok di Gudang</b><table class="pdf-table"><thead><tr><th>No</th><th>PLU</th><th>Nama Barang</th><th>Stok Gudang</th><th>Lokasi Penempatan</th></tr></thead><tbody>${whTableRows}</tbody></table><b>2. Rincian Stok di Kabinet / Booth &amp; Rekomendasi Rak</b><table class="pdf-table"><thead><tr><th>No</th><th>PLU</th><th>Nama Barang</th><th>Kategori</th><th>Rincian Stok Booth</th><th>Penataan Rak / Kabinet</th></tr></thead><tbody>${boothTableRows}</tbody></table><b>3. Rincian Item yang Dikompair</b><table class="pdf-table"><thead><tr><th>No</th><th>Arah</th><th>Item Sumber</th><th>Item Tujuan</th><th>Rasio</th><th>Hasil Akhir</th></tr></thead><tbody>${logTableRows}</tbody></table></div>`;
+  return `<tr><td>${i+1}</td><td>${esc(x.plu)}</td><td>${esc(x.nama)}</td><td>${fmt(q)} ${esc(x.satuan)}</td><td>Gudang</td></tr>`;
+ }).join("") || `<tr><td colspan="5" style="text-align:center">Tidak ada stok</td></tr>`;
+ return `<div class="pdf-detail-sheet"><h4>📋 Rincian Lengkap</h4><table class="pdf-table"><thead><tr><th>No</th><th>PLU</th><th>Nama</th><th>Stok</th><th>Lokasi</th></tr></thead><tbody>${whTableRows}</tbody></table></div>`;
 }
+
 function sortedItems(items,order){ const a=[...items]; if(order==="minus")a.sort((x,y)=>x.selisih-y.selisih); else if(order==="plus")a.sort((x,y)=>y.selisih-x.selisih); else if(order==="plu")a.sort((x,y)=>x.plu.localeCompare(y.plu,undefined,{numeric:true})); else if(order==="name")a.sort((x,y)=>x.nama.localeCompare(y.nama)); return a; }
 function summaryHTML(items){ const plus=items.filter(x=>x.selisih>0).length,minus=items.filter(x=>x.selisih<0).length,same=items.filter(x=>x.selisih===0).length; return `<div class="mini-stat"><span>PLUS</span><strong class="plus">${plus}</strong></div><div class="mini-stat"><span>MINUS</span><strong class="minus">${minus}</strong></div><div class="mini-stat"><span>SESUAI</span><strong class="same">${same}</strong></div>`; }
-function linkedFlags(items){
- const rawByPlu=new Map(items.filter(x=>x.kategori==="RAW").map(x=>[x.plu,x])); const flags=[];
- items.filter(x=>x.kategori==="KONVERSI"&&x.rawLink).forEach(conv=>{
-  parseRawLinks(conv.rawLink).forEach(lk => { const raw=rawByPlu.get(lk); if(!raw)return;
-   if(raw.selisih>0 && conv.selisih<0) flags.push({type:"RAW_PLUS_CONV_MINUS",raw,conv});
-   else if(conv.selisih>0 && raw.selisih<0) flags.push({type:"CONV_PLUS_RAW_MINUS",raw,conv});
-  });
- });
- return flags;
-}
+function linkedFlags(items){ return []; }
+
 function resultCard(x,flags){
  const cls=x.selisih>0?"plus":x.selisih<0?"minus":"same";
- const convMinusFlags = flags.filter(f=>f.type==="RAW_PLUS_CONV_MINUS" && f.conv.id===x.id);
- const rawForConvMinusFlags = flags.filter(f=>f.type==="RAW_PLUS_CONV_MINUS" && f.raw.id===x.id);
- const convPlusFlags = flags.filter(f=>f.type==="CONV_PLUS_RAW_MINUS" && f.conv.id===x.id);
- const rawForConvPlusFlags = flags.filter(f=>f.type==="CONV_PLUS_RAW_MINUS" && f.raw.id===x.id);
- let flag="";
- if(convMinusFlags.length) flag=`<div class="flag">⚠ KOMPAIR RAW PLUS ↔ KONVERSI MINUS: stok fisik RAW <b>${convMinusFlags.map(f=>`${esc(f.raw.nama)} (+${fmt(f.raw.selisih)})`).join(", ")}</b> PLUS, KONVERSI MINUS (${fmt(x.selisih)} ${esc(x.satuan)}).</div>`;
- else if(rawForConvMinusFlags.length) flag=`<div class="flag">⚠ KOMPAIR RAW PLUS ↔ KONVERSI MINUS: RAW PLUS (+${fmt(x.selisih)} ${esc(x.satuan)}), KONVERSI <b>${rawForConvMinusFlags.map(f=>`${esc(f.conv.nama)} (${fmt(f.conv.selisih)})`).join(", ")}</b> MINUS.</div>`;
- else if(convPlusFlags.length) flag=`<div class="flag rev">🚨 KONVERSI PLUS &amp; RAW MINUS: KONVERSI PLUS (+${fmt(x.selisih)} ${esc(x.satuan)}), RAW <b>${convPlusFlags.map(f=>`${esc(f.raw.nama)} (${fmt(f.raw.selisih)})`).join(", ")}</b> MINUS.</div>`;
- else if(rawForConvPlusFlags.length) flag=`<div class="flag rev">🚨 RAW MINUS &amp; KONVERSI PLUS: RAW MINUS (${fmt(x.selisih)} ${esc(x.satuan)}), KONVERSI <b>${rawForConvPlusFlags.map(f=>`${esc(f.conv.nama)} (+${fmt(f.conv.selisih)})`).join(", ")}</b> PLUS.</div>`;
  const balVal = Number(x.penyeimbangRAW)||0;
- const balNote = balVal !== 0 ? `<div class="bal-note">⚖️ Hasil Kompair: ${balVal>0?`+${fmt(balVal)}`:fmt(balVal)} ${esc(x.satuan)} (Fisik awal: ${fmt(x.fisikBersihAsli)} ${esc(x.satuan)} · Selisih awal: ${x.selisihAsli>0?`+${fmt(x.selisihAsli)}`:fmt(x.selisihAsli)})</div>` : "";
- const openCount = Number(x.jumlahTerbuka)||0;
- const openedNet = openCount>0 ? Math.max(0,(Number(x.fisikKotorTerbuka||0)-((Number(x.berat)||0)*openCount))) : 0;
- return `<div><div class="result-card"><div class="name">${esc(x.nama)} ${balVal!==0?'<span class="tag bal-tag">DIKOMPAIR</span>':''}<div class="sub">PLU ${esc(x.plu)} · ${esc(x.kategori)}</div></div><div class="metric"><span>Komputer</span><strong>${fmt(x.komputer)} ${esc(x.satuan)}</strong></div><div class="metric"><span>Fisik bersih</span><strong>${fmt(x.fisikBersih)} ${esc(x.satuan)}</strong><div class="sub">${x.kategori==="KONVERSI"?`${esc(x.modeFisik||"-")} · Segel: ${fmt(x.isiSegel||0)} · Terbuka: ${fmt(openedNet)}`:`${esc(x.modeFisik||fmt(x.fisikKotor))}`}</div></div><div class="metric"><span>Selisih</span><strong class="${cls}">${x.selisih>0?"+":""}${fmt(x.selisih)} ${esc(x.satuan)}<br>${x.hasilStatus}</strong></div></div>${flag}${balNote}</div>`;
+ const balNote = balVal !== 0 ? `<div class="bal-note">⚖️ Kompair: ${balVal>0?`+${fmt(balVal)}`:fmt(balVal)}</div>` : "";
+ return `<div><div class="result-card"><div class="name">${esc(x.nama)}<div class="sub">PLU ${esc(x.plu)}</div></div><div class="metric"><span>Komputer</span><strong>${fmt(x.komputer)}</strong></div><div class="metric"><span>Fisik</span><strong>${fmt(x.fisikBersih)}</strong></div><div class="metric"><span>Selisih</span><strong class="${cls}">${x.selisih>0?"+":""}${fmt(x.selisih)}<br>${x.hasilStatus}</strong></div></div>${balNote}</div>`;
 }
+
 function renderResultsInto(items,rawId,convId,rawSumId,convSumId,infoId,metaId,order){
  const whOnly = currentReport && currentReport.lokasi === "GUDANG";
  const raw=sortedItems(items.filter(x=>x.kategori==="RAW"),order);
  const conv=whOnly ? [] : sortedItems(items.filter(x=>x.kategori==="KONVERSI"),order);
- const flags=whOnly ? [] : linkedFlags(items);
- $(rawId).innerHTML=raw.map(x=>resultCard(x,flags)).join("")||'<div class="empty">Tidak ada data RAW.</div>';
- $(convId).innerHTML=conv.map(x=>resultCard(x,flags)).join("")||'<div class="empty">Tidak ada data KONVERSI.</div>';
- $(rawSumId).innerHTML=summaryHTML(raw);$(convSumId).innerHTML=summaryHTML(conv);
- if(infoId){
-  const active = whOnly ? raw : items;
-  const plus=active.filter(x=>x.selisih>0).length,minus=active.filter(x=>x.selisih<0).length;
-  $(infoId).innerHTML=`<b>Mode Audit:</b> ${esc(locationLabel(currentReport.lokasi))}<br><b>Nama Auditor:</b> ${esc(currentReport.auditor)}<br><b>Tanggal Audit:</b> ${esc(currentReport.tanggal)}<br><b>Total PLU Diaudit:</b> ${active.length} &nbsp; | &nbsp; <b>Plus:</b> ${plus} &nbsp; | &nbsp; <b>Minus:</b> ${minus}`;
- }
- if(metaId)$(metaId).textContent=`Poin Coffee | Mode: ${items.length?esc(locationLabel(currentReport.lokasi)):""} | Auditor: ${items.length?esc(currentReport.auditor):""} | Tanggal: ${items.length?esc(currentReport.tanggal):""} | Mulai: ${timeText(currentReport.mulaiPada)} | Selesai: ${timeText(currentReport.selesaiPada)} | Durasi: ${durationText(currentReport.mulaiPada,currentReport.selesaiPada)}`;
+ const flags=[];
+ if($(rawId)) $(rawId).innerHTML=raw.map(x=>resultCard(x,flags)).join("")||'<div class="empty">Kosong.</div>';
+ if($(convId)) $(convId).innerHTML=conv.map(x=>resultCard(x,flags)).join("")||'<div class="empty">Kosong.</div>';
+ if($(rawSumId)) $(rawSumId).innerHTML=summaryHTML(raw);
+ if($(convSumId)) $(convSumId).innerHTML=summaryHTML(conv);
 }
+
 let currentReport=null;
 function renderCurrentResult(){
  currentReport=audit;
  const whOnly = isWarehouseOnly();
  const items = whOnly ? categoryItems("RAW") : audit.items;
  const plus=items.filter(x=>x.selisih>0).length,minus=items.filter(x=>x.selisih<0).length;
- $("resultInfo").innerHTML=`<b>Mode Audit:</b> <span class="tag loc-tag">${esc(locationLabel(audit.lokasi))}</span> ${audit.balanced?'<span class="tag bal-tag">SUDAH DIKOMPAIR RAW ↔ KONVERSI</span>':''}<br><b>Nama Auditor:</b> ${esc(audit.auditor)}<br><b>Tanggal Audit:</b> ${esc(audit.tanggal)}<br><b>Mulai Audit:</b> ${dateTimeText(audit.mulaiPada)}<br><b>Selesai Audit:</b> ${dateTimeText(audit.selesaiPada)}<br><b>Durasi Audit:</b> ${durationText(audit.mulaiPada,audit.selesaiPada)}`;
- $("resultTotal").textContent=items.length;$("resultPlus").textContent=plus;$("resultMinus").textContent=minus;
- $("comparePanel").innerHTML = comparePanelHTML(audit);
- $("menuRecommendationPanel").innerHTML = menuRecommendationHTML(audit);
- $("warehouseConclusion").innerHTML = warehouseConclusionHTML(audit);
- $("pdfFullBreakdown").innerHTML = fullDetailSheetHTML(audit);
- $("saveResultButton").textContent=audit.saved?"✓ Hasil Audit Tersimpan":"Simpan Hasil Audit";
- $("saveResultButton").disabled=!!audit.saved;
- $("rawCount").textContent=categoryItems("RAW").length+" PLU";
- $("konversiCount").textContent=categoryItems("KONVERSI").length+" PLU";
- $("resultConvSection").classList.toggle("hidden", whOnly);
- renderResultsInto(audit.items,"rawResults","konversiResults","rawSummary","konversiSummary",null,"resultMeta",$("sortOrder").value);
+ if($("resultInfo")) $("resultInfo").innerHTML=`<b>Mode:</b> ${esc(locationLabel(audit.lokasi))}<br><b>Auditor:</b> ${esc(audit.auditor)}<br><b>Tanggal:</b> ${esc(audit.tanggal)}`;
+ if($("resultTotal")) $("resultTotal").textContent=items.length;
+ if($("resultPlus")) $("resultPlus").textContent=plus;
+ if($("resultMinus")) $("resultMinus").textContent=minus;
+ if($("comparePanel")) $("comparePanel").innerHTML = comparePanelHTML(audit);
+ if($("menuRecommendationPanel")) $("menuRecommendationPanel").innerHTML = menuRecommendationHTML(audit);
+ if($("warehouseConclusion")) $("warehouseConclusion").innerHTML = warehouseConclusionHTML(audit);
+ if($("pdfFullBreakdown")) $("pdfFullBreakdown").innerHTML = fullDetailSheetHTML(audit);
+ if($("saveResultButton")){
+  $("saveResultButton").textContent=audit.saved?"✓ Tersimpan":"Simpan Hasil Audit";
+  $("saveResultButton").disabled=!!audit.saved;
+ }
+ if($("rawCount")) $("rawCount").textContent=categoryItems("RAW").length+" PLU";
+ if($("konversiCount")) $("konversiCount").textContent=categoryItems("KONVERSI").length+" PLU";
+ const rcSec = $("resultConvSection");
+ if(rcSec) rcSec.classList.toggle("hidden", whOnly);
+ const sortOrderEl = $("sortOrder");
+ renderResultsInto(audit.items,"rawResults","konversiResults","rawSummary","konversiSummary",null,"resultMeta",sortOrderEl?sortOrderEl.value:"minus");
 }
+
 function renderResult(){if(audit)renderCurrentResult()}
+
 function saveAuditResult(){
  if(!audit||audit.status!=="completed")return;
- if(audit.saved){alert("Hasil audit ini sudah tersimpan di riwayat.");return}
+ if(audit.saved){alert("Sudah tersimpan.");return}
  const copy=JSON.parse(JSON.stringify(audit));
  copy.saved=true;copy.historyId=Date.now();
  auditHistory.unshift(copy);audit.saved=true;
- saveAudit();saveHistory();renderCurrentResult();alert("Hasil audit berhasil disimpan dan dikirim ke Google Sheets.");
+ saveAudit();saveHistory();renderCurrentResult();alert("Berhasil disimpan.");
 }
+
 function renderHistory(){
  const list=$("historyList");
- if(!auditHistory.length){list.innerHTML='<div class="empty">Belum ada hasil audit yang disimpan.</div>';return}
+ if(!list) return;
+ if(!auditHistory.length){list.innerHTML='<div class="empty">Belum ada riwayat.</div>';return}
  list.innerHTML=auditHistory.map((h,i)=>{
   const whOnly = (h.lokasi==="GUDANG");
   const active = whOnly ? h.items.filter(x=>x.kategori==="RAW") : h.items;
   const p=active.filter(x=>x.selisih>0).length,m=active.filter(x=>x.selisih<0).length;
-  return `<div class="history-card"><div><strong>${esc(h.auditor)} — ${esc(h.tanggal)} <span class="tag loc-tag">${esc(locationLabel(h.lokasi||"KEDUANYA"))}</span> ${h.balanced?'<span class="tag bal-tag">DIKOMPAIR</span>':''}</strong><p>${esc(active.length)} PLU · ${p} Plus · ${m} Minus</p><p>Mulai: ${timeText(h.mulaiPada)} · Selesai: ${timeText(h.selesaiPada)} · Durasi: ${durationText(h.mulaiPada,h.selesaiPada)}</p></div><div class="actions" style="margin:0"><button class="btn edit" onclick="openHistory(${i})">Lihat</button><button class="btn blue" onclick="openHistoryAndPrint(${i})">PDF</button><button class="btn delete" onclick="deleteHistory(${i})">Hapus</button></div></div>`;
+  return `<div class="history-card"><div><strong>${esc(h.auditor)} — ${esc(h.tanggal)} <span class="tag loc-tag">${esc(locationLabel(h.lokasi||"KEDUANYA"))}</span></strong><p>${esc(active.length)} PLU · ${p} Plus · ${m} Minus</p></div><div class="actions" style="margin:0"><button class="btn edit" onclick="openHistory(${i})">Lihat</button><button class="btn blue" onclick="openHistoryAndPrint(${i})">PDF</button><button class="btn delete" onclick="deleteHistory(${i})">Hapus</button></div></div>`;
  }).join("");
 }
+
 function openHistory(i){
  historyViewing=JSON.parse(JSON.stringify(auditHistory[i]));
- $("historyDetail").classList.remove("hidden");
- $("historyResultInfo").innerHTML=`<b>Mode Audit:</b> <span class="tag loc-tag">${esc(locationLabel(historyViewing.lokasi||"KEDUANYA"))}</span> ${historyViewing.balanced?'<span class="tag bal-tag">SUDAH DIKOMPAIR RAW ↔ KONVERSI</span>':''}<br><b>Nama Auditor:</b> ${esc(historyViewing.auditor)}<br><b>Tanggal Audit:</b> ${esc(historyViewing.tanggal)}<br><b>Mulai Audit:</b> ${dateTimeText(historyViewing.mulaiPada)}<br><b>Selesai Audit:</b> ${dateTimeText(historyViewing.selesaiPada)}<br><b>Durasi Audit:</b> ${durationText(historyViewing.mulaiPada,historyViewing.selesaiPada)}`;
- $("historyMenuRecommendation").innerHTML = menuRecommendationHTML(historyViewing);
- $("historyWarehouseConclusion").innerHTML = warehouseConclusionHTML(historyViewing);
- $("historyFullBreakdown").innerHTML = fullDetailSheetHTML(historyViewing);
+ if($("historyDetail")) $("historyDetail").classList.remove("hidden");
+ if($("historyResultInfo")) $("historyResultInfo").innerHTML=`<b>Auditor:</b> ${esc(historyViewing.auditor)}<br><b>Tanggal:</b> ${esc(historyViewing.tanggal)}`;
+ if($("historyMenuRecommendation")) $("historyMenuRecommendation").innerHTML = menuRecommendationHTML(historyViewing);
+ if($("historyWarehouseConclusion")) $("historyWarehouseConclusion").innerHTML = warehouseConclusionHTML(historyViewing);
+ if($("historyFullBreakdown")) $("historyFullBreakdown").innerHTML = fullDetailSheetHTML(historyViewing);
  renderHistoryDetail();
- $("historyDetail").scrollIntoView({behavior:"smooth"});
+ const hd = $("historyDetail");
+ if(hd) hd.scrollIntoView({behavior:"smooth"});
 }
+
 function openHistoryAndPrint(i){ openHistory(i); setTimeout(()=>exportPDF(true), 120); }
-function closeHistoryDetail(){historyViewing=null;$("historyDetail").classList.add("hidden")}
+function closeHistoryDetail(){historyViewing=null; if($("historyDetail")) $("historyDetail").classList.add("hidden");}
+
 function deleteHistory(i){
- if(!confirm("Hapus riwayat audit ini dari database bersama? Tindakan ini akan terlihat oleh semua perangkat."))return;
+ if(!confirm("Hapus riwayat ini?"))return;
  auditHistory.splice(i,1);
  saveHistory();
  renderHistory();closeHistoryDetail();
 }
+
 function renderHistoryDetail(){
  if(!historyViewing)return;
  const whOnly = historyViewing.lokasi === "GUDANG";
  const items=historyViewing.items;
- const order=$("historySort").value;
+ const hs = $("historySort");
+ const order=hs?hs.value:"minus";
  const raw=items.filter(x=>x.kategori==="RAW"),conv=whOnly?[]:items.filter(x=>x.kategori==="KONVERSI");
- $("historyConvSection").classList.toggle("hidden", whOnly);
- $("historyRawSummary").innerHTML=summaryHTML(raw);$("historyKonversiSummary").innerHTML=summaryHTML(conv);
- const flags=whOnly?[]:linkedFlags(items);
- $("historyRawResults").innerHTML=sortedItems(raw,order).map(x=>resultCard(x,flags)).join("")||'<div class="empty">Tidak ada data RAW.</div>';
- $("historyKonversiResults").innerHTML=sortedItems(conv,order).map(x=>resultCard(x,flags)).join("")||'<div class="empty">Tidak ada data KONVERSI.</div>';
- $("historyMeta").textContent=`Poin Coffee | Mode: ${locationLabel(historyViewing.lokasi||"KEDUANYA")} | Auditor: ${historyViewing.auditor} | Tanggal: ${historyViewing.tanggal} | Mulai: ${timeText(historyViewing.mulaiPada)} | Selesai: ${timeText(historyViewing.selesaiPada)} | Durasi: ${durationText(historyViewing.mulaiPada,historyViewing.selesaiPada)}`;
+ if($("historyConvSection")) $("historyConvSection").classList.toggle("hidden", whOnly);
+ if($("historyRawSummary")) $("historyRawSummary").innerHTML=summaryHTML(raw);
+ if($("historyKonversiSummary")) $("historyKonversiSummary").innerHTML=summaryHTML(conv);
+ const flags=[];
+ if($("historyRawResults")) $("historyRawResults").innerHTML=sortedItems(raw,order).map(x=>resultCard(x,flags)).join("")||'<div class="empty">Kosong.</div>';
+ if($("historyKonversiResults")) $("historyKonversiResults").innerHTML=sortedItems(conv,order).map(x=>resultCard(x,flags)).join("")||'<div class="empty">Kosong.</div>';
 }
+
 function exportPDF(fromHistory=false){
  let report = fromHistory ? historyViewing : audit;
- if(!report){alert("Tidak ada data audit untuk diekspor ke PDF.");return}
+ if(!report){alert("Tidak ada data audit.");return}
  if(!fromHistory && report.status !== "completed"){
-  if(!confirm("Audit masih berjalan. Selesaikan audit sekarang agar hasil akhir & kompair masuk ke PDF?")) return;
+  if(!confirm("Selesaikan audit sekarang untuk cetak PDF?")) return;
   finishAudit(true); report = audit; if(!report || report.status !== "completed") return;
  }
  currentReport=report; const oldAudit=audit; audit=report;
- $("pageHistory").classList.add("hidden"); $("pageRecipes").classList.add("hidden"); $("pageAudit").classList.remove("hidden");
- $("auditStart").classList.add("hidden");$("auditWorkspace").classList.add("hidden");$("auditResult").classList.remove("hidden");
+ if($("pageHistory")) $("pageHistory").classList.add("hidden");
+ if($("pageRecipes")) $("pageRecipes").classList.add("hidden");
+ if($("pageAudit")) $("pageAudit").classList.remove("hidden");
+ if($("auditStart")) $("auditStart").classList.add("hidden");
+ if($("auditWorkspace")) $("auditWorkspace").classList.add("hidden");
+ if($("auditResult")) $("auditResult").classList.remove("hidden");
  renderCurrentResult();
  window.print();
  window.onafterprint=()=>{
   audit=oldAudit; currentReport=fromHistory?historyViewing:audit;
-  if(fromHistory){ $("pageAudit").classList.add("hidden"); $("pageHistory").classList.remove("hidden"); $("historyDetail").classList.remove("hidden"); }
-  else renderAudit();
+  if(fromHistory){
+   if($("pageAudit")) $("pageAudit").classList.add("hidden");
+   if($("pageHistory")) $("pageHistory").classList.remove("hidden");
+   if($("historyDetail")) $("historyDetail").classList.remove("hidden");
+  } else renderAudit();
  };
 }
+
 function exportAllHistory(){
- if(!auditHistory.length){alert("Belum ada riwayat audit.");return}
- const rows=[["Tanggal","Mode Audit","Nama Auditor","Waktu Mulai","Waktu Selesai","Durasi","PLU","Nama Barang","Kategori","Satuan","Stok Komputer","Kondisi Fisik","Fisik Gudang (RAW)","Fisik Booth (RAW)","Fisik Kotor","Berat Kemasan per Wadah","Isi Bersih Segel per Wadah","Jumlah Segel","Isi Bersih Segel Total","Jumlah Terbuka","Berat Kotor Terbuka","Fisik Awal","Penyeimbang Kompair","Fisik Bersih","Selisih","Status"]];
+ if(!auditHistory.length){alert("Belum ada riwayat.");return}
+ const rows=[["Tanggal","Auditor","PLU","Nama","Kategori","Satuan","Komputer","Fisik","Selisih","Status"]];
  auditHistory.forEach(h=>{
   const whOnly = h.lokasi === "GUDANG"; const list = whOnly ? h.items.filter(x=>x.kategori==="RAW") : h.items;
-  list.forEach(x=>rows.push([h.tanggal,locationLabel(h.lokasi||"KEDUANYA"),h.auditor,dateTimeText(h.mulaiPada),dateTimeText(h.selesaiPada),durationText(h.mulaiPada,h.selesaiPada),x.plu,x.nama,x.kategori,x.satuan,x.komputer,x.modeFisik||"",x.kategori==="RAW"?(x.gudangRaw??""):"",x.kategori==="RAW"?(x.boothRaw??""):"",x.fisikKotor,x.berat??0,x.isiBersih??0,x.qtySegel??0,x.isiSegel??0,x.jumlahTerbuka??0,x.fisikKotorTerbuka??0,x.fisikBersihAsli ?? x.fisikBersih,x.penyeimbangRAW ?? 0,x.fisikBersih,x.selisih,x.hasilStatus]));
+  list.forEach(x=>rows.push([h.tanggal,h.auditor,x.plu,x.nama,x.kategori,x.satuan,x.komputer,x.fisikBersih,x.selisih,x.hasilStatus]));
  });
- downloadCSV(rows,"Riwayat-Audit-Poin-Coffee.csv");
+ downloadCSV(rows,"Riwayat-Audit.csv");
 }
+
 function downloadCSV(rows,name){
  const csv=rows.map(r=>r.map(v=>'"'+String(v??"").replace(/"/g,'""')+'"').join(",")).join("\n");
  const blob=new Blob(["\uFEFF"+csv],{type:"text/csv;charset=utf-8;"});
  const url=URL.createObjectURL(blob),a=document.createElement("a");a.href=url;a.download=name;a.click();URL.revokeObjectURL(url);
 }
 
-// ================= REAL-TIME GOOGLE SHEETS SYNC + HEADER SPINNER =================
 function setBusyIndicator(active, labelText, kind="ok"){
  const badge = $("headerLiveBadge");
  const lbl = $("headerSyncLabel");
@@ -1939,10 +2037,10 @@ function jsonpRead(url){
  return new Promise((resolve, reject) => {
   const cb = "poinCb" + Date.now() + "_" + Math.floor(Math.random()*100000);
   const script = document.createElement("script");
-  const timer = setTimeout(() => { cleanup(); reject(new Error("Waktu koneksi habis.")); }, 20000);
+  const timer = setTimeout(() => { cleanup(); reject(new Error("Waktu habis.")); }, 20000);
   function cleanup(){ clearTimeout(timer); delete window[cb]; script.remove(); }
   window[cb] = data => { cleanup(); resolve(data); };
-  script.onerror = () => { cleanup(); reject(new Error("Gagal memuat data dari Google Sheets.")); };
+  script.onerror = () => { cleanup(); reject(new Error("Gagal memuat data.")); };
   script.src = url + (url.includes("?") ? "&" : "?") + "action=read&callback=" + cb + "&_=" + Date.now();
   document.body.appendChild(script);
  });
@@ -1956,7 +2054,7 @@ function enqueueSyncAction(actionName){
  });
  savePendingQueue();
  setBusyIndicator(true, "Mengirim...", "ok");
- setSyncStatus("Perubahan sedang dikirim ke Google Sheets...", "");
+ setSyncStatus("Menyimpan ke Google Sheets...", "");
  if(pushDebounceTimer) clearTimeout(pushDebounceTimer);
  pushDebounceTimer = setTimeout(() => { flushPendingQueue(); }, 250);
 }
@@ -1983,10 +2081,10 @@ async function flushPendingQueue(){
    savePendingQueue();
   }
   const jam = new Date().toLocaleTimeString("id-ID", { hour:"2-digit", minute:"2-digit", second:"2-digit" });
-  setSyncStatus("Tersinkron real-time ke Google Sheets (" + jam + ").", "ok");
+  setSyncStatus("Tersinkron real-time (" + jam + ").", "ok");
   setBusyIndicator(false, "Live · " + jam, "ok");
  } catch (e) {
-  setSyncStatus("Menunggu koneksi untuk mengirim perubahan: " + e.message, "bad");
+  setSyncStatus("Gagal mengirim: " + e.message, "bad");
   setBusyIndicator(false, "Antre Kirim", "bad");
  } finally {
   isPushing = false;
@@ -1999,29 +2097,39 @@ async function pullFromCloud(silent = true){
  if(!silent) setBusyIndicator(true, "Menarik data...", "ok");
  try {
   const data = await jsonpRead(SHEETS_API);
-  if(!data || !data.ok) throw new Error(data?.error || "Respons database tidak valid.");
+  if(!data || !data.ok) throw new Error(data?.error || "Respons tidak valid.");
+  
   const remoteMaster = Array.isArray(data.master) ? data.master : [];
   const remoteHistory = Array.isArray(data.history) ? data.history : [];
   const remoteRecipes = Array.isArray(data.recipes) ? data.recipes : [];
+  
   const sig = JSON.stringify({ m: remoteMaster, h: remoteHistory, r: remoteRecipes });
-
   const changed = sig !== lastCloudSignature;
   lastCloudSignature = sig;
 
   if(changed){
-   masterPLU = remoteMaster;
-   auditHistory = remoteHistory;
+   if(remoteMaster.length > 0 || masterPLU.length === 0){
+    masterPLU = remoteMaster;
+    localStorage.setItem("masterPLU", JSON.stringify(masterPLU));
+   }
+   if(remoteHistory.length > 0 || auditHistory.length === 0){
+    auditHistory = remoteHistory;
+    localStorage.setItem("poinAuditHistory", JSON.stringify(auditHistory));
+   }
    if(remoteRecipes.length > 0 || menuRecipes.length === 0){
     menuRecipes = remoteRecipes;
     localStorage.setItem("poinMenuRecipes", JSON.stringify(menuRecipes));
    }
-   localStorage.setItem("masterPLU", JSON.stringify(masterPLU));
-   localStorage.setItem("poinAuditHistory", JSON.stringify(auditHistory));
 
-   if(!$("pageMaster").classList.contains("hidden")) renderMaster();
-   if(!$("pageRecipes").classList.contains("hidden")){ renderRecipeFormRows(); renderRecipes(); }
-   if(!$("pageAudit").classList.contains("hidden") && audit && audit.status === "completed") renderCurrentResult();
-   if(!$("pageHistory").classList.contains("hidden")){
+   const pMaster = $("pageMaster");
+   const pRec = $("pageRecipes");
+   const pAudit = $("pageAudit");
+   const pHist = $("pageHistory");
+   
+   if(pMaster && !pMaster.classList.contains("hidden")) renderMaster();
+   if(pRec && !pRec.classList.contains("hidden")){ renderRecipeFormRows(); renderRecipes(); }
+   if(pAudit && !pAudit.classList.contains("hidden") && audit && audit.status === "completed") renderCurrentResult();
+   if(pHist && !pHist.classList.contains("hidden")){
     renderHistory();
     if(historyViewing && historyViewing.historyId){
      const updatedDoc = auditHistory.find(x => String(x.historyId) === String(historyViewing.historyId));
@@ -2031,10 +2139,10 @@ async function pullFromCloud(silent = true){
   }
 
   const jam = new Date().toLocaleTimeString("id-ID", { hour:"2-digit", minute:"2-digit", second:"2-digit" });
-  setSyncStatus("Terhubung real-time — Master PLU, Resep Menu & Riwayat Audit sinkron (" + jam + ").", "ok");
+  setSyncStatus("Terhubung real-time (" + jam + ").", "ok");
   setBusyIndicator(false, "Live · " + jam, "ok");
  } catch (e) {
-  setSyncStatus("Gagal menarik data Google Sheets: " + e.message, "bad");
+  setSyncStatus("Gagal menarik data: " + e.message, "bad");
   setBusyIndicator(false, "Gangguan Sync", "bad");
  } finally {
   isPulling = false;
@@ -2047,6 +2155,7 @@ document.addEventListener("visibilitychange", () => {
   else pullFromCloud(false);
  }
 });
+
 window.addEventListener("focus", () => {
  if(pendingQueue.length > 0) flushPendingQueue();
  else pullFromCloud(true);
@@ -2057,14 +2166,6 @@ setInterval(() => {
  if(pendingQueue.length > 0) flushPendingQueue();
  else pullFromCloud(true);
 }, 5000);
-
-renderMaster();
-renderRecipeFormRows();
-renderRecipes();
-if(pendingQueue.length > 0) flushPendingQueue();
-else pullFromCloud(false);
-if(audit) renderAudit();
-else document.body.classList.remove("audit-active");
 </script>
 </body>
-  </html>
+</html>
