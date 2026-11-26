@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Poin Coffee | Raw Material Audit & Recipe System</title>
+<title>Poin Coffee | Raw Material Audit &amp; Recipe System</title>
 <style>
 :root{--green:#19372b;--green2:#244b36;--gold:#d7b98e;--bg:#f4f6f4;--text:#263a2e;--muted:#78847b;--line:#e7ece8;--red:#b73535;--orange:#a66a13;--blue:#315e91}
 *{box-sizing:border-box;font-family:Arial,sans-serif}
@@ -148,9 +148,23 @@ th{background:#f3f6f3;color:#526357}
 .compare-box h4{margin:0 0 8px;font-size:15px;color:#7b5312}
 .compare-summary-bar{display:flex;gap:8px;flex-wrap:wrap;margin:10px 0}
 .compare-pill{background:#fff;border:1px solid #ead1a2;border-radius:7px;padding:6px 10px;font-size:11px;font-weight:bold;color:#6c470b}
-.compare-item{background:#fff;border:1px solid #f0dec0;border-radius:8px;padding:10px 12px;margin-top:8px;font-size:11px;line-height:1.55;display:flex;gap:10px;align-items:flex-start}
+.compare-item{background:#fff;border:1px solid #f0dec0;border-radius:8px;padding:11px 12px;margin-top:8px;font-size:11px;line-height:1.55;display:flex;gap:10px;align-items:flex-start}
+.compare-item.is-applied{border-color:#26713b;background:#f3fbf5}
 .compare-item input[type="checkbox"]{width:16px;height:16px;margin-top:2px;flex-shrink:0;cursor:pointer}
 .compare-item-body{flex:1;min-width:0}
+.scen-badge{display:inline-block;padding:2px 7px;border-radius:5px;font-size:10px;font-weight:bold;margin-left:4px}
+.scen-1{background:#e6f4ea;color:#1b6b38;border:1px solid #b6dfc4}
+.scen-3{background:#fff1d6;color:#8a5306;border:1px solid #ecc684}
+.scen-4{background:#e3effd;color:#1d4f8a;border:1px solid #b9d3f4}
+.scen-5{background:#f1eefb;color:#4b338a;border:1px solid #d1c6f2}
+
+.special-minus-box{background:#fff5f4;border:1px solid #e7b5b0;border-radius:10px;padding:15px;margin-top:16px}
+.special-minus-box h4{margin:0 0 8px;font-size:15px;color:#9b241e}
+.special-minus-item{background:#fff;border:1px solid #f2cfcb;border-left:4px solid var(--red);border-radius:8px;padding:10px 12px;margin-top:8px;font-size:11px;line-height:1.55}
+.special-minus-head{display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:4px}
+.minus-reason-tag{display:inline-block;padding:2px 8px;border-radius:999px;font-size:10px;font-weight:bold;background:#fde9e7;color:#a62a24}
+.minus-reason-tag.after-comp{background:#fff0d4;color:#8a4f04}
+
 .manual-compare-box{background:#fff;border:1px dashed #d7b26d;border-radius:8px;padding:11px;margin-top:12px}
 .manual-compare-grid{display:grid;grid-template-columns:1.3fr 1.3fr .8fr auto;gap:8px;align-items:end;margin-top:8px}
 .wh-summary-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:9px;margin-bottom:12px}
@@ -221,7 +235,7 @@ th{background:#f3f6f3;color:#526357}
  .result-card{border:1px solid #bbb;break-inside:avoid;padding:7px}
  .result-grid{grid-template-columns:repeat(3,1fr)}
  .result-list{gap:4px}
- .menu-reco-box,.pdf-detail-sheet{border:1px solid #888;background:#fff;padding:10px;break-inside:avoid}
+ .menu-reco-box,.pdf-detail-sheet,.special-minus-box,.compare-box{border:1px solid #888;background:#fff;padding:10px;break-inside:avoid}
  .reco-cols{grid-template-columns:repeat(2,1fr)}
  .pdf-table th,.pdf-table td{font-size:9px;padding:5px 6px}
  .print-heading{display:block!important}
@@ -293,11 +307,11 @@ th{background:#f3f6f3;color:#526357}
     <div class="field"><label>3. Kategori di Daftar Sistem</label><select id="kategori" required><option value="">Pilih Kategori</option><option>RAW</option><option>KONVERSI</option></select><small>Mengikuti daftar &amp; satuan stok di sistem (RAW = unit utuh, KONVERSI = satuan takaran/konversi).</small></div>
     <div class="field hidden" id="satuanField">
      <label>4. Satuan</label>
-     <input id="satuan" list="pilihanSatuan" placeholder="Pilih atau ketik satuan">
+     <input id="satuan" list="pilihanSatuan" placeholder="Pilih atau ketik satuan (Gram / ML)">
      <datalist id="pilihanSatuan"><option value="ML"><option value="Liter"><option value="Gram"><option value="Kg"><option value="Pcs"><option value="Pack"><option value="Box"><option value="Bottle"><option value="Cup"></datalist>
     </div>
     <div class="field hidden" id="beratField"><label>5. Berat Kemasan per Botol/Wadah (Opsional)</label><input type="number" id="berat" min="0" step="any" placeholder="Contoh: 35"><small>Berat tara satu wadah. Dipakai di Kabinet/Booth untuk sisa terbuka.</small></div>
-    <div class="field hidden" id="isiBersihField"><label>6. Isi Bersih per Kemasan Segel (Rasio Kompair)</label><input type="number" id="isiBersih" min="0" step="any" placeholder="Contoh: 750"><small>Isi bersih kemasan utuh/segel (misal 750 ML = 1 RAW). Dipakai untuk kompair dua arah RAW ↔ KONVERSI.</small></div>
+    <div class="field hidden" id="isiBersihField"><label>6. Isi Bersih per Kemasan Segel (Rasio Kompair)</label><input type="number" id="isiBersih" min="0" step="any" placeholder="Contoh: 1000 atau 750"><small>Isi bersih kemasan utuh/segel per 1 RAW (misal 750 ML = 1 RAW atau 1000 Gram = 1 RAW). Tiap item punya rasio spesifik.</small></div>
     <div class="field full hidden" id="rawLinkField">
      <label>7. PLU RAW Terkait (Bisa pilih 1 atau lebih agar semua yang berkendala bisa dikompair)</label>
      <div id="rawLinkContainer" class="raw-multi-box"></div>
@@ -448,6 +462,7 @@ th{background:#f3f6f3;color:#526357}
     <div class="stat"><p>Jumlah MINUS</p><h2 id="resultMinus">0</h2></div>
    </div>
    <div id="comparePanel"></div>
+   <div id="specialMinusPanel"></div>
    <div id="menuRecommendationPanel"></div>
    <div id="warehouseConclusion"></div>
    <div id="pdfFullBreakdown"></div>
@@ -502,6 +517,8 @@ th{background:#f3f6f3;color:#526357}
    <div class="print-heading"><h2>POIN COFFEE — LAPORAN DETAIL AUDIT BAHAN BAKU (GUDANG, BOOTH &amp; KOMPAIR)</h2></div>
    <h3>Detail Hasil Audit</h3>
    <div id="historyResultInfo"></div>
+   <div id="historyComparePanel"></div>
+   <div id="historySpecialMinusPanel"></div>
    <div id="historyMenuRecommendation"></div>
    <div id="historyWarehouseConclusion"></div>
    <div id="historyFullBreakdown"></div>
@@ -699,8 +716,18 @@ function parseRawLinks(rawLinkVal){
  return String(rawLinkVal).split(",").map(v=>v.trim()).filter(Boolean);
 }
 
+function normalizeIngredientKey(name){
+ return String(name || "")
+  .toLowerCase()
+  .replace(/\b(raw|konversi|segel|kemasan|botol|wadah|fresh|powder|syrup|sirup|milk|bean|tea|jelly|sauce)\b/g, " ")
+  .replace(/\b\d+(\.\d+)?\s*(ml|l|lt|liter|gr|gram|kg|pcs|pc)\b/g, " ")
+  .replace(/[^a-z0-9]+/g, " ")
+  .trim();
+}
+
 function esc(v){return String(v??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]))}
-function fmt(v){if(v===null||v===undefined||v==="")return "-";return Number(v).toLocaleString("id-ID",{maximumFractionDigits:3})}
+function fmt(v){if(v===null||v===undefined||v==="")return "-";const n=Number(v);if(!Number.isFinite(n))return "-";const r=Math.round(n*1000)/1000;return r.toLocaleString("id-ID",{maximumFractionDigits:3})}
+function fmtSigned(v){const n=Number(v)||0;const r=Math.round(n*1000)/1000;if(r>0)return "+"+fmt(r);if(r<0)return fmt(r);return "0"}
 function safeDate(v){return esc(v||"-")}
 function dateTimeText(value){if(!value)return "-";const d=new Date(value);return Number.isNaN(d.getTime())?"-":d.toLocaleString("id-ID",{dateStyle:"medium",timeStyle:"medium"})}
 function locationLabel(loc){
@@ -820,15 +847,16 @@ function injectDataFromCode(){
   const rawLinkStr = Array.isArray(item.rawLink) ? item.rawLink.join(", ") : String(item.rawLink || "").trim();
 
   const existingIdx = masterPLU.findIndex(x => String(x.plu).toLowerCase() === pluStr.toLowerCase());
+  const oldObj = existingIdx >= 0 ? masterPLU[existingIdx] : null;
   const payload = {
-   id: existingIdx >= 0 ? masterPLU[existingIdx].id : Date.now() + index,
+   id: oldObj ? oldObj.id : Date.now() + index,
    plu: pluStr,
    nama: namaStr,
    kategori: katStr,
    satuan: satuanStr,
-   berat: Number.isFinite(beratNum) && beratNum >= 0 ? beratNum : null,
-   isiBersih: Number.isFinite(isiNum) && isiNum >= 0 ? isiNum : null,
-   rawLink: rawLinkStr
+   berat: Number.isFinite(beratNum) && beratNum >= 0 ? beratNum : (oldObj ? oldObj.berat : null),
+   isiBersih: Number.isFinite(isiNum) && isiNum >= 0 ? isiNum : (oldObj ? oldObj.isiBersih : null),
+   rawLink: rawLinkStr || (oldObj ? oldObj.rawLink : "")
   };
 
   if(existingIdx >= 0){
@@ -1326,6 +1354,7 @@ function startAudit(){
   status:"computer_raw",
   combinedZone:"GUDANG",
   balanced:false,
+  appliedKeys:[],
   compareLogs:[],
   manualCompares:[],
   saved:false,
@@ -1344,7 +1373,7 @@ function startAudit(){
 
 function newAudit(){
  if(!confirm("Mulai audit baru? Progres lama akan dihapus."))return;
- audit=null;saveAudit();
+ audit=null;saveAudit();selectedCompareKeys.clear();
  if($("auditPerson")) $("auditPerson").value="";
  if($("auditDate")) $("auditDate").value=today();
  renderAudit();
@@ -1353,7 +1382,7 @@ function newAudit(){
 function cancelAudit(){
  if(!audit||audit.status==="completed")return;
  if(!confirm("Batalkan audit yang sedang berlangsung?"))return;
- audit=null;saveAudit();
+ audit=null;saveAudit();selectedCompareKeys.clear();
  if($("auditPerson")) $("auditPerson").value="";
  if($("auditDate")) $("auditDate").value=today();
  renderAudit();
@@ -1602,7 +1631,7 @@ function renderComputer(cat){
       <span class="tag ${cat==='RAW'?'raw':'konversi'}">${esc(cat)}</span>
      </div>
      <div class="comp-name">${esc(x.nama)}</div>
-     <div class="comp-sub">Satuan: <b>${esc(x.satuan)}</b>${x.isiBersih!=null?` · Rasio: ${fmt(x.isiBersih)}`:""}</div>
+     <div class="comp-sub">Satuan: <b>${esc(x.satuan)}</b>${x.isiBersih!=null?` · Rasio Master PLU: 1 RAW = ${fmt(x.isiBersih)} ${esc(x.satuan)}`:""}</div>
     </div>
     <div class="comp-input-wrap">
      <label for="comp-inp-${Number(x.id)}">Stok Komputer (${esc(x.satuan)})</label>
@@ -1754,10 +1783,10 @@ function renderPairedCards(){
    }
   }
   let convHTML = showWhInput ? "" : g.convs.map(c => {
-   const hasIsi = c.isiBersih !== null && c.isiBersih !== undefined;
+   const hasIsi = c.isiBersih !== null && c.isiBersih !== undefined && Number(c.isiBersih) > 0;
    const calc = calcConvNet(c);
    const openDisplay = c.jumlahTerbuka!==null && c.jumlahTerbuka!==undefined ? c.jumlahTerbuka : (Number(c.fisikKotorTerbuka)>0 ? 1 : "");
-   return `<div class="box-konv" data-card-item="${c.id}"><div class="box-title"><span>⚡ BOOTH · KONVERSI (${esc(c.satuan)})</span><button type="button" class="zero-btn" onclick="setConvZero(${Number(c.id)})">0</button></div><div class="satset-row ${hasIsi?'single':''}"><div class="field"><label>${hasIsi ? `Wadah Segel (× ${fmt(c.isiBersih)})` : `Wadah Segel`}</label><input type="number" inputmode="numeric" min="0" step="1" placeholder="0" value="${c.qtySegel??""}" oninput="updateConvSatset(${Number(c.id)},'qtySegel',this.value)"></div>${!hasIsi ? `<div class="field"><label>Total Isi Segel</label><input type="number" inputmode="decimal" min="0" step="any" placeholder="0" value="${c.isiSegel??""}" oninput="updateConvSatset(${Number(c.id)},'isiSegel',this.value)"></div>` : ``}</div><div class="satset-row triple"><div class="field"><label>Berat Kotor Terbuka</label><input type="number" inputmode="decimal" min="0" step="any" placeholder="0" value="${c.fisikKotorTerbuka??""}" oninput="updateConvSatset(${Number(c.id)},'fisikKotorTerbuka',this.value)"></div><div class="field open-qty-col"><label>Jml Wadah Terbuka</label><input type="number" inputmode="numeric" min="0" step="1" placeholder="1" value="${openDisplay}" oninput="updateConvSatset(${Number(c.id)},'jumlahTerbuka',this.value)"></div></div><div class="calc-preview" id="prev-${c.id}">Total: <b>${fmt(calc.total)} ${esc(c.satuan)}</b></div></div>`;
+   return `<div class="box-konv" data-card-item="${c.id}"><div class="box-title"><span>⚡ BOOTH · KONVERSI (${esc(c.satuan)})</span><button type="button" class="zero-btn" onclick="setConvZero(${Number(c.id)})">0</button></div><div class="satset-row ${hasIsi?'single':''}"><div class="field"><label>${hasIsi ? `Wadah Segel (× ${fmt(c.isiBersih)} ${esc(c.satuan)})` : `Wadah Segel`}</label><input type="number" inputmode="numeric" min="0" step="1" placeholder="0" value="${c.qtySegel??""}" oninput="updateConvSatset(${Number(c.id)},'qtySegel',this.value)"></div>${!hasIsi ? `<div class="field"><label>Total Isi Segel</label><input type="number" inputmode="decimal" min="0" step="any" placeholder="0" value="${c.isiSegel??""}" oninput="updateConvSatset(${Number(c.id)},'isiSegel',this.value)"></div>` : ``}</div><div class="satset-row triple"><div class="field"><label>Berat Kotor Terbuka</label><input type="number" inputmode="decimal" min="0" step="any" placeholder="0" value="${c.fisikKotorTerbuka??""}" oninput="updateConvSatset(${Number(c.id)},'fisikKotorTerbuka',this.value)"></div><div class="field open-qty-col"><label>Jml Wadah Terbuka</label><input type="number" inputmode="numeric" min="0" step="1" placeholder="1" value="${openDisplay}" oninput="updateConvSatset(${Number(c.id)},'jumlahTerbuka',this.value)"></div></div><div class="calc-preview" id="prev-${c.id}">Total: <b>${fmt(calc.total)} ${esc(c.satuan)}</b></div></div>`;
   }).join("");
   return `<div class="paired-card ${allDone?'done':''}" data-group-item="${mainId}" id="group-${g.key}"><div class="paired-header"><div><div class="paired-title">${idx+1}. ${esc(g.title)}</div><div class="paired-sub">${g.raw ? `<span class="tag raw">RAW: ${esc(g.raw.plu)}</span>` : ''}</div></div></div><div class="paired-grid">${rawHTML}${convHTML}</div></div>`;
  }).join("");
@@ -1767,7 +1796,7 @@ function updateConvSatset(id, key, val){
  const x = audit.items.find(a=>a.id===id); if(!x) return;
  if(val==="") x[key]=null;
  else { const n = Number(val); if(!Number.isFinite(n) || n<0) return; x[key] = (key==="qtySegel"||key==="jumlahTerbuka") ? Math.floor(n) : n; }
- if(key==="qtySegel" && x.isiBersih!=null) x.isiSegel = (Number(x.qtySegel)||0) * Number(x.isiBersih);
+ if(key==="qtySegel" && x.isiBersih!=null && Number(x.isiBersih)>0) x.isiSegel = (Number(x.qtySegel)||0) * Number(x.isiBersih);
  saveAudit(); updateProgressOnly();
  const prev = $("prev-"+id);
  if(prev){ const calc = calcConvNet(x); prev.innerHTML = `Total: <b>${fmt(calc.total)} ${esc(x.satuan)}</b>`; }
@@ -1799,6 +1828,12 @@ function finishAudit(forceEarly = false){
  const whOnly = isWarehouseOnly();
  const btOnly = isBoothOnly();
  audit.items.forEach(x => {
+  const masterRef = masterPLU.find(m => String(m.plu) === String(x.plu));
+  if(masterRef && x.kategori === "KONVERSI"){
+   if(masterRef.isiBersih != null && Number(masterRef.isiBersih) > 0) x.isiBersih = Number(masterRef.isiBersih);
+   if(masterRef.rawLink) x.rawLink = masterRef.rawLink;
+  }
+
   if(x.komputer===null || x.komputer===undefined || !Number.isFinite(Number(x.komputer))) x.komputer = 0;
   if(whOnly){
    if(x.kategori==="RAW"){ const gRaw = Number(x.gudangRaw)||0; x.gudangRaw = gRaw; x.boothRaw = 0; x.fisikKotor = gRaw; x.fisikBersih = gRaw; x.modeFisik = gRaw>0 ? "GUDANG" : "KOSONG"; }
@@ -1811,15 +1846,23 @@ function finishAudit(forceEarly = false){
    else applyConvBoothCalculation(x);
   }
   x.fisikBersihAsli = x.fisikBersih;
-  x.selisihAsli = x.fisikBersihAsli - Number(x.komputer);
+  x.selisihAsli = Math.round((x.fisikBersihAsli - Number(x.komputer)) * 1000) / 1000;
   x.hasilStatusAsli = x.selisihAsli>0 ? "PLUS" : x.selisihAsli<0 ? "MINUS" : "SESUAI";
   x.penyeimbangRAW = 0;
+  x.kompairKeterangan = "";
   x.selisih = x.selisihAsli;
   x.hasilStatus = x.hasilStatusAsli;
  });
- audit.balanced = false; audit.compareLogs = []; audit.manualCompares = []; selectedCompareKeys.clear();
- audit.status="completed"; audit.selesaiPada=new Date().toISOString(); audit.saved=false;
- saveAudit(); renderAudit();
+ audit.balanced = false;
+ audit.appliedKeys = [];
+ audit.compareLogs = [];
+ audit.manualCompares = [];
+ selectedCompareKeys.clear();
+ audit.status="completed";
+ audit.selesaiPada=new Date().toISOString();
+ audit.saved=false;
+ saveAudit();
+ renderAudit();
 }
 
 function applyConvBoothCalculation(x){
@@ -1832,125 +1875,504 @@ function applyConvBoothCalculation(x){
  else x.modeFisik = "KOSONG";
 }
 
-function resetAuditToOriginal(report){
- report.items.forEach(x => {
-  if(x.fisikBersihAsli !== null && x.fisikBersihAsli !== undefined) x.fisikBersih = Number(x.fisikBersihAsli);
-  x.penyeimbangRAW = 0;
-  x.selisih = Number(x.fisikBersih) - Number(x.komputer||0);
-  x.hasilStatus = x.selisih>0 ? "PLUS" : x.selisih<0 ? "MINUS" : "SESUAI";
- });
- report.balanced = false; report.compareLogs = [];
+// ============================================================================
+// MESIN SMART KOMPAIR 4 SKENARIO + CATATAN KHUSUS ITEM MINUS
+// ============================================================================
+function resolvePairRatio(convItem, rawItem){
+ const directRatio = Number(convItem?.isiBersih);
+ if(Number.isFinite(directRatio) && directRatio > 0){
+  return { ratio: directRatio, source: "Master PLU (Isi Bersih Segel)" };
+ }
+ const masterConv = masterPLU.find(m => String(m.plu) === String(convItem?.plu) && m.kategori === "KONVERSI");
+ const masterRatio = Number(masterConv?.isiBersih);
+ if(Number.isFinite(masterRatio) && masterRatio > 0){
+  return { ratio: masterRatio, source: "Master PLU (Isi Bersih Segel)" };
+ }
+ return { ratio: null, source: "Belum Diatur" };
 }
 
-function getAllCompareCandidates(report){
- const items = report.items || [];
- const rawByPlu = new Map(items.filter(x=>x.kategori==="RAW").map(x=>[x.plu, x]));
- const candidates = []; const usedPairIds = new Set();
- items.filter(x=>x.kategori==="KONVERSI").forEach(conv => {
-  parseRawLinks(conv.rawLink).forEach(rawPlu => {
-   const raw = rawByPlu.get(rawPlu); if(!raw) return;
-   const key = `LINK_${raw.id}_${conv.id}`; if(usedPairIds.has(key)) return; usedPairIds.add(key);
-   const ratio = Number(conv.isiBersih); const validRatio = Number.isFinite(ratio) && ratio > 0;
-   if(raw.selisih > 0 && conv.selisih < 0) candidates.push({key,source:"AUTO",direction:"RAW_TO_CONV",raw,conv,ratio,validRatio});
-   else if(conv.selisih > 0 && raw.selisih < 0) candidates.push({key,source:"AUTO",direction:"CONV_TO_RAW",raw,conv,ratio,validRatio});
+function findLinkedRawsForConv(convItem, rawItems){
+ const explicitLinks = parseRawLinks(convItem?.rawLink);
+ const masterConv = masterPLU.find(m => String(m.plu) === String(convItem?.plu) && m.kategori === "KONVERSI");
+ const masterLinks = parseRawLinks(masterConv?.rawLink);
+ const allPluLinks = Array.from(new Set([...explicitLinks, ...masterLinks]));
+
+ const matched = [];
+ allPluLinks.forEach(rPlu => {
+  const found = rawItems.find(r => String(r.plu) === String(rPlu));
+  if(found && !matched.some(x => x.id === found.id)) matched.push(found);
+ });
+
+ if(!matched.length && convItem){
+  const convKey = normalizeIngredientKey(convItem.nama);
+  if(convKey){
+   rawItems.forEach(r => {
+    const rawKey = normalizeIngredientKey(r.nama);
+    if(rawKey && (rawKey === convKey || rawKey.includes(convKey) || convKey.includes(rawKey))){
+     if(!matched.some(x => x.id === r.id)) matched.push(r);
+    }
+   });
+  }
+ }
+ return matched;
+}
+
+function evaluateSmartKompairSystem(report){
+ const items = report?.items || [];
+ const rawItems = items.filter(x => x.kategori === "RAW");
+ const convItems = items.filter(x => x.kategori === "KONVERSI");
+
+ const baseDiffMap = new Map();
+ items.forEach(x => {
+  const komp = Number(x.komputer) || 0;
+  const fisikAwal = (x.fisikBersihAsli !== null && x.fisikBersihAsli !== undefined)
+   ? Number(x.fisikBersihAsli)
+   : Number(x.fisikBersih) || 0;
+  const diffAwal = Math.round((fisikAwal - komp) * 1000) / 1000;
+  baseDiffMap.set(x.id, diffAwal);
+ });
+
+ const plans = [];
+ const specialMinusNotes = [];
+ const pairedItemIds = new Set();
+
+ const simDiff = new Map(baseDiffMap);
+ const appliedSet = new Set(Array.isArray(report.appliedKeys) ? report.appliedKeys : []);
+
+ convItems.forEach(conv => {
+  const linkedRaws = findLinkedRawsForConv(conv, rawItems);
+  if(!linkedRaws.length) return;
+
+  const { ratio } = resolvePairRatio(conv, linkedRaws[0]);
+  const convDiffAwal = baseDiffMap.get(conv.id) || 0;
+
+  const relevantRaws = linkedRaws.length === 1
+   ? linkedRaws
+   : linkedRaws.filter(r => (baseDiffMap.get(r.id) || 0) !== 0);
+  const targetRaws = relevantRaws.length > 0 ? relevantRaws : [linkedRaws[0]];
+
+  targetRaws.forEach(raw => {
+   const rawDiffAwal = baseDiffMap.get(raw.id) || 0;
+   const key = `PAIR_${raw.id}_${conv.id}`;
+
+   if(rawDiffAwal === 0 && convDiffAwal === 0) return;
+
+   pairedItemIds.add(raw.id);
+   pairedItemIds.add(conv.id);
+
+   if(rawDiffAwal < 0 && convDiffAwal < 0){
+    const rawMinusAbs = Math.abs(rawDiffAwal);
+    const convMinusAbs = Math.abs(convDiffAwal);
+    const ratioInfo = ratio && ratio > 0
+     ? ` (Patokan Master PLU: 1 ${raw.satuan} RAW = ${fmt(ratio)} ${conv.satuan} Konversi)`
+     : ` (Rasio Master PLU belum diisi)`;
+    specialMinusNotes.push({
+     key: `BOTH_MINUS_${raw.id}_${conv.id}`,
+     kind: "BOTH_MINUS",
+     badgeText: "Skenario 2 · Tanpa Notif Kompair",
+     title: `${raw.nama} — RAW (PLU ${raw.plu}) & Konversi (PLU ${conv.plu}) Sama-Sama Minus`,
+     detail: `Kedua stok minus sehingga tidak dikompair: Minus RAW ${fmt(rawMinusAbs)} ${raw.satuan} dan Konversinya Minus ${fmt(convMinusAbs)} ${conv.satuan}${ratioInfo}.`
+    });
+    return;
+   }
+
+   if(!ratio || ratio <= 0){
+    if(rawDiffAwal < 0 || convDiffAwal < 0){
+     specialMinusNotes.push({
+      key: `NO_RATIO_${raw.id}_${conv.id}`,
+      kind: "NO_RATIO",
+      badgeText: "Rasio Master PLU Kosong",
+      title: `${raw.nama} (PLU ${raw.plu}) ↔ ${conv.nama} (PLU ${conv.plu})`,
+      detail: `Selisih awal RAW: ${fmtSigned(rawDiffAwal)} ${raw.satuan}, Konversi: ${fmtSigned(convDiffAwal)} ${conv.satuan}. Isi "Isi Bersih per Kemasan Segel" di Master PLU agar sistem dapat menghitung rasio item ini.`
+     });
+    }
+    return;
+   }
+
+   const curRawDiff = simDiff.get(raw.id) ?? rawDiffAwal;
+   const curConvDiff = simDiff.get(conv.id) ?? convDiffAwal;
+   const isApplied = appliedSet.has(key);
+
+   if(rawDiffAwal < 0 && convDiffAwal > 0){
+    const neededRaw = Math.abs(rawDiffAwal);
+    const requiredConvQty = Math.round((neededRaw * ratio) * 1000) / 1000;
+    const availableConvPlus = Math.max(0, curConvDiff);
+
+    let rawClosed = 0;
+    let convUsed = 0;
+    let partialNote = "";
+
+    if(availableConvPlus >= requiredConvQty){
+     rawClosed = neededRaw;
+     convUsed = requiredConvQty;
+    } else {
+     rawClosed = Math.min(neededRaw, Math.floor(availableConvPlus / ratio));
+     convUsed = Math.round((rawClosed * ratio) * 1000) / 1000;
+     if(rawClosed < neededRaw){
+      partialNote = ` Kelebihan konversi (+${fmt(availableConvPlus)} ${conv.satuan}) hanya menutup ${fmt(rawClosed)} ${raw.satuan} RAW (${fmt(convUsed)} ${conv.satuan}), sehingga RAW masih sisa minus.`;
+     }
+    }
+
+    const finalRawDiff = Math.round((curRawDiff + rawClosed) * 1000) / 1000;
+    const finalConvDiff = Math.round((curConvDiff - convUsed) * 1000) / 1000;
+
+    plans.push({
+     key,
+     scenario: 1,
+     scenarioClass: "scen-1",
+     scenarioLabel: "SKENARIO 1: RAW MINUS + KONVERSI PLUS",
+     raw,
+     conv,
+     ratio,
+     rawDiffAwal,
+     convDiffAwal,
+     rawDelta: rawClosed,
+     convDelta: -convUsed,
+     finalRawDiff,
+     finalConvDiff,
+     isApplied,
+     summaryText: `RAW minus ${fmt(neededRaw)} ${raw.satuan} & Konversi plus +${fmt(convDiffAwal)} ${conv.satuan} (Rasio 1 RAW = ${fmt(ratio)} ${conv.satuan}). Mengambil ${fmt(convUsed)} ${conv.satuan} dari Konversi untuk menutup ${fmt(rawClosed)} ${raw.satuan} RAW → RAW menjadi ${finalRawDiff === 0 ? 'AMAN (0)' : fmtSigned(finalRawDiff) + ' ' + raw.satuan}, sisa Konversi ${fmtSigned(finalConvDiff)} ${conv.satuan}.${partialNote}`
+    });
+
+    if(isApplied){
+     simDiff.set(raw.id, finalRawDiff);
+     simDiff.set(conv.id, finalConvDiff);
+    }
+
+    if(isApplied && finalRawDiff < 0){
+     specialMinusNotes.push({
+      key: `REM_RAW_${raw.id}_${conv.id}`,
+      kind: "AFTER_COMP_RAW_MINUS",
+      badgeText: "Sisa Minus RAW Setelah Kompair",
+      title: `${raw.nama} (RAW PLU ${raw.plu})`,
+      detail: `Setelah dikompair maksimal dengan ${conv.nama} (rasio 1 RAW = ${fmt(ratio)} ${conv.satuan}), stok RAW masih minus ${fmt(Math.abs(finalRawDiff))} ${raw.satuan}.`
+     });
+    }
+   }
+
+   else if(rawDiffAwal > 0 && convDiffAwal < 0){
+    const rawExcess = Math.max(0, curRawDiff);
+    const addedConvQty = Math.round((rawExcess * ratio) * 1000) / 1000;
+    const finalRawDiff = Math.round((curRawDiff - rawExcess) * 1000) / 1000;
+    const finalConvDiff = Math.round((curConvDiff + addedConvQty) * 1000) / 1000;
+
+    plans.push({
+     key,
+     scenario: 3,
+     scenarioClass: "scen-3",
+     scenarioLabel: "SKENARIO 3: RAW PLUS + KONVERSI MINUS",
+     raw,
+     conv,
+     ratio,
+     rawDiffAwal,
+     convDiffAwal,
+     rawDelta: -rawExcess,
+     convDelta: addedConvQty,
+     finalRawDiff,
+     finalConvDiff,
+     isApplied,
+     summaryText: `RAW plus +${fmt(rawDiffAwal)} ${raw.satuan} & Konversi minus ${fmt(Math.abs(convDiffAwal))} ${conv.satuan} (Rasio 1 RAW = ${fmt(ratio)} ${conv.satuan}). Mengonversi ${fmt(rawExcess)} ${raw.satuan} RAW menjadi +${fmt(addedConvQty)} ${conv.satuan} Konversi agar RAW sesuai komputer → RAW menjadi ${fmtSigned(finalRawDiff)} ${raw.satuan} dan Konversi menjadi ${fmtSigned(finalConvDiff)} ${conv.satuan}.`
+    });
+
+    if(isApplied){
+     simDiff.set(raw.id, finalRawDiff);
+     simDiff.set(conv.id, finalConvDiff);
+    }
+
+    const checkedConvDiff = isApplied ? finalConvDiff : Math.round((convDiffAwal + (rawDiffAwal * ratio)) * 1000) / 1000;
+    if(checkedConvDiff < 0){
+     specialMinusNotes.push({
+      key: `REM_CONV_${raw.id}_${conv.id}`,
+      kind: "AFTER_COMP_CONV_MINUS",
+      badgeText: "Item Minus Konversi (Setelah Kompair)",
+      title: `${conv.nama} (Konversi PLU ${conv.plu} ← RAW ${raw.nama})`,
+      detail: `Awalnya Konversi minus ${fmt(Math.abs(convDiffAwal))} ${conv.satuan}. Setelah dikompair dari RAW (${rawDiffAwal > 0 ? '+' : ''}${fmt(rawDiffAwal)} ${raw.satuan} × ${fmt(ratio)} = +${fmt(rawDiffAwal * ratio)} ${conv.satuan}), stok Konversi masih minus ${fmt(Math.abs(checkedConvDiff))} ${conv.satuan}.`
+     });
+    }
+   }
+
+   else if(rawDiffAwal > 0 && convDiffAwal > 0){
+    const rawExcess = Math.max(0, curRawDiff);
+    const addedConvQty = Math.round((rawExcess * ratio) * 1000) / 1000;
+    const finalRawDiff = Math.round((curRawDiff - rawExcess) * 1000) / 1000;
+    const finalConvDiff = Math.round((curConvDiff + addedConvQty) * 1000) / 1000;
+
+    plans.push({
+     key,
+     scenario: 4,
+     scenarioClass: "scen-4",
+     scenarioLabel: "SKENARIO 4: RAW PLUS + KONVERSI PLUS",
+     raw,
+     conv,
+     ratio,
+     rawDiffAwal,
+     convDiffAwal,
+     rawDelta: -rawExcess,
+     convDelta: addedConvQty,
+     finalRawDiff,
+     finalConvDiff,
+     isApplied,
+     summaryText: `RAW plus +${fmt(rawDiffAwal)} ${raw.satuan} & Konversi plus +${fmt(convDiffAwal)} ${conv.satuan} (Rasio 1 RAW = ${fmt(ratio)} ${conv.satuan}). Mengonversi ${fmt(rawExcess)} ${raw.satuan} RAW menjadi +${fmt(addedConvQty)} ${conv.satuan} Konversi → RAW menjadi ${fmtSigned(finalRawDiff)} ${raw.satuan} dan total Konversi menjadi ${fmtSigned(finalConvDiff)} ${conv.satuan}.`
+    });
+
+    if(isApplied){
+     simDiff.set(raw.id, finalRawDiff);
+     simDiff.set(conv.id, finalConvDiff);
+    }
+   }
+
+   else if(rawDiffAwal > 0 && convDiffAwal === 0){
+    const rawExcess = Math.max(0, curRawDiff);
+    const addedConvQty = Math.round((rawExcess * ratio) * 1000) / 1000;
+    const finalRawDiff = Math.round((curRawDiff - rawExcess) * 1000) / 1000;
+    const finalConvDiff = Math.round((curConvDiff + addedConvQty) * 1000) / 1000;
+
+    plans.push({
+     key,
+     scenario: 5,
+     scenarioClass: "scen-5",
+     scenarioLabel: "KONVERSI KELEBIHAN RAW KE KONVERSI",
+     raw,
+     conv,
+     ratio,
+     rawDiffAwal,
+     convDiffAwal,
+     rawDelta: -rawExcess,
+     convDelta: addedConvQty,
+     finalRawDiff,
+     finalConvDiff,
+     isApplied,
+     summaryText: `RAW plus +${fmt(rawDiffAwal)} ${raw.satuan} (Konversi awal 0). Mengonversi ${fmt(rawExcess)} ${raw.satuan} RAW (Rasio 1 RAW = ${fmt(ratio)} ${conv.satuan}) menjadi +${fmt(addedConvQty)} ${conv.satuan} Konversi agar RAW sesuai komputer.`
+    });
+
+    if(isApplied){
+     simDiff.set(raw.id, finalRawDiff);
+     simDiff.set(conv.id, finalConvDiff);
+    }
+   } else if(rawDiffAwal < 0 && convDiffAwal === 0){
+    specialMinusNotes.push({
+     key: `RAW_MINUS_ZERO_CONV_${raw.id}_${conv.id}`,
+     kind: "SINGLE_RAW_MINUS",
+     badgeText: "Minus RAW (Konversi Tidak Plus)",
+     title: `${raw.nama} (RAW PLU ${raw.plu})`,
+     detail: `RAW minus ${fmt(Math.abs(rawDiffAwal))} ${raw.satuan}, sedangkan Konversi (${conv.nama}) selisih 0 (tidak ada stok plus untuk mengompair).`
+    });
+   } else if(rawDiffAwal === 0 && convDiffAwal < 0){
+    specialMinusNotes.push({
+     key: `CONV_MINUS_ZERO_RAW_${raw.id}_${conv.id}`,
+     kind: "SINGLE_CONV_MINUS",
+     badgeText: "Minus Konversi (RAW Pas)",
+     title: `${conv.nama} (Konversi PLU ${conv.plu})`,
+     detail: `Konversi minus ${fmt(Math.abs(convDiffAwal))} ${conv.satuan}, sedangkan stok RAW (${raw.nama}) sudah sesuai komputer (0).`
+    });
+   }
   });
  });
- (report.manualCompares || []).forEach((mc, idx) => {
-  const plusItem = items.find(x=>x.id===mc.plusId); const minusItem = items.find(x=>x.id===mc.minusId);
-  if(!plusItem || !minusItem) return;
-  const key = `MANUAL_${idx}_${plusItem.id}_${minusItem.id}`; const ratio = Number(mc.ratio) || 1;
-  candidates.push({key,source:"MANUAL",direction:plusItem.kategori==="RAW"?"RAW_TO_CONV":"CONV_TO_RAW",raw:plusItem.kategori==="RAW"?plusItem:minusItem,conv:plusItem.kategori==="KONVERSI"?plusItem:minusItem,plusItem,minusItem,ratio,validRatio:Number.isFinite(ratio) && ratio > 0});
- });
- const simSelisih = new Map(items.map(x => [x.id, Number(x.selisih)||0]));
- return candidates.map(c => {
-  if(c.source === "MANUAL"){
-   const pSel = simSelisih.get(c.plusItem.id) || 0; const mSel = simSelisih.get(c.minusItem.id) || 0;
-   let plusShift = 0, minusShift = 0;
-   if(c.validRatio && pSel > 0 && mSel < 0){ minusShift = Math.min(pSel * c.ratio, Math.abs(mSel)); plusShift = minusShift / c.ratio; simSelisih.set(c.plusItem.id, pSel - plusShift); simSelisih.set(c.minusItem.id, mSel + minusShift); }
-   return { ...c, rawShift: plusShift, convShift: minusShift, plusShift, minusShift };
+
+ items.forEach(x => {
+  const dAwal = baseDiffMap.get(x.id) || 0;
+  if(dAwal < 0 && !pairedItemIds.has(x.id)){
+   specialMinusNotes.push({
+    key: `UNPAIRED_MINUS_${x.id}`,
+    kind: "UNPAIRED_MINUS",
+    badgeText: `Minus ${x.kategori}`,
+    title: `${x.nama} (${x.kategori} PLU ${x.plu})`,
+    detail: `Item mengalami minus ${fmt(Math.abs(dAwal))} ${x.satuan} dan belum memiliki tautan pasangan kompair.`
+   });
   }
-  const rSel = simSelisih.get(c.raw.id) || 0; const cSel = simSelisih.get(c.conv.id) || 0;
-  let rawShift = 0, convShift = 0;
-  if(c.validRatio){
-   if(c.direction === "RAW_TO_CONV" && rSel > 0 && cSel < 0){ rawShift = Math.min(rSel, Math.abs(cSel) / c.ratio); convShift = rawShift * c.ratio; simSelisih.set(c.raw.id, rSel - rawShift); simSelisih.set(c.conv.id, cSel + convShift); }
-   else if(c.direction === "CONV_TO_RAW" && cSel > 0 && rSel < 0){ rawShift = Math.min(Math.abs(rSel), cSel / c.ratio); convShift = rawShift * c.ratio; simSelisih.set(c.raw.id, rSel + rawShift); simSelisih.set(c.conv.id, cSel - convShift); }
-  }
-  return { ...c, rawShift, convShift };
  });
+
+ return { plans, specialMinusNotes, baseDiffMap, simDiff };
 }
 
-function toggleCompareKey(key, checked){ if(checked) selectedCompareKeys.add(key); else selectedCompareKeys.delete(key); }
-function addManualCompare(){
- if(!audit) return;
- const plusId = Number($("mcPlusSelect")?.value); const minusId = Number($("mcMinusSelect")?.value); const ratio = Number($("mcRatioInput")?.value);
- if(!plusId || !minusId){alert("Pilih item PLUS dan MINUS.");return}
- if(plusId === minusId){alert("Tidak boleh sama.");return}
- audit.manualCompares = audit.manualCompares || []; audit.manualCompares.push({plusId, minusId, ratio});
- saveAudit(); renderCurrentResult();
+function recalculateReportItemsFromApplied(report){
+ if(!report || !Array.isArray(report.items)) return;
+ const { plans, baseDiffMap } = evaluateSmartKompairSystem(report);
+ const appliedSet = new Set(Array.isArray(report.appliedKeys) ? report.appliedKeys : []);
+
+ // Reset ke kondisi awal terlebih dahulu
+ report.items.forEach(x => {
+  const fisikAwal = (x.fisikBersihAsli !== null && x.fisikBersihAsli !== undefined)
+   ? Number(x.fisikBersihAsli)
+   : Number(x.fisikBersih) || 0;
+  x.fisikBersihAsli = fisikAwal;
+  const dAwal = baseDiffMap.get(x.id) ?? (fisikAwal - (Number(x.komputer) || 0));
+  x.selisihAsli = dAwal;
+  x.hasilStatusAsli = dAwal > 0 ? "PLUS" : dAwal < 0 ? "MINUS" : "SESUAI";
+  x.penyeimbangRAW = 0;
+  x.kompairKeterangan = "";
+  x.fisikBersih = fisikAwal;
+  x.selisih = dAwal;
+  x.hasilStatus = x.hasilStatusAsli;
+ });
+
+ const logs = [];
+ plans.forEach(p => {
+  if(!appliedSet.has(p.key)) return;
+  const rawObj = report.items.find(i => i.id === p.raw.id);
+  const convObj = report.items.find(i => i.id === p.conv.id);
+
+  if(rawObj){
+   rawObj.penyeimbangRAW = Math.round((Number(rawObj.penyeimbangRAW || 0) + Number(p.rawDelta)) * 1000) / 1000;
+   rawObj.fisikBersih = Math.round((Number(rawObj.fisikBersihAsli || 0) + Number(rawObj.penyeimbangRAW)) * 1000) / 1000;
+   rawObj.selisih = Math.round((Number(rawObj.fisikBersih) - (Number(rawObj.komputer) || 0)) * 1000) / 1000;
+   rawObj.hasilStatus = rawObj.selisih > 0 ? "PLUS" : rawObj.selisih < 0 ? "MINUS" : "SESUAI";
+   rawObj.kompairKeterangan = `${p.scenarioLabel}: ${fmtSigned(p.rawDelta)} ${rawObj.satuan} (Rasio 1 RAW = ${fmt(p.ratio)} ${p.conv.satuan})`;
+  }
+  if(convObj){
+   convObj.penyeimbangRAW = Math.round((Number(convObj.penyeimbangRAW || 0) + Number(p.convDelta)) * 1000) / 1000;
+   convObj.fisikBersih = Math.round((Number(convObj.fisikBersihAsli || 0) + Number(convObj.penyeimbangRAW)) * 1000) / 1000;
+   convObj.selisih = Math.round((Number(convObj.fisikBersih) - (Number(convObj.komputer) || 0)) * 1000) / 1000;
+   convObj.hasilStatus = convObj.selisih > 0 ? "PLUS" : convObj.selisih < 0 ? "MINUS" : "SESUAI";
+   convObj.kompairKeterangan = `${p.scenarioLabel}: ${fmtSigned(p.convDelta)} ${convObj.satuan} (Rasio 1 RAW = ${fmt(p.ratio)} ${convObj.satuan})`;
+  }
+
+  logs.push({
+   key: p.key,
+   scenarioLabel: p.scenarioLabel,
+   rawNama: p.raw.nama,
+   rawPlu: p.raw.plu,
+   convNama: p.conv.nama,
+   convPlu: p.conv.plu,
+   ratio: p.ratio,
+   rawDelta: p.rawDelta,
+   rawSatuan: p.raw.satuan,
+   convDelta: p.convDelta,
+   convSatuan: p.conv.satuan,
+   finalRawDiff: p.finalRawDiff,
+   finalConvDiff: p.finalConvDiff
+  });
+ });
+
+ report.balanced = logs.length > 0;
+ report.compareLogs = logs;
 }
-function removeManualCompare(idx){ if(!audit || !audit.manualCompares) return; audit.manualCompares.splice(idx, 1); saveAudit(); renderCurrentResult(); }
+
+function toggleCompareKey(key, checked){
+ if(checked) selectedCompareKeys.add(key);
+ else selectedCompareKeys.delete(key);
+}
+
+function applySingleKompair(key){
+ if(!audit || audit.status !== "completed") return;
+ audit.appliedKeys = Array.isArray(audit.appliedKeys) ? audit.appliedKeys : [];
+ if(audit.appliedKeys.includes(key)){
+  audit.appliedKeys = audit.appliedKeys.filter(k => k !== key);
+ } else {
+  audit.appliedKeys.push(key);
+ }
+ recalculateReportItemsFromApplied(audit);
+ audit.saved = false;
+ saveAudit();
+ renderCurrentResult();
+}
 
 function applyCompareBalance(applyAll = true){
- if(!audit || audit.status!=="completed") return;
- resetAuditToOriginal(audit);
- const allCandidates = getAllCompareCandidates(audit);
- const targets = applyAll ? allCandidates : allCandidates.filter(c => selectedCompareKeys.has(c.key));
- let adjustedCount = 0; const logs = [];
- targets.forEach(c => {
-  if(!c.validRatio) return;
-  if(c.source === "MANUAL"){
-   const pItem = audit.items.find(x=>x.id===c.plusItem.id); const mItem = audit.items.find(x=>x.id===c.minusItem.id); if(!pItem || !mItem) return;
-   const livePlus = Number(pItem.selisih)||0; const liveMinus = Number(mItem.selisih)||0; if(livePlus <= 0 || liveMinus >= 0) return;
-   const minusShift = Math.min(livePlus * c.ratio, Math.abs(liveMinus)); const plusShift = minusShift / c.ratio; if(plusShift <= 0) return;
-   pItem.fisikBersih = Number(pItem.fisikBersih) - plusShift; pItem.penyeimbangRAW = Number(pItem.penyeimbangRAW||0) - plusShift; pItem.selisih = Number(pItem.fisikBersih) - Number(pItem.komputer||0); pItem.hasilStatus = pItem.selisih>0 ? "PLUS" : pItem.selisih<0 ? "MINUS" : "SESUAI";
-   mItem.fisikBersih = Number(mItem.fisikBersih) + minusShift; mItem.penyeimbangRAW = Number(mItem.penyeimbangRAW||0) + minusShift; mItem.selisih = Number(mItem.fisikBersih) - Number(mItem.komputer||0); mItem.hasilStatus = mItem.selisih>0 ? "PLUS" : mItem.selisih<0 ? "MINUS" : "SESUAI";
-   adjustedCount++;
-   logs.push({ tipe:"MANUAL", fromNama:`${pItem.nama}`, toNama:`${mItem.nama}`, fromDelta:-plusShift, fromSatuan:pItem.satuan, toDelta:minusShift, toSatuan:mItem.satuan, rasio:c.ratio, selisihAkhirFrom:pItem.selisih, selisihAkhirTo:mItem.selisih });
-   return;
-  }
-  const raw = audit.items.find(x=>x.id===c.raw.id); const conv = audit.items.find(x=>x.id===c.conv.id); if(!raw || !conv) return;
-  const liveRawSel = Number(raw.selisih)||0; const liveConvSel = Number(conv.selisih)||0;
-  if(c.direction === "RAW_TO_CONV" && liveRawSel > 0 && liveConvSel < 0){
-   const rawShift = Math.min(liveRawSel, Math.abs(liveConvSel) / c.ratio); const convShift = rawShift * c.ratio; if(rawShift <= 0) return;
-   raw.fisikBersih = Number(raw.fisikBersih) - rawShift; raw.penyeimbangRAW = Number(raw.penyeimbangRAW||0) - rawShift; raw.selisih = Number(raw.fisikBersih) - Number(raw.komputer||0); raw.hasilStatus = raw.selisih>0 ? "PLUS" : raw.selisih<0 ? "MINUS" : "SESUAI";
-   conv.fisikBersih = Number(conv.fisikBersih) + convShift; conv.penyeimbangRAW = Number(conv.penyeimbangRAW||0) + convShift; conv.selisih = Number(conv.fisikBersih) - Number(conv.komputer||0); conv.hasilStatus = conv.selisih>0 ? "PLUS" : conv.selisih<0 ? "MINUS" : "SESUAI";
-   adjustedCount++;
-   logs.push({ tipe:"RAW → KONVERSI", fromNama:`${raw.nama}`, toNama:`${conv.nama}`, fromDelta:-rawShift, fromSatuan:raw.satuan, toDelta:convShift, toSatuan:conv.satuan, rasio:c.ratio, selisihAkhirFrom:raw.selisih, selisihAkhirTo:conv.selisih });
-  } else if(c.direction === "CONV_TO_RAW" && liveConvSel > 0 && liveRawSel < 0){
-   const rawShift = Math.min(Math.abs(liveRawSel), liveConvSel / c.ratio); const convShift = rawShift * c.ratio; if(rawShift <= 0) return;
-   raw.fisikBersih = Number(raw.fisikBersih) + rawShift; raw.penyeimbangRAW = Number(raw.penyeimbangRAW||0) + rawShift; raw.selisih = Number(raw.fisikBersih) - Number(raw.komputer||0); raw.hasilStatus = raw.selisih>0 ? "PLUS" : raw.selisih<0 ? "MINUS" : "SESUAI";
-   conv.fisikBersih = Number(conv.fisikBersih) - convShift; conv.penyeimbangRAW = Number(conv.penyeimbangRAW||0) - convShift; conv.selisih = Number(conv.fisikBersih) - Number(conv.komputer||0); conv.hasilStatus = conv.selisih>0 ? "PLUS" : conv.selisih<0 ? "MINUS" : "SESUAI";
-   adjustedCount++;
-   logs.push({ tipe:"KONVERSI → RAW", fromNama:`${conv.nama}`, toNama:`${raw.nama}`, fromDelta:-convShift, fromSatuan:conv.satuan, toDelta:rawShift, toSatuan:raw.satuan, rasio:c.ratio, selisihAkhirFrom:conv.selisih, selisihAkhirTo:raw.selisih });
-  }
- });
- if(adjustedCount===0){ alert("Tidak ada item yang dapat dikompair."); return; }
- audit.balanced = true; audit.compareLogs = logs; audit.saved = false;
- saveAudit(); renderCurrentResult();
- alert(`Berhasil mengompair ${adjustedCount} pasangan.`);
+ if(!audit || audit.status !== "completed") return;
+ const { plans } = evaluateSmartKompairSystem(audit);
+ if(!plans.length){ alert("Tidak ada notifikasi kompair aktif."); return; }
+
+ const targets = applyAll
+  ? plans.map(p => p.key)
+  : plans.filter(p => selectedCompareKeys.has(p.key)).map(p => p.key);
+
+ if(!targets.length){ alert("Centang minimal 1 notifikasi kompair terlebih dahulu."); return; }
+
+ const currentSet = new Set(Array.isArray(audit.appliedKeys) ? audit.appliedKeys : []);
+ targets.forEach(k => currentSet.add(k));
+ audit.appliedKeys = Array.from(currentSet);
+ recalculateReportItemsFromApplied(audit);
+ audit.saved = false;
+ saveAudit();
+ renderCurrentResult();
+ alert(`Berhasil menerapkan ${targets.length} kompair berdasarkan rasio Master PLU.`);
 }
 
-function undoCompareBalance(){ if(!audit || !audit.balanced) return; resetAuditToOriginal(audit); audit.saved = false; saveAudit(); renderCurrentResult(); }
+function undoCompareBalance(){
+ if(!audit) return;
+ audit.appliedKeys = [];
+ selectedCompareKeys.clear();
+ recalculateReportItemsFromApplied(audit);
+ audit.saved = false;
+ saveAudit();
+ renderCurrentResult();
+}
 
 function comparePanelHTML(report){
  if(!report || report.lokasi === "GUDANG") return "";
- const items = report.items || [];
- const troubledItems = items.filter(x => Number(x.selisih) !== 0);
- const plusItems = items.filter(x => Number(x.selisih) > 0);
- const minusItems = items.filter(x => Number(x.selisih) < 0);
- if(!troubledItems.length && !report.balanced) return "";
- const candidates = getAllCompareCandidates(report);
- if(selectedCompareKeys.size === 0 && candidates.length > 0) candidates.forEach(c => selectedCompareKeys.add(c.key));
- const rows = candidates.map((c, idx) => {
-  const checked = selectedCompareKeys.has(c.key) ? "checked" : "";
-  if(c.source === "MANUAL"){
-   const mIdx = (report.manualCompares||[]).findIndex(m => m.plusId===c.plusItem.id && m.minusId===c.minusItem.id);
-   return `<div class="compare-item"><input type="checkbox" ${checked} onchange="toggleCompareKey('${esc(c.key)}', this.checked)"><div class="compare-item-body"><div><b>#${idx+1} [MANUAL] ${esc(c.plusItem.nama)}</b> ↔ <b>${esc(c.minusItem.nama)}</b> <button type="button" class="zero-btn" style="margin-left:6px" onclick="removeManualCompare(${mIdx})">Hapus</button></div></div></div>`;
-  }
-  return `<div class="compare-item"><input type="checkbox" ${checked} onchange="toggleCompareKey('${esc(c.key)}', this.checked)"><div class="compare-item-body"><div><b>#${idx+1} ${esc(c.raw.nama)}</b> &amp; <b>${esc(c.conv.nama)}</b></div></div></div>`;
+ const { plans } = evaluateSmartKompairSystem(report);
+ const appliedSet = new Set(Array.isArray(report.appliedKeys) ? report.appliedKeys : []);
+ if(!plans.length && !appliedSet.size) return "";
+
+ if(selectedCompareKeys.size === 0 && plans.length > 0){
+  plans.forEach(p => selectedCompareKeys.add(p.key));
+ }
+
+ const cardsHTML = plans.map((p, idx) => {
+  const checked = selectedCompareKeys.has(p.key) ? "checked" : "";
+  const isApp = appliedSet.has(p.key);
+  return `<div class="compare-item ${isApp ? 'is-applied' : ''}">
+   <input type="checkbox" ${checked} onchange="toggleCompareKey('${esc(p.key)}', this.checked)">
+   <div class="compare-item-body">
+    <div style="display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap">
+     <div>
+      <b>#${idx+1} ${esc(p.raw.nama)}</b> <span class="muted">(RAW ${esc(p.raw.plu)} ↔ KONV ${esc(p.conv.plu)})</span>
+      <span class="scen-badge ${esc(p.scenarioClass)}">${esc(p.scenarioLabel)}</span>
+     </div>
+     <span class="tag bal-tag">Rasio: 1 RAW = ${fmt(p.ratio)} ${esc(p.conv.satuan)}</span>
+    </div>
+    <div style="margin-top:6px;color:#33483b">${esc(p.summaryText)}</div>
+    <div style="margin-top:6px;display:flex;gap:12px;flex-wrap:wrap;font-size:11px">
+     <span>RAW: <b>${fmtSigned(p.rawDiffAwal)}</b> → <b>${fmtSigned(p.rawDelta)}</b> → <b class="${p.finalRawDiff===0?'plus':p.finalRawDiff<0?'minus':'same'}">${p.finalRawDiff===0?'0 (AMAN)':fmtSigned(p.finalRawDiff)} ${esc(p.raw.satuan)}</b></span>
+     <span>KONVERSI: <b>${fmtSigned(p.convDiffAwal)}</b> → <b>${fmtSigned(p.convDelta)}</b> → <b class="${p.finalConvDiff>0?'plus':p.finalConvDiff<0?'minus':'same'}">${fmtSigned(p.finalConvDiff)} ${esc(p.conv.satuan)}</b></span>
+    </div>
+    <div class="no-print" style="margin-top:8px">
+     <button type="button" class="btn ${isApp ? 'cancel' : 'primary'}" style="padding:6px 11px;font-size:11px" onclick="applySingleKompair('${esc(p.key)}')">
+      ${isApp ? '↩ Batalkan Kompair Ini' : '⚖️ Terapkan Kompair Ini'}
+     </button>
+    </div>
+   </div>
+  </div>`;
  }).join("");
- const manualBuilderHTML = (plusItems.length && minusItems.length) ? `<div class="manual-compare-box no-print"><b style="font-size:12px;color:#7b5312">+ Tambah Kompair Manual</b><div class="manual-compare-grid"><div class="field"><label>PLUS</label><select id="mcPlusSelect">${plusItems.map(x=>`<option value="${x.id}">${esc(x.nama)} (+${fmt(x.selisih)})</option>`).join("")}</select></div><div class="field"><label>MINUS</label><select id="mcMinusSelect">${minusItems.map(x=>`<option value="${x.id}">${esc(x.nama)} (${fmt(x.selisih)})</option>`).join("")}</select></div><div class="field"><label>Rasio</label><input id="mcRatioInput" type="number" inputmode="decimal" min="0.0001" step="any" value="1"></div><button type="button" class="btn warn-btn" onclick="addManualCompare()">+ Tambah</button></div></div>` : "";
- return `<div class="compare-box"><h4>⚖️ Kompair Item Berkendala</h4><div class="compare-summary-bar"><span class="compare-pill">Total Berkendala: <b>${troubledItems.length}</b></span><span class="compare-pill">Pasangan: <b>${candidates.length}</b></span></div>${rows || '<div class="empty" style="padding:12px">Tidak ada pasangan.</div>'}${manualBuilderHTML}<div class="actions no-print" style="margin-top:12px"><button type="button" class="btn primary" onclick="applyCompareBalance(true)" ${candidates.length?'':'disabled'}>⚖️ Kompair Semua</button><button type="button" class="btn cancel" onclick="undoCompareBalance()">↩ Reset</button></div></div>`;
+
+ return `<div class="compare-box">
+  <h4>⚖️ Notifikasi &amp; Eksekusi Smart Kompair</h4>
+  <div class="compare-summary-bar">
+   <span class="compare-pill">Total Notif Kompair: <b>${plans.length}</b></span>
+   <span class="compare-pill">Sudah Diterapkan: <b>${appliedSet.size}</b></span>
+  </div>
+  ${cardsHTML || '<div class="empty" style="padding:10px">Tidak ada notifikasi kompair aktif.</div>'}
+  <div class="actions no-print" style="margin-top:12px">
+   <button type="button" class="btn primary" onclick="applyCompareBalance(true)" ${plans.length?'':'disabled'}>⚖️ Terapkan Semua Kompair</button>
+   <button type="button" class="btn warn-btn" onclick="applyCompareBalance(false)" ${plans.length?'':'disabled'}>✓ Terapkan yang Dicentang</button>
+   <button type="button" class="btn cancel" onclick="undoCompareBalance()">↩ Reset Kompair</button>
+  </div>
+ </div>`;
+}
+
+function specialMinusPanelHTML(report){
+ if(!report) return "";
+ const { specialMinusNotes } = evaluateSmartKompairSystem(report);
+ if(!specialMinusNotes.length) return "";
+
+ const listHTML = specialMinusNotes.map((n, idx) => {
+  const tagClass = (n.kind === "AFTER_COMP_CONV_MINUS" || n.kind === "AFTER_COMP_RAW_MINUS")
+   ? "minus-reason-tag after-comp"
+   : "minus-reason-tag";
+  return `<div class="special-minus-item">
+   <div class="special-minus-head">
+    <b>${idx+1}. ${esc(n.title)}</b>
+    <span class="${tagClass}">${esc(n.badgeText)}</span>
+   </div>
+   <div style="color:#4a2320">${esc(n.detail)}</div>
+  </div>`;
+ }).join("");
+
+ return `<div class="special-minus-box">
+  <h4>📝 Catatan Khusus Item Minus &amp; Sisa Minus Konversi (${specialMinusNotes.length})</h4>
+  <div class="muted" style="margin-bottom:6px">Mencakup item yang kedua sisinya minus (tanpa notifikasi kompair) maupun item yang konversinya masih minus setelah dikompair.</div>
+  ${listHTML}
+ </div>`;
 }
 
 function warehouseConclusionHTML(report){
@@ -1982,8 +2404,15 @@ function summaryHTML(items){ const plus=items.filter(x=>x.selisih>0).length,minu
 function resultCard(x){
  const cls=x.selisih>0?"plus":x.selisih<0?"minus":"same";
  const balVal = Number(x.penyeimbangRAW)||0;
- const balNote = balVal !== 0 ? `<div class="bal-note">⚖️ Kompair: ${balVal>0?`+${fmt(balVal)}`:fmt(balVal)}</div>` : "";
- return `<div><div class="result-card"><div class="name">${esc(x.nama)}<div class="sub">PLU ${esc(x.plu)}</div></div><div class="metric"><span>Komputer</span><strong>${fmt(x.komputer)}</strong></div><div class="metric"><span>Fisik</span><strong>${fmt(x.fisikBersih)}</strong></div><div class="metric"><span>Selisih</span><strong class="${cls}">${x.selisih>0?"+":""}${fmt(x.selisih)}<br>${x.hasilStatus}</strong></div></div>${balNote}</div>`;
+ const fisikAwal = (x.fisikBersihAsli !== null && x.fisikBersihAsli !== undefined) ? Number(x.fisikBersihAsli) : Number(x.fisikBersih) || 0;
+ const fisikAkhir = balVal !== 0
+  ? Math.round((fisikAwal + balVal) * 1000) / 1000
+  : (Number(x.fisikBersih) || 0);
+ const selAwal = (x.selisihAsli !== null && x.selisihAsli !== undefined) ? Number(x.selisihAsli) : Number(x.selisih);
+ const balNote = balVal !== 0
+  ? `<div class="bal-note">⚖️ Kompair: <b>${fmtSigned(balVal)} ${esc(x.satuan)}</b> · Fisik Awal: <b>${fmt(fisikAwal)}</b> → Fisik Akhir: <b>${fmt(fisikAkhir)}</b> · Selisih Awal: <b>${fmtSigned(selAwal)}</b> → Selisih Akhir: <b>${fmtSigned(x.selisih)}</b>${x.kompairKeterangan ? `<br><span class="muted">${esc(x.kompairKeterangan)}</span>` : ``}</div>`
+  : "";
+ return `<div><div class="result-card"><div class="name">${esc(x.nama)}<div class="sub">PLU ${esc(x.plu)} · ${esc(x.satuan)}</div></div><div class="metric"><span>Komputer</span><strong>${fmt(x.komputer)}</strong></div><div class="metric"><span>${balVal !== 0 ? "Fisik Akhir" : "Fisik"}</span><strong>${fmt(fisikAkhir)}</strong></div><div class="metric"><span>Selisih Akhir</span><strong class="${cls}">${x.selisih>0?"+":""}${fmt(x.selisih)}<br>${x.hasilStatus}</strong></div></div>${balNote}</div>`;
 }
 
 function renderResultsInto(items,rawId,convId,rawSumId,convSumId,infoId,metaId,order){
@@ -2007,6 +2436,7 @@ function renderCurrentResult(){
  if($("resultPlus")) $("resultPlus").textContent=plus;
  if($("resultMinus")) $("resultMinus").textContent=minus;
  if($("comparePanel")) $("comparePanel").innerHTML = comparePanelHTML(audit);
+ if($("specialMinusPanel")) $("specialMinusPanel").innerHTML = specialMinusPanelHTML(audit);
  if($("menuRecommendationPanel")) $("menuRecommendationPanel").innerHTML = menuRecommendationHTML(audit);
  if($("warehouseConclusion")) $("warehouseConclusion").innerHTML = warehouseConclusionHTML(audit);
  if($("pdfFullBreakdown")) $("pdfFullBreakdown").innerHTML = fullDetailSheetHTML(audit);
@@ -2027,6 +2457,7 @@ function renderResult(){if(audit)renderCurrentResult()}
 function saveAuditResult(){
  if(!audit||audit.status!=="completed")return;
  if(audit.saved){alert("Sudah tersimpan.");return}
+ recalculateReportItemsFromApplied(audit);
  const copy=JSON.parse(JSON.stringify(audit));
  copy.saved=true;copy.historyId=Date.now();
  auditHistory.unshift(copy);audit.saved=true;
@@ -2049,6 +2480,8 @@ function openHistory(i){
  historyViewing=JSON.parse(JSON.stringify(auditHistory[i]));
  if($("historyDetail")) $("historyDetail").classList.remove("hidden");
  if($("historyResultInfo")) $("historyResultInfo").innerHTML=`<b>Auditor:</b> ${esc(historyViewing.auditor)}<br><b>Tanggal:</b> ${esc(historyViewing.tanggal)}`;
+ if($("historyComparePanel")) $("historyComparePanel").innerHTML = comparePanelHTML(historyViewing);
+ if($("historySpecialMinusPanel")) $("historySpecialMinusPanel").innerHTML = specialMinusPanelHTML(historyViewing);
  if($("historyMenuRecommendation")) $("historyMenuRecommendation").innerHTML = menuRecommendationHTML(historyViewing);
  if($("historyWarehouseConclusion")) $("historyWarehouseConclusion").innerHTML = warehouseConclusionHTML(historyViewing);
  if($("historyFullBreakdown")) $("historyFullBreakdown").innerHTML = fullDetailSheetHTML(historyViewing);
@@ -2109,10 +2542,15 @@ function exportPDF(fromHistory=false){
 
 function exportAllHistory(){
  if(!auditHistory.length){alert("Belum ada riwayat.");return}
- const rows=[["Tanggal","Auditor","PLU","Nama","Kategori","Satuan","Komputer","Fisik","Selisih","Status"]];
+ const rows=[["Tanggal","Auditor","PLU","Nama","Kategori","Satuan","Komputer","Fisik Awal","Penyesuaian Kompair","Fisik Akhir","Selisih","Status","Kompair"]];
  auditHistory.forEach(h=>{
   const whOnly = h.lokasi === "GUDANG"; const list = whOnly ? h.items.filter(x=>x.kategori==="RAW") : h.items;
-  list.forEach(x=>rows.push([h.tanggal,h.auditor,x.plu,x.nama,x.kategori,x.satuan,x.komputer,x.fisikBersih,x.selisih,x.hasilStatus]));
+  list.forEach(x=>{
+   const fisikAwal = (x.fisikBersihAsli !== null && x.fisikBersihAsli !== undefined) ? Number(x.fisikBersihAsli) : Number(x.fisikBersih) || 0;
+   const penyesuaian = Number(x.penyeimbangRAW) || 0;
+   const fisikAkhir = penyesuaian !== 0 ? Math.round((fisikAwal + penyesuaian) * 1000) / 1000 : (Number(x.fisikBersih) || 0);
+   rows.push([h.tanggal,h.auditor,x.plu,x.nama,x.kategori,x.satuan,x.komputer,fisikAwal,penyesuaian,fisikAkhir,x.selisih,x.hasilStatus,x.kompairKeterangan||""]);
+  });
  });
  downloadCSV(rows,"Riwayat-Audit.csv");
 }
