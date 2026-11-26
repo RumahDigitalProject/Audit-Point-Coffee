@@ -867,8 +867,15 @@ function injectRecipesFromCode(){
  saveRecipes();
  renderRecipes();
  $("recipeInjectionBox").value = "";
- alert(`Selesai! ${added} resep menu baru ditambahkan, ${updated} resep diperbarui dan dikirim ke Google Sheets.`);
+
+ // === TAMBAHKAN BARIS INI AGAR LANGSUNG TERKIRIM KE GOOGLE SHEETS ===
+ if(typeof flushPendingQueue === "function"){
+  flushPendingQueue();
+ }
+
+ alert(`Selesai! ${added} resep menu baru ditambahkan, ${updated} resep diperbarui dan sedang dikirim ke Google Sheets.`);
 }
+
 
 $("recipeForm").addEventListener("submit", e => {
  e.preventDefault();
